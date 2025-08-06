@@ -1,1 +1,161 @@
-/* You can add global styles to this file, and also import other style files */
+
+
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* Optional */
+  height: 100%;
+}
+
+  
+  .app-wrapper {
+    display: flex;
+    height: 100vh;        /* full viewport height */
+    width: 100vw;         /* full viewport width */
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+  }
+  
+  
+  .main-content {
+    flex: 1;
+    height: 100vh;   
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    
+  }
+  
+  .content-wrapper {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0;
+    margin: 0;
+    background-color: #f5f5f5;
+  }
+  
+  .sidebar {
+    width: 250px;
+  min-width: 250px;
+  background-color: #3a3a3a;
+  height: 100vh;
+  flex-shrink: 0;
+  overflow-y: auto;
+  border-right: 1px solid #ddd;
+  position: relative;
+  z-index: 1;
+  }
+  
+  .sidebar a {
+    color: white;
+    padding: 10px 15px;
+    display: block;
+    text-decoration: none;
+  }
+  
+  .sidebar a.active, .sidebar a:hover {
+    background: #495057;
+  }
+  
+  .header {
+    background-color: #3a3a3a;
+    padding: 10px 20px;
+    border-bottom: 1px solid #ccc;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: rgb(250, 251, 251);
+  }
+  .p-datatable .p-datatable-tbody > tr {
+    background-color: #3a3a3a !important;
+    color: white;
+    
+  }
+  
+  .p-datatable .p-datatable-tbody > tr:hover {
+    background-color: #4a4a4a !important;
+  }
+  .custom-popup-menu {
+    position: absolute;
+    top: 120%;
+    right: 0;
+    background-color: #1e1e1e;
+    color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    padding: 0.5rem 0;
+    z-index: 999;
+    min-width: 150px;
+  }
+  
+  .custom-popup-menu ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .custom-popup-menu li {
+    padding: 10px 16px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    display: flex;
+    align-items: center;
+  }
+  
+  .custom-popup-menu li:hover {
+    background-color: #333;
+  }
+  
+  
+  .p-datatable .p-datatable-thead > tr > th {
+    background-color: #2e2e2e !important;
+    color: white !important;
+    text-align: center !important;
+  }
+  .p-datatable .p-datatable-tbody > tr > td {
+    border: 1px solid #444 !important;
+    text-align: center;
+  }
+  
+  .p-datatable .p-datatable-thead > tr > th {
+    border: 1px solid #444 !important;
+  }
+  ::ng-deep .p-splitbutton.p-button-sm {
+    font-size: 0.85rem;
+  }
+  
+  
+  .custom-popup-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background-color: #1c1c1c;
+    color: #ffffff;
+    border: 1px solid #2b2b2b;
+    border-radius: 6px;
+    padding: 10px 0;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    min-width: 150px;
+    z-index: 1000;
+    transition: all 0.2s ease-in-out;
+  }
+  
+  .custom-popup-menu ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .custom-popup-menu li {
+    padding: 10px 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+  }
+  
+  .custom-popup-menu li:hover {
+    background-color: #353535;
+  }
+ 
+  
