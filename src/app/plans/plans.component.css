@@ -1,0 +1,35 @@
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    padding: 1rem;
+  }
+  
+  .dark-card ::ng-deep .p-card {
+    background-color: #202020 !important;
+    color: #ffffff !important;
+    border: 1px solid #333;
+    border-radius: 8px;
+  }
+  
+  .dark-card ::ng-deep .p-card-body {
+    background-color: #202020 !important;
+    color: #ffffff !important;
+    border-radius: 10px;
+  }
+  
+  .dark-card ::ng-deep p {
+    font-size: 1.2rem;
+    text-align: center;
+    font-weight: 500;
+    color: #ffffff;
+  }
+  
+  .mt-4 {
+    margin-top: 2rem;
+  }
+  
+  .mt-3 {
+    margin-top: 1rem;
+  }
+  

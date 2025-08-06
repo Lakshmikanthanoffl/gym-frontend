@@ -1,0 +1,26 @@
+.sidebar {
+    width: 200px;
+    min-height: 100vh;
+    background-color: #1f1f1f;
+    color: white;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .sidebar h4 {
+    margin-bottom: 1rem;
+    font-weight: bold;
+    text-align: center;
+  }
+  
+  .sidebar a {
+    color: white;
+    padding: 0.5rem 1rem;
+    text-decoration: none;
+  }
+  
+  .sidebar a.active {
+    background-color: #343a40;
+    font-weight: bold;
+  }
+  

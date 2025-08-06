@@ -1,0 +1,24 @@
+<h2 class="text-white text-center mt-4">Completed Payments</h2>
+
+<div class="search-filters mb-3">
+  <input type="text" pInputText placeholder="Search by name" [(ngModel)]="nameFilter" />
+  <input type="text" pInputText placeholder="Search by plan" [(ngModel)]="planFilter" />
+  <input type="text" pInputText placeholder="Search by date" [(ngModel)]="dateFilter" />
+</div>
+
+<div class="dashboard-grid">
+  <p-card *ngFor="let payment of filteredPayments" class="dark-card" header="{{ payment.userName }}">
+    <p><strong>Plan:</strong> {{ payment.plan }}</p>
+    <p><strong>Amount:</strong> ₹{{ payment.price }}</p>
+    <p><strong>Date:</strong> {{ payment.paymentDate }}</p>
+
+    <div class="text-center mt-2">
+      <img 
+        [src]="payment.screenshot" 
+        alt="Screenshot" 
+        class="screenshot-img"
+        (click)="openScreenshot(payment.screenshot)"
+      />
+    </div>
+  </p-card>
+</div>
