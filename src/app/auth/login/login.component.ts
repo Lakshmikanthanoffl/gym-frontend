@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-
+import { AuthService } from '../../services/auth.service'; // Adjust path if needed
 @Component({
   selector: 'app-login',
   standalone: false,
@@ -12,24 +12,26 @@ export class LoginComponent implements OnInit {
   password = '';
   showPassword = false;
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private authService: AuthService) {}
 
   ngOnInit() {
-    if (localStorage.getItem('authToken')) {
+    if (this.authService.isLoggedIn()) {
       this.router.navigate(['/dashboard']);
     }
   }
 
   login() {
-    // Dummy login logic (replace with real API call later)
     if (this.username === 'admin' && this.password === 'admin') {
-      localStorage.setItem('authToken', 'dummy-token');
+      this.authService.setRole('admin');
+      this.router.navigate(['/dashboard']);
+    } else if (this.username === 'user' && this.password === 'user') {
+      this.authService.setRole('user');
       this.router.navigate(['/dashboard']);
     } else {
       alert('Invalid credentials');
     }
   }
-  
+
   togglePasswordVisibility() {
     this.showPassword = !this.showPassword;
   }

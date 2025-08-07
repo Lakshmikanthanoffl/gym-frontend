@@ -7,7 +7,20 @@ html, body {
   height: 100%;
 }
 
-  
+.small-button {
+  width: 100px; /* or 80px, 120px as needed */
+  padding: 4px 8px;
+  font-size: 13px;
+}
+
+
+/* Clean, small, rounded button */
+.rounded-button {
+  border-radius: 20px;
+  padding: 4px 12px;
+  min-width: 90px;
+  font-size: 13px;
+}
   .app-wrapper {
     display: flex;
     height: 100vh;        /* full viewport height */

@@ -13,68 +13,117 @@
       
       
     
-    <p-table
-      [value]="members"
-      [paginator]="true"
-      
-[rows]="5"
-[rowsPerPageOptions]="[5, 10, 20, 50]"
+      <p-table
+        [value]="members"
+        [paginator]="true"
+        
+  [rows]="5"
+  [rowsPerPageOptions]="[5, 10, 20, 50]"
 
-      
-      class="p-datatable-gridlines dark-table"
-    >
-      <ng-template pTemplate="header">
-        <tr>
-          <th>ID</th>
-          <th>Name</th>
-          <th>Email</th>
-          <th>Mobile No</th>
-          <th class="text-center">Actions</th>
-        </tr>
-      </ng-template>
-  
-      <ng-template pTemplate="body" let-member>
-        <tr>
-          <td>{{ member.id }}</td>
-          <td>{{ member.name }}</td>
-          <td>{{ member.email }}</td>
-          <td>{{ member.phone }}</td>
-          <td class="text-center">
+        
+        class="p-datatable-gridlines dark-table"
+      >
+        <ng-template pTemplate="header">
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Mobile No</th>
+            <th>Status</th> <!-- New column header -->
+            <th class="text-center">Actions</th>
+          </tr>
+        </ng-template>
+    
+        <ng-template pTemplate="body" let-member>
+          <tr>
+            <td>{{ member.id }}</td>
+            <td>{{ member.name }}</td>
+            <td>{{ member.email }}</td>
+            <td>{{ member.phone }}</td>
+            <td>
+              <span [ngClass]="getStatusClass(member.validUntil)">
+                {{ getStatus(member.validUntil) }}
+              </span>
+            </td>
+            <td class="text-center">
+              <button
+              pButton
+              type="button"
+              icon="pi pi-eye"
+              class="p-button-rounded p-button-text p-button-sm p-button-info me-2"
+              (click)="viewMember(member)"
+            ></button>
             <button
             pButton
             type="button"
-            icon="pi pi-eye"
-            class="p-button-rounded p-button-text p-button-sm p-button-info me-2"
-            (click)="viewMember(member)"
+            icon="pi pi-pencil"
+            class="p-button-rounded p-button-text p-button-sm p-button-primary me-2"
+            (click)="editMember(member)"
           ></button>
-            <button
-              pButton
-              type="button"
-              icon="pi pi-pencil"
-              class="p-button-rounded p-button-text p-button-sm p-button-primary me-2"
-              
-            ></button>
-            <button
-              pButton
-              type="button"
-              icon="pi pi-trash"
-              class="p-button-rounded p-button-text p-button-sm p-button-danger"
-            ></button>
-          </td>
-        </tr>
-      </ng-template>
-    </p-table>
+          
+          <button
+          pButton
+          type="button"
+          icon="pi pi-trash"
+          class="p-button-rounded p-button-text p-button-sm p-button-danger"
+          (click)="confirmDelete(member)"
+        ></button>
+        
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
   </div>
+  <p-dialog
+  header="Confirm Delete"
+  [(visible)]="deleteDialogVisible"
+  [modal]="true"
+  [closable]="false"
+  [style]="{ width: '400px' }"
+>
+  <p class="mb-3">
+    Are you sure you want to delete <b>{{ memberToDelete?.name }}</b>?<br />
+    Type <b>delete</b> in the box below to confirm.
+  </p>
+
+  <input
+    type="text"
+    pInputText
+    [(ngModel)]="deleteConfirmationText"
+    placeholder="Type 'delete' to confirm"
+    class="w-full mb-3"
+  />
+
+  <div class="d-flex justify-content-end gap-2">
+    <button
+      pButton
+      type="button"
+      label="Cancel"
+      class="p-button-secondary"
+      (click)="deleteDialogVisible = false"
+    ></button>
+    <button
+      pButton
+      type="button"
+      label="Delete"
+      class="p-button-danger"
+      (click)="deleteMember()"
+      [disabled]="deleteConfirmationText.trim().toLowerCase() !== 'delete'"
+    ></button>
+  </div>
+</p-dialog>
+
   <!-- Add Member Dialog -->
   <p-dialog
-  header="Add New Member"
+  [header]="isEditMode ? 'Edit Member' : 'Add New Member'"
   [(visible)]="addDialogVisible"
   [modal]="true"
   [style]="{ width: '600px' }"
-
   [closable]="true"
   [dismissableMask]="true"
+  (onHide)="resetOtpState()"
 >
+
   <form class="p-fluid">
     <!-- Reusable field structure -->
     <div class="field mb-2 d-flex align-items-center">
@@ -109,6 +158,22 @@
         class="flex-grow-1"
       />
     </div>
+    <!-- <div class="field mb-2 d-flex align-items-center justify-content-end">
+      <label class="form-label w-40"></label>
+      <button
+        pButton
+        label="Send OTP"
+        icon="pi pi-send"
+        class="p-button-sm p-button-info w-auto"
+        type="button"
+        (click)="sendOTP(newMember.phone)"
+        [disabled]="otpSent || !newMember.phone"
+      ></button>
+    </div>
+     -->
+    
+    
+    
     
     <div class="field mb-2 d-flex align-items-center">
       <label for="subscriptionType" class="form-label w-40">Subscription Type</label>
@@ -190,21 +255,55 @@
     
     
 
-    <!-- Save button aligned to right and small -->
-    <div class="text-end mt-3">
-      <button
-        pButton
-        type="button"
-        label="Save"
-        icon="pi pi-check"
-        class="p-button-sm p-button-success"
-        (click)="saveMember()"
-      ></button>
-    </div>
+    <!-- Save button aligned to right and small  [disabled]="!isPhoneVerified" -->
+    <button
+  pButton
+  type="button"
+  label="Save"
+  icon="pi pi-check"
+  class="p-button-sm p-button-success"
+  (click)="saveMember()"
+ 
+></button>
+
   </form>
 </p-dialog>
 
-  
+<p-dialog
+  header="Verify OTP"
+  [(visible)]="otpDialogVisible"
+  [modal]="true"
+  [closable]="true"  
+  [style]="{ width: '400px' }"
+  (onHide)="resetOtpDialog()"
+>
+  <div class="p-fluid">
+    <p class="mb-3">An OTP has been sent to {{ newMember.phone }}.</p>
+
+    <div class="field mb-2 d-flex align-items-center">
+      <label for="otp" class="form-label w-40">Enter OTP</label>
+      <input
+        pInputText
+        id="otp"
+        [(ngModel)]="enteredOtp"
+        name="otp"
+        class="flex-grow-1"
+      />
+    </div>
+
+    <div class="text-end mt-3">
+      <button
+        pButton
+        label="Verify"
+        icon="pi pi-check"
+        class="p-button-sm p-button-success"
+        (click)="verifyOTP()"
+      ></button>
+    </div>
+  </div>
+</p-dialog>
+
+
 
   <!-- Edit Popup -->
   <p-dialog

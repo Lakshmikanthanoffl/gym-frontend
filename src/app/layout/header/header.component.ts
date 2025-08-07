@@ -1,5 +1,7 @@
-import { Component, ElementRef, HostListener, ViewChild } from '@angular/core';
+import { Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
+import { AuthService } from '../../services/auth.service'; // adjust the path
+
 import {
   trigger,
   state,
@@ -36,14 +38,17 @@ import { filter, map } from 'rxjs/operators';
     ]),
   ]
 })
-export class HeaderComponent {
+export class HeaderComponent implements OnInit {
+  
   headerTitle = 'Dashboard';
-  username = 'Admin';
+  
   popupVisible = false;
 
   @ViewChild('logoutItem') logoutItem!: ElementRef;
-
-  constructor(private router: Router, private activatedRoute: ActivatedRoute) {
+  userrole: any;
+  username: any;
+ 
+  constructor(private router: Router, private activatedRoute: ActivatedRoute,private authService: AuthService) {
     this.router.events
       .pipe(
         filter(event => event instanceof NavigationEnd),
@@ -58,8 +63,15 @@ export class HeaderComponent {
       .subscribe((title: string) => {
         this.headerTitle = title;
       });
+     
   }
 
+  ngOnInit() {
+    this.authService.role$.subscribe(role => {
+      this.username = role;
+      console.log('Header userrole:', this.userrole);
+    });
+  }
   togglePopup() {
     this.popupVisible = !this.popupVisible;
 
@@ -72,6 +84,7 @@ export class HeaderComponent {
 
   logout() {
     localStorage.removeItem('authToken');
+    localStorage.removeItem('role');
     this.router.navigate(['/login']);
   }
 
