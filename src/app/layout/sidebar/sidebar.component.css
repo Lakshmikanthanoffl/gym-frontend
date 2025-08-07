@@ -1,26 +1,43 @@
 .sidebar {
-    width: 200px;
-    min-height: 100vh;
-    background-color: #1f1f1f;
-    color: white;
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .sidebar h4 {
-    margin-bottom: 1rem;
-    font-weight: bold;
-    text-align: center;
-  }
-  
-  .sidebar a {
-    color: white;
-    padding: 0.5rem 1rem;
-    text-decoration: none;
-  }
-  
-  .sidebar a.active {
-    background-color: #343a40;
-    font-weight: bold;
-  }
-  
+  background-color: #1f1f1f;
+  color: white;
+  padding: 20px 10px;
+  width: 220px;
+  height: 100vh;
+  transition: width 0.3s ease;
+  overflow: hidden;
+}
+
+.sidebar a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: white;
+  padding: 10px 8px;
+  text-decoration: none;
+  transition: background 0.3s;
+}
+
+.sidebar a:hover {
+  background-color: #333;
+  border-radius: 4px;
+}
+
+
+
+.sidebar a span {
+  transition: opacity 0.2s;
+  white-space: nowrap;
+}
+
+.toggle-btn {
+  cursor: pointer;
+  margin-bottom: 20px;
+  text-align: right;
+  padding-right: 10px;
+}
+
+.sidebar-title {
+  margin-bottom: 20px;
+  font-size: 1.2rem;
+}
