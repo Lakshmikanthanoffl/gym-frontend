@@ -8,6 +8,8 @@ import { Component, OnInit } from '@angular/core';
   styleUrl: './dashboard.component.css'
 })
 export class DashboardComponent implements OnInit {
+  userrole: any;
+  isAdmin: boolean=false;
   constructor() {}
 
 
@@ -20,8 +22,9 @@ export class DashboardComponent implements OnInit {
   memberChartOptions: any;
 
   ngOnInit() {
-    
- 
+    this.userrole = localStorage.getItem("role")
+    this.isAdmin = this.userrole === 'admin';
+    console.log("this.userrole",this.userrole)
     this.memberChartData = {
       labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
       datasets: [
@@ -46,4 +49,5 @@ export class DashboardComponent implements OnInit {
       }
     };
   }
+  
 }

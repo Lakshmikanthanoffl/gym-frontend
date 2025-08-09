@@ -27,19 +27,19 @@ const routes: Routes = [
     path: 'members',
     component: MembersComponent,
     canActivate: [AuthGuard],
-    data: { title: 'Members' }
+    data: { title: 'Members', roles: ['admin'] } // ❗️Only admin
   },
   {
     path: 'plans',
     component: PlansComponent,
     canActivate: [AuthGuard],
-    data: { title: 'Plans' }
+    data: { title: 'Plans' } // ✅ All authenticated users
   },
   {
     path: 'payments',
     component: PaymentsComponent,
     canActivate: [AuthGuard],
-    data: { title: 'Payments' }
+    data: { title: 'Payments', roles: ['admin'] } // ❗️Only admin
   },
 
   // Fallback for unknown paths

@@ -1,9 +1,23 @@
 <div *ngIf="isLoggedIn()" class="sidebar px-3 py-3" style="background-color: #1f1f1f; color: white;">
-    <h4 class="mb-4">Gym Management</h4>
-    
-    <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
-    <a routerLink="/members" routerLinkActive="active">Members</a>
-    <a routerLink="/plans" routerLinkActive="active">Plans</a>
-    <a routerLink="/payments" routerLinkActive="active">Payments</a>
-  </div>
-  
+  <h4 class="mb-4">Gym Management</h4>
+
+  <a routerLink="/dashboard" routerLinkActive="active">
+    <i class="pi pi-home"></i>
+    <span > Dashboard</span>
+  </a>
+
+  <a *ngIf="userrole === 'admin'" routerLink="/members" routerLinkActive="active">
+    <i class="pi pi-users"></i>
+    <span > Members</span>
+  </a> 
+
+  <a routerLink="/plans" routerLinkActive="active">
+    <i class="pi pi-book"></i>
+    <span > Plans</span>
+  </a>
+
+  <a *ngIf="userrole === 'admin'" routerLink="/payments" routerLinkActive="active">
+    <i class="pi pi-credit-card"></i>
+    <span > Payments</span>
+  </a>
+</div>
