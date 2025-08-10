@@ -1,0 +1,20 @@
+export interface Member {
+    id: number; // Remove the optional "?" here
+    name: string;
+    email: string;
+    phone: string;
+    subscriptionType: SubscriptionType;
+    period: string;
+    amountPaid: number;
+    paidDate: Date;
+    validUntil: Date;
+  }
+  
+  
+  export interface SubscriptionType {
+    label: string;
+    value: string;
+    period: string;
+    price: number;
+  }
+  

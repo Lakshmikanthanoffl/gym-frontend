@@ -1,39 +1,44 @@
+/* Wrapper Styling */
 .table-wrapper {
-    background-color: #2e2e2e;
-    border-radius: 12px;
-    padding: 1rem;
-    box-shadow: 0 0 12px rgba(0, 0, 0, 0.4); /* highlight effect */
-    border: 1px solid #444;
-    margin: 1rem 0;
-  }
-  
-  ::ng-deep .dark-table .p-datatable-wrapper,
-  ::ng-deep .dark-table .p-datatable-thead > tr > th,
-  ::ng-deep .dark-table .p-datatable-tbody > tr > td,
-  ::ng-deep .dark-table .p-paginator {
-    background-color: #2e2e2e;
-    color: white;
-    border-color: #444;
-  }
-  ::ng-deep .p-paginator .p-highlight {
-  background-color: #333 !important; /* Dark background */
-  color: #fff !important;            /* White text */
-  border-color: #333 !important;     /* Match background */
+  background-color: #2e2e2e;
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.4);
+  border: 1px solid #444;
+  margin: 1rem 0;
 }
 
-  ::ng-deep .dark-table .p-paginator {
-    justify-content: flex-end !important;
-    padding: 0.75rem 1rem;
-    border-top: 1px solid #444;
-    border-bottom-left-radius: 12px;
-    border-bottom-right-radius: 12px;
-  }
-  
-  ::ng-deep .dark-table .p-datatable {
-    border-radius: 12px;
-    overflow: hidden;
-  }
-  /* Add to styles.css or component's style */
+/* DataTable Styling */
+::ng-deep .dark-table .p-datatable-wrapper,
+::ng-deep .dark-table .p-datatable-thead > tr > th,
+::ng-deep .dark-table .p-datatable-tbody > tr > td,
+::ng-deep .dark-table .p-paginator {
+  background-color: #2e2e2e;
+  color: white;
+  border-color: #444;
+}
+
+
+::ng-deep .p-paginator .p-highlight {
+  background-color: #333 !important;
+  color: #fff !important;
+  border-color: #333 !important;
+}
+
+::ng-deep .dark-table .p-paginator {
+  justify-content: flex-end !important;
+  padding: 0.75rem 1rem;
+  border-top: 1px solid #444;
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+}
+
+::ng-deep .dark-table .p-datatable {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* Input + Button Row Layout Helpers */
 .w-40 {
   width: 40%;
   min-width: 130px;
@@ -41,10 +46,35 @@
 .flex-grow-1 {
   flex-grow: 1;
 }
+
+/* Search Input - Dark Theme */
+.custom-search-input {
+  border-radius: 30px !important;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  border: 1px solid #444;
+  background-color: #1f1f1f !important;
+  color: #fff !important;
+}
+
+::ng-deep .custom-search-input::placeholder {
+  color: #aaa;
+}
+
+/* Container around the search input */
+.search-input-wrapper {
+  max-width: 400px;
+}
+
+/* Calendar Mini Adjustments */
 ::ng-deep .calendar-sm .p-datepicker {
   font-size: 0.75rem !important;
   width: 240px !important;
   padding: 0.5rem !important;
+  background-color: #2e2e2e;
+  color: #fff;
+  border: 1px solid #444;
 }
 
 ::ng-deep .calendar-sm .p-timepicker {
@@ -58,47 +88,50 @@
 ::ng-deep .calendar-sm .p-datepicker-header,
 ::ng-deep .calendar-sm .p-datepicker-buttonbar {
   padding: 0.5rem !important;
+  background-color: #2e2e2e;
+  color: #fff;
+  border-bottom: 1px solid #444;
 }
+
+/* Dialog Overlay */
 ::ng-deep .p-dialog .p-component-overlay {
   overflow: visible !important;
 }
-/* ✅ Pagination page buttons */
+
+/* Pagination Buttons */
 ::ng-deep .p-paginator .p-highlight {
   background-color: #333 !important;
   color: #fff !important;
   border-color: #333 !important;
 }
 
-/* ✅ Pagination hover effect */
 ::ng-deep .p-paginator .p-paginator-page:hover {
   background-color: #444 !important;
   color: #fff !important;
 }
 
-/* ✅ Dropdown for rowsPerPageOptions */
+/* Dropdown Styling */
 ::ng-deep .p-paginator .p-dropdown {
   background-color: #2c2c2c !important;
   color: #fff !important;
   border-color: #444 !important;
 }
 
-/* ✅ Dropdown panel (options list) */
 ::ng-deep .p-dropdown-panel {
   background-color: #2c2c2c !important;
   color: #fff !important;
 }
 
-/* ✅ Dropdown item hover */
 ::ng-deep .p-dropdown-item:hover {
   background-color: #444 !important;
   color: #fff !important;
 }
 
-/* ✅ Selected option inside dropdown panel */
 ::ng-deep .p-dropdown-item.p-highlight {
   background-color: #333 !important;
   color: #fff !important;
 }
+
 ::ng-deep .p-dropdown .p-dropdown-trigger {
   color: #aaa !important;
 }

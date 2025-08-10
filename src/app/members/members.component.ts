@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 
-
+import { MemberService } from '../services/member.service';
+import { Member } from '../models/member.model';
 interface SubscriptionOption {
   label: string;
   value: string;
@@ -17,7 +18,7 @@ interface SubscriptionOption {
 })
 
 export class MembersComponent implements OnInit{
-  constructor() {}
+  constructor(private memberService: MemberService) {}
   otpSent: boolean = false;
 enteredOtp: string = '';
 generatedOtp: string = '';
@@ -66,54 +67,10 @@ isAdmin: boolean=false;
   ];
   
   
-  members = [
-    {
-      id: 1,
-      name: 'John Doe',
-      email: 'john@example.com',
-      phone: '9876543210',
-      subscriptionType: { label: 'Monthly', value: 'Monthly', period: '1 Month', price: 600  },
-      period: '1 Month',
-      amountPaid: 500,
-      paidDate: new Date('2025-07-01T09:30:00'),
-      validUntil: new Date('2025-07-31'),
-    },
-    {
-      id: 2,
-      name: 'Priya Sharma',
-      email: 'priya.sharma@example.com',
-      phone: '9123456789',
-      subscriptionType: { label: 'Quarterly', value: 'Quarterly', period: '3 Months', price: 1500  },
-      period: '3 Months',
-      amountPaid: 1400,
-      paidDate: new Date('2025-06-15T15:45:00'),
-      validUntil: new Date('2025-09-15'),
-    },
-    {
-      id: 3,
-      name: 'Rahul Verma',
-      email: 'rahulv@example.com',
-      phone: '9871203045',
-      subscriptionType: { label: 'Half-Yearly', value: 'Half-Yearly', period: '6 Months', price: 3200  },
-      period: '6 Months',
-      amountPaid: 2500,
-      paidDate: new Date('2025-05-10T10:00:00'),
-      validUntil: new Date('2025-11-10'),
-    },
-    {
-      id: 4,
-      name: 'Meena Krishnan',
-      email: 'meena.k@example.com',
-      phone: '9900887766',
-      subscriptionType: { label: 'Yearly', value: 'Yearly', period: '12 Months', price: 6000  },
-      period: '12 Months',
-      amountPaid: 4800,
-      paidDate: new Date('2025-01-01T08:15:00'),
-      validUntil: new Date('2025-12-31'),
-    },
-  ];
-  
-  
+  members: Member[] = [];
+  filteredMembers: Member[] = [];
+
+searchTerm: string = '';
 
   editDialogVisible = false;
   selectedMember: any = null;
@@ -121,7 +78,10 @@ isAdmin: boolean=false;
   ngOnInit() {
     this.userrole = localStorage.getItem("role")
     this.isAdmin = this.userrole === 'admin';
+    this.fetchMembersFromAPI(); // 👈 
+    
   }
+  
   viewMember(member: any) {
     this.selectedMember = member;
     this.editDialogVisible = true;
@@ -129,8 +89,92 @@ isAdmin: boolean=false;
   editMember(member: any) {
     this.isEditMode = true;
     this.selectedMemberId = member.id;
-    this.newMember = { ...member }; // Deep copy to prevent live editing
+  
+    // Deep clone member to avoid live editing and preserve form state
+    this.newMember = {
+      id: member.id,
+      name: member.name,
+      email: member.email,
+      phone: member.phone,
+      subscriptionType: {
+        label: member.subscriptionType?.label || '',
+        value: member.subscriptionType?.value || '',
+        period: member.subscriptionType?.period || '',
+        price: member.subscriptionType?.price || 0,
+      },
+      period: member.period,
+      amountPaid: member.amountPaid,
+      paidDate: member.paidDate,
+      validUntil: member.validUntil,
+    };
+  
     this.addDialogVisible = true;
+  }
+  
+  transformMemberForInsert(member: Member): any {
+    return {
+      id: member.id,
+      name: member.name,
+      email: member.email,
+      phone: member.phone,
+      subscriptionType: member.subscriptionType.value, // flatten to string
+      period: member.period,
+      amountPaid: member.amountPaid,
+      paidDate: member.paidDate,
+      validUntil: member.validUntil
+    };
+  }
+  insertMember(member: Member) {
+    const requestBody = this.transformMemberForInsert(member);
+  
+    this.memberService.addMember(requestBody).subscribe({
+      next: () => {
+        this.fetchMembersFromAPI(); // refresh list
+      },
+      error: (err) => {
+        console.error('Insert failed:', err);
+      }
+    });
+  }
+    
+  fetchMembersFromAPI() {
+    this.memberService.getAllMembers().subscribe({
+      next: (data) => {
+        this.members = data.map((m: any) => ({
+          id: m.Id,
+          name: m.Name,
+          email: m.Email,
+          phone: m.Phone,
+          subscriptionType: {
+            label: m.SubscriptionType?.Label || '',
+            value: m.SubscriptionType?.Value || '',
+            period: m.SubscriptionType?.Period || '',
+            price: m.SubscriptionType?.Price || 0,
+          },
+          period: m.Period,
+          amountPaid: m.AmountPaid,
+          paidDate: new Date(m.PaidDate),
+          validUntil: new Date(m.ValidUntil),
+        }));
+        this.filteredMembers = [...this.members]; 
+      },
+      error: (err) => {
+        console.error('Failed to fetch members:', err);
+      }
+    });
+  }
+  filterMembers() {
+    const term = this.searchTerm.toLowerCase();
+  
+    this.filteredMembers = this.members.filter((member) => {
+      const nameMatch = member.name.toLowerCase().includes(term);
+      const emailMatch = member.email.toLowerCase().includes(term);
+      const phoneMatch = member.phone.toLowerCase().includes(term);
+      const status = this.getStatus(member.validUntil).toLowerCase();
+      const statusMatch = status.includes(term);
+  
+      return nameMatch || emailMatch || phoneMatch || statusMatch;
+    });
   }
   
   
@@ -143,33 +187,34 @@ isAdmin: boolean=false;
       );
     }
   }
-  getStatus(validUntil: string): string {
+  getStatus(validUntil: Date): string {
     const today = new Date();
-    const expiryDate = new Date(validUntil);
-    const diffInMs = expiryDate.getTime() - today.getTime();
-    const daysLeft = Math.ceil(diffInMs / (1000 * 60 * 60 * 24));
+    const timeDiff = new Date(validUntil).getTime() - today.getTime();
+    const daysLeft = Math.ceil(timeDiff / (1000 * 3600 * 24));
   
     if (daysLeft < 0) {
       return 'Expired';
     } else if (daysLeft <= 7) {
-      return 'Expiring';
+      return 'Expiring Soon';
     } else {
-      return 'Valid';
+      return 'Active';
     }
   }
-  getStatusClass(validUntil: string): string {
-    const status = this.getStatus(validUntil);
+  
+  getStatusClass(validUntil: Date): string {
+    const status = this.getStatus(validUntil); // now accepts Date
     switch (status) {
       case 'Expired':
         return 'text-danger font-bold';
-      case 'Expiring':
+      case 'Expiring Soon':
         return 'text-warning font-bold';
-      case 'Valid':
+      case 'Active':
         return 'text-success font-bold';
       default:
         return '';
     }
   }
+  
   isExpiringSoon(validUntil: string | Date): boolean {
     const today = new Date();
     const expiryDate = new Date(validUntil);
@@ -200,12 +245,19 @@ isAdmin: boolean=false;
       this.deleteConfirmationText.trim().toLowerCase() === 'delete' &&
       this.memberToDelete
     ) {
-      this.members = this.members.filter(m => m.id !== this.memberToDelete.id);
-      this.memberToDelete = null;
-      this.deleteDialogVisible = false;
+      this.memberService.deleteMember(this.memberToDelete.id).subscribe(() => {
+        // Remove from UI after successful deletion
+        this.members = this.members.filter(m => m.id !== this.memberToDelete.id);
+        this.memberToDelete = null;
+        this.deleteDialogVisible = false;
+        this.fetchMembersFromAPI();
+      });
+     
     }
   }
-    
+  
+ 
+  
   onSubscriptionTypeChange(selected: SubscriptionOption) {
     if (selected) {
       this.newMember.period = selected.period;
@@ -323,43 +375,53 @@ isAdmin: boolean=false;
       validUntil: this.calculateValidUntil(defaultOption.value, now),
     };
   }
-
+  closeDialog() {
+    this.addDialogVisible = false;
+    this.fetchMembersFromAPI();
+    
+    this.resetOtpState();
+  }
   
   saveMember() {
-    const subscription = this.newMember.subscriptionType;
-    const validUntil = this.newMember.validUntil;
+    const { subscriptionType, validUntil } = this.newMember;
   
     if (this.isEditMode && this.selectedMemberId != null) {
-      // Editing existing member
+      // Edit mode: update existing member by ID
       const index = this.members.findIndex(m => m.id === this.selectedMemberId);
       if (index !== -1) {
-        const updatedMember = {
+        const updatedMember: Member = {
           ...this.newMember,
           id: this.selectedMemberId,
-          validUntil: validUntil,
-          subscriptionType: subscription
+          subscriptionType,
+          validUntil
         };
-        this.members[index] = updatedMember;
   
-        // Trigger change detection
-        this.members = [...this.members];
+        this.memberService.updateMember(updatedMember).subscribe(() => {
+          // Update the member in-place to avoid changing order
+          this.members[index] = { ...updatedMember };
+          this.members = [...this.members]; // Trigger Angular change detection
+          this.closeDialog();
+        });
       }
     } else {
-      // Adding new member
-      const newId = this.members.length + 1;
-      const memberToAdd = {
-        id: newId,
+      // Add new member: backend will assign ID
+      const memberToAdd: Member = {
         ...this.newMember,
-        validUntil: validUntil,
-        subscriptionType: subscription
+        id: 0,
+        subscriptionType,
+        validUntil
       };
   
-      this.members = [...this.members, memberToAdd];
+      this.memberService.addMember(memberToAdd).subscribe((createdMember: Member) => {
+        this.members = [...this.members, createdMember]; // Append to list
+        this.closeDialog();
+      });
     }
-  
-    this.addDialogVisible = false;
-    this.resetOtpState(); // Reset form and flags
   }
+  
+  
+  
+  
   
   
   
