@@ -1,78 +1,96 @@
-<!-- Table Wrapper -->
 <div class="table-wrapper">
-    <div class="d-flex justify-content-end align-items-center mb-3">
-        <button
-          pButton
-          label="Add Member"
-          icon="pi pi-plus"
-          class="p-button-rounded p-button-success p-button-outlined px-4 py-2 shadow-sm"
-          style="border-radius: 30px; font-weight: 500;"
-          (click)="showAddDialog()"
-        ></button>
-      </div>
-      
+  <!-- Top Row: Search on left, Add Member button on right -->
+  <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+    <!-- Search box -->
+    <div class="p-inputgroup search-input-wrapper" style="flex: 1 1 60%;">
+      <!-- <span class="p-inputgroup-addon"><i class="pi pi-search"></i></span>  -->
+      <input
+        type="text"
+        pInputText
+        placeholder="Search by name, email or phone"
+        [(ngModel)]="searchTerm"
+        (ngModelChange)="filterMembers()"
+        class="w-full custom-search-input"
+      />
+    </div>
+
+    <!-- Add Member Button -->
+    <button
+      pButton
+      label="Add Member"
+      icon="pi pi-plus"
+      class="p-button-rounded p-button-success p-button-outlined px-4 py-2 shadow-sm"
+      style="border-radius: 30px; font-weight: 500;"
+      (click)="showAddDialog()"
+    ></button>
+  </div>
       
     
-      <p-table
-        [value]="members"
-        [paginator]="true"
-        
+  <p-table
+  [value]="filteredMembers"
+  [paginator]="true"
+  [sortField]="'id'"
+  [sortOrder]="1"
   [rows]="5"
   [rowsPerPageOptions]="[5, 10, 20, 50]"
+  class="p-datatable-gridlines dark-table"
+>
+  <ng-template pTemplate="header">
+    <tr>
+      <th>ID</th>
+      <th>Name</th>
+      <th>Email</th>
+      <th>Mobile No</th>
+      <th>Status</th>
+      <th class="text-center">Actions</th>
+    </tr>
+  </ng-template>
 
-        
-        class="p-datatable-gridlines dark-table"
-      >
-        <ng-template pTemplate="header">
-          <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Mobile No</th>
-            <th>Status</th> <!-- New column header -->
-            <th class="text-center">Actions</th>
-          </tr>
-        </ng-template>
-    
-        <ng-template pTemplate="body" let-member>
-          <tr>
-            <td>{{ member.id }}</td>
-            <td>{{ member.name }}</td>
-            <td>{{ member.email }}</td>
-            <td>{{ member.phone }}</td>
-            <td>
-              <span [ngClass]="getStatusClass(member.validUntil)">
-                {{ getStatus(member.validUntil) }}
-              </span>
-            </td>
-            <td class="text-center">
-              <button
-              pButton
-              type="button"
-              icon="pi pi-eye"
-              class="p-button-rounded p-button-text p-button-sm p-button-info me-2"
-              (click)="viewMember(member)"
-            ></button>
-            <button
-            pButton
-            type="button"
-            icon="pi pi-pencil"
-            class="p-button-rounded p-button-text p-button-sm p-button-primary me-2"
-            (click)="editMember(member)"
-          ></button>
-          
-          <button
+  <ng-template pTemplate="body" let-member>
+    <tr>
+      <td>{{ member.id }}</td>
+      <td>{{ member.name }}</td>
+      <td>{{ member.email }}</td>
+      <td>{{ member.phone }}</td>
+      <td>
+        <span [ngClass]="getStatusClass(member.validUntil)">
+          {{ getStatus(member.validUntil) }}
+        </span>
+      </td>
+      <td class="text-center">
+        <button
+          pButton
+          type="button"
+          icon="pi pi-eye"
+          class="p-button-rounded p-button-text p-button-sm p-button-info me-2"
+          (click)="viewMember(member)"
+        ></button>
+        <button
+          pButton
+          type="button"
+          icon="pi pi-pencil"
+          class="p-button-rounded p-button-text p-button-sm p-button-primary me-2"
+          (click)="editMember(member)"
+        ></button>
+        <button
           pButton
           type="button"
           icon="pi pi-trash"
           class="p-button-rounded p-button-text p-button-sm p-button-danger"
           (click)="confirmDelete(member)"
         ></button>
-        
-            </td>
-          </tr>
-        </ng-template>
-      </p-table>
+      </td>
+    </tr>
+  </ng-template>
+
+  <!-- No Records Message -->
+  <ng-template pTemplate="emptymessage">
+    <tr>
+      <td colspan="6" class="text-center">No records found</td>
+    </tr>
+  </ng-template>
+</p-table>
+
   </div>
   <p-dialog
   header="Confirm Delete"
@@ -113,8 +131,9 @@
   </div>
 </p-dialog>
 
+
   <!-- Add Member Dialog -->
-  <p-dialog
+  <p-dialog 
   [header]="isEditMode ? 'Edit Member' : 'Add New Member'"
   [(visible)]="addDialogVisible"
   [modal]="true"

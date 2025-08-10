@@ -14,7 +14,7 @@ import { DashboardComponent } from './dashboard/dashboard.component';
 import { MembersComponent } from './members/members.component';
 import { PlansComponent } from './plans/plans.component';
 import { PaymentsComponent } from './payments/payments.component';
-
+import { HttpClientModule } from '@angular/common/http';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -61,6 +61,7 @@ import { SignupComponent } from './auth/signup/signup.component';
     ToastModule,
     ReactiveFormsModule,
     CardModule,
+    HttpClientModule,
     ChartModule,
     CalendarModule,
     MenuModule,
