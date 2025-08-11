@@ -15,7 +15,7 @@ export class SignupComponent {
   userEmail = '';
   password = '';
 
-  private apiUrl = 'https://localhost:44363/api/Role'; // your signup API endpoint
+  private apiUrl = 'https://gymmanagementapi-production-offl.up.railway.app/api/Role'; // your signup API endpoint
 
   constructor(private router: Router, private http: HttpClient) {}
 
