@@ -189,31 +189,41 @@ searchTerm: string = '';
   }
   getStatus(validUntil: Date): string {
     const today = new Date();
-    const timeDiff = new Date(validUntil).getTime() - today.getTime();
-    const daysLeft = Math.ceil(timeDiff / (1000 * 3600 * 24));
+    const expiryDate = new Date(validUntil);
+  
+    // Calculate difference in milliseconds
+    const timeDiff = expiryDate.getTime() - today.getTime();
+  
+    // Convert difference to days (round down to avoid partial day confusion)
+    const daysLeft = Math.floor(timeDiff / (1000 * 3600 * 24));
   
     if (daysLeft < 0) {
       return 'Expired';
+    } else if (daysLeft === 0) {
+      return 'Expires Today';
     } else if (daysLeft <= 7) {
-      return 'Expiring Soon';
+      return `Expiring Soon (${daysLeft} day${daysLeft > 1 ? 's' : ''} left)`;
     } else {
-      return 'Active';
+      return `Active (${daysLeft} day${daysLeft > 1 ? 's' : ''} left)`;
     }
   }
   
   getStatusClass(validUntil: Date): string {
-    const status = this.getStatus(validUntil); // now accepts Date
-    switch (status) {
-      case 'Expired':
-        return 'text-danger font-bold';
-      case 'Expiring Soon':
-        return 'text-warning font-bold';
-      case 'Active':
-        return 'text-success font-bold';
-      default:
-        return '';
+    const status = this.getStatus(validUntil);
+  
+    if (status.includes('Expired')) {
+      return 'text-danger font-bold';
+    } else if (status.includes('Expiring Soon')) {
+      return 'text-warning font-bold';
+    } else if (status.includes('Active')) {
+      return 'text-success font-bold';
+    } else if (status.includes('Expires Today')) {
+      return 'text-warning font-bold'; // treat "Expires Today" as warning
+    } else {
+      return '';
     }
   }
+  
   
   isExpiringSoon(validUntil: string | Date): boolean {
     const today = new Date();
