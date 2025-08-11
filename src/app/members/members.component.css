@@ -35,7 +35,7 @@
 
 ::ng-deep .dark-table .p-datatable {
   border-radius: 12px;
-  overflow: hidden;
+  
 }
 
 /* Input + Button Row Layout Helpers */
