@@ -7,8 +7,8 @@ import { Member } from '../models/member.model';
   providedIn: 'root'
 })
 export class MemberService {
-  private apiUrl = 'https://gymmanagementapi-production-offl.up.railway.app/api/members';
-
+  // private apiUrl = 'https://gymmanagementapi-production-offl.up.railway.app/api/members';
+  private apiUrl = 'https://localhost:44363/api/members';
   constructor(private http: HttpClient) {}
 
   getAllMembers(): Observable<Member[]> {
