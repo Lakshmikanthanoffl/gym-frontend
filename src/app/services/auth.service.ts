@@ -20,7 +20,7 @@ export class AuthService {
   private usernameSubject = new BehaviorSubject<string | null>(localStorage.getItem('username'));
   username$ = this.usernameSubject.asObservable();
 
-  private apiUrl = 'https://localhost:44363/api/Role/login'; // adjust if needed
+  private apiUrl = 'https://gymmanagementapi-production-offl.up.railway.app/api/Role/login'; // adjust if needed
 
   constructor(private http: HttpClient) {}
 
