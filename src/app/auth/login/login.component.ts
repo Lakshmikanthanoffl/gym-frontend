@@ -8,7 +8,7 @@ import { AuthService } from '../../services/auth.service'; // Adjust path if nee
   styleUrl: './login.component.css'
 })
 export class LoginComponent implements OnInit {
-  username = '';
+  UserEmail = '';
   password = '';
   showPassword = false;
 
@@ -22,7 +22,7 @@ export class LoginComponent implements OnInit {
 
   login() {
     const loginData = {
-      email: this.username, // or this.email if you renamed the field
+      email: this.UserEmail, // or this.email if you renamed the field
       password: this.password
     };
   
