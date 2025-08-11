@@ -1,39 +1,50 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-// 🔽 Add these imports at the top
+
+// Firebase imports
 import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
 import { provideAuth, getAuth } from '@angular/fire/auth';
-import { environment } from '../environments/environment';
 import { AngularFireModule } from '@angular/fire/compat';
 import { AngularFireAuthModule } from '@angular/fire/compat/auth';
+
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
+
+// Layout & feature components
 import { HeaderComponent } from './layout/header/header.component';
 import { SidebarComponent } from './layout/sidebar/sidebar.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { MembersComponent } from './members/members.component';
 import { PlansComponent } from './plans/plans.component';
 import { PaymentsComponent } from './payments/payments.component';
-import { HttpClientModule } from '@angular/common/http';
+
+// Angular modules
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+
+// PrimeNG modules
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { DropdownModule } from 'primeng/dropdown';
-import { FormsModule } from '@angular/forms';
 import { SplitButtonModule } from 'primeng/splitbutton';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { MenuModule } from 'primeng/menu';
 import { DialogModule } from 'primeng/dialog';
-
-
 import { CardModule } from 'primeng/card';
 import { ChartModule } from 'primeng/chart';
 import { CalendarModule } from 'primeng/calendar';
 
-import { ReactiveFormsModule } from '@angular/forms';
+// Auth components
 import { LoginComponent } from './auth/login/login.component';
 import { SignupComponent } from './auth/signup/signup.component';
+
+// Loader interceptor and component
+import { LoadingInterceptor } from './interceptors/loading.interceptor';
+import { LoaderComponent } from './shared/loader/loader.component';  // Adjust path if needed
+
+import { environment } from '../environments/environment';
 
 @NgModule({
   declarations: [
@@ -42,34 +53,42 @@ import { SignupComponent } from './auth/signup/signup.component';
     DashboardComponent,
     PlansComponent,
     PaymentsComponent,
-
     MembersComponent,
     HeaderComponent,
     LoginComponent,
     SignupComponent,
-
+    LoaderComponent  // Add LoaderComponent here
   ],
   imports: [
-    FormsModule,
     BrowserModule,
     AppRoutingModule,
     BrowserAnimationsModule,
+    FormsModule,
+    ReactiveFormsModule,
+    HttpClientModule,
+
     TableModule,
     ButtonModule,
     DropdownModule,
     SplitButtonModule,
     ToastModule,
-    ReactiveFormsModule,
-    CardModule,
-    HttpClientModule,
-    ChartModule,
-    CalendarModule,
     MenuModule,
     DialogModule,
+    CardModule,
+    ChartModule,
+    CalendarModule,
+
     AngularFireModule.initializeApp(environment.firebase),
     AngularFireAuthModule,
   ],
-  providers: [MessageService],
+  providers: [
+    MessageService,
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: LoadingInterceptor,
+      multi: true
+    }
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
