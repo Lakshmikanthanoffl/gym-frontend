@@ -1,0 +1,32 @@
+.password-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  
+  .password-wrapper input.form-control {
+    padding-right: 2.5rem; /* space for eye button */
+    flex-grow: 1;
+    height: 2.5rem; /* fixed height */
+    min-height: 2.5rem;
+  }
+  
+  .toggle-btn {
+    position: absolute;
+    right: 0.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    padding: 0.25rem 0.5rem;
+    height: auto;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    color: #555;
+  }
+  
+  .toggle-btn:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px #007bff;
+  }
+  

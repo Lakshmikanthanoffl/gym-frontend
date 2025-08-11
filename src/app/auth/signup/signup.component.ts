@@ -14,6 +14,10 @@ export class SignupComponent {
   userName = '';
   userEmail = '';
   password = '';
+  confirmPassword = '';
+  showPassword = false;
+  showConfirmPassword = false;
+  isPasswordStrong = false;
 
   private apiUrl = 'https://gymmanagementapi-production-offl.up.railway.app/api/Role'; // your signup API endpoint
 
@@ -38,5 +42,22 @@ export class SignupComponent {
         console.error('Signup error:', error);
       }
     });
+  }
+ 
+  togglePasswordVisibility() {
+    this.showPassword = !this.showPassword;
+  }
+
+  toggleConfirmPasswordVisibility() {
+    this.showConfirmPassword = !this.showConfirmPassword;
+  }
+
+  validatePassword() {
+    const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?#&])[A-Za-z\d@$!%*?#&]{8,}$/;
+    this.isPasswordStrong = strongPasswordRegex.test(this.password);
+  }
+
+  doPasswordsMatch(): boolean {
+    return this.password === this.confirmPassword;
   }
 }

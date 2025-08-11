@@ -1,18 +1,103 @@
 <div class="d-flex justify-content-center align-items-center vh-100">
   <div class="card w-25 p-4 shadow">
     <h3 class="mb-3">Sign Up</h3>
-    <form (ngSubmit)="signup()" #signupForm="ngForm">
+    <form (ngSubmit)="signup()" #signupForm="ngForm" novalidate>
 
       <div class="mb-3">
-        <input type="text" placeholder="User Name" class="form-control" [(ngModel)]="userName" name="userName" required>
+        <input
+          type="text"
+          placeholder="User Name"
+          class="form-control"
+          [(ngModel)]="userName"
+          name="userName"
+          required
+          #userNameCtrl="ngModel"
+        />
+        <div *ngIf="userNameCtrl.invalid && userNameCtrl.touched" class="text-danger small">
+          User Name is required.
+        </div>
       </div>
+
       <div class="mb-3">
-        <input type="email" placeholder="User Email" class="form-control" [(ngModel)]="userEmail" name="userEmail" required>
+        <input
+          type="email"
+          placeholder="User Email"
+          class="form-control"
+          [(ngModel)]="userEmail"
+          name="userEmail"
+          required
+          email
+          #userEmailCtrl="ngModel"
+        />
+        <div *ngIf="userEmailCtrl.invalid && userEmailCtrl.touched" class="text-danger small">
+          Enter a valid email.
+        </div>
       </div>
-      <div class="mb-3">
-        <input type="password" placeholder="Password" class="form-control" [(ngModel)]="password" name="password" required>
+
+      <div class="mb-3 position-relative">
+        <div class="password-wrapper position-relative">
+          <input
+            [type]="showPassword ? 'text' : 'password'"
+            placeholder="Password"
+            class="form-control"
+            [(ngModel)]="password"
+            name="password"
+            required
+            minlength="8"
+            #passwordCtrl="ngModel"
+            (ngModelChange)="validatePassword()"
+          />
+          <button
+            type="button"
+            (click)="togglePasswordVisibility()"
+            class="btn btn-sm btn-outline-secondary toggle-btn"
+            tabindex="-1"
+            aria-label="Toggle Password Visibility"
+          >
+            <i class="pi" [ngClass]="showPassword ? 'pi-eye' : 'pi-eye-slash'"></i>
+          </button>
+        </div>
+
+        <div *ngIf="passwordCtrl.touched && !isPasswordStrong" class="text-danger small mt-1">
+          Password must be at least 8 chars, include uppercase, lowercase, number & special char.
+        </div>
       </div>
-      <button type="submit" class="btn btn-success w-100">Sign Up</button>
+
+      <div class="mb-3 position-relative">
+        <div class="password-wrapper position-relative">
+          <input
+            [type]="showConfirmPassword ? 'text' : 'password'"
+            placeholder="Confirm Password"
+            class="form-control"
+            [(ngModel)]="confirmPassword"
+            name="confirmPassword"
+            required
+            #confirmPasswordCtrl="ngModel"
+          />
+          <button
+            type="button"
+            (click)="toggleConfirmPasswordVisibility()"
+            class="btn btn-sm btn-outline-secondary toggle-btn"
+            tabindex="-1"
+            aria-label="Toggle Confirm Password Visibility"
+          >
+            <i class="pi" [ngClass]="showConfirmPassword ? 'pi-eye' : 'pi-eye-slash'"></i>
+          </button>
+        </div>
+
+        <div *ngIf="confirmPasswordCtrl.touched && !doPasswordsMatch()" class="text-danger small mt-1">
+          Passwords do not match.
+        </div>
+      </div>
+
+      <button
+        type="submit"
+        class="btn btn-success w-100"
+        [disabled]="!signupForm.form.valid || !isPasswordStrong || !doPasswordsMatch()"
+      >
+        Sign Up
+      </button>
+
       <p class="mt-3 text-center">
         Already have an account? <a routerLink="/login">Login</a>
       </p>
