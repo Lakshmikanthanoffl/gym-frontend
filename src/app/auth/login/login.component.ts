@@ -21,16 +21,27 @@ export class LoginComponent implements OnInit {
   }
 
   login() {
-    if (this.username === 'admin' && this.password === 'admin') {
-      this.authService.setRole('admin');
-      this.router.navigate(['/dashboard']);
-    } else if (this.username === 'user' && this.password === 'user') {
-      this.authService.setRole('user');
-      this.router.navigate(['/dashboard']);
-    } else {
-      alert('Invalid credentials');
-    }
+    const loginData = {
+      email: this.username, // or this.email if you renamed the field
+      password: this.password
+    };
+  
+    this.authService.login(loginData).subscribe({
+      next: (role) => {
+        this.authService.setRole(role.RoleName);
+        this.router.navigate(['/dashboard']);
+      },
+      error: (err) => {
+        if (err.status === 401) {
+          alert('Invalid credentials');
+        } else {
+          alert('Login failed. Please try again.');
+        }
+      }
+    });
   }
+  
+  
 
   togglePasswordVisibility() {
     this.showPassword = !this.showPassword;

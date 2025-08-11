@@ -68,10 +68,13 @@ export class HeaderComponent implements OnInit {
 
   ngOnInit() {
     this.authService.role$.subscribe(role => {
-      this.username = role;
-      console.log('Header userrole:', this.userrole);
+      this.userrole = role;
+    });
+    this.authService.username$.subscribe(username => {
+      this.username = username;
     });
   }
+  
   togglePopup() {
     this.popupVisible = !this.popupVisible;
 
