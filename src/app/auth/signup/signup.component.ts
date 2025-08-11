@@ -1,21 +1,42 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-signup',
   standalone: false,
   templateUrl: './signup.component.html',
-  styleUrl: './signup.component.css'
+  styleUrls: ['./signup.component.css']  // corrected typo
 })
 export class SignupComponent {
-  username = '';
+  roleId = 0;
+  roleName = 'user';
+  userName = '';
+  userEmail = '';
   password = '';
 
-  constructor(private router: Router) {}
+  private apiUrl = 'https://gymmanagementapi-production-offl.up.railway.app/api/Role'; // your signup API endpoint
+
+  constructor(private router: Router, private http: HttpClient) {}
 
   signup() {
-    // Dummy signup logic
-    alert('Signup successful!');
-    this.router.navigate(['/login']);
+    const signupData = {
+      roleId: this.roleId,
+      roleName: this.roleName,
+      userName: this.userName,
+      userEmail: this.userEmail,
+      password: this.password
+    };
+
+    this.http.post(this.apiUrl, signupData).subscribe({
+      next: (response) => {
+        alert('Signup successful!');
+        this.router.navigate(['/login']);
+      },
+      error: (error) => {
+        alert('Signup failed, please try again.');
+        console.error('Signup error:', error);
+      }
+    });
   }
 }

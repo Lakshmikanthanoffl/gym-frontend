@@ -1,8 +1,13 @@
-<div class="card w-25 mx-auto mt-5 p-4 shadow">
+<div class="d-flex justify-content-center align-items-center vh-100">
+  <div class="card w-25 p-4 shadow">
     <h3 class="mb-3">Sign Up</h3>
     <form (ngSubmit)="signup()" #signupForm="ngForm">
+
       <div class="mb-3">
-        <input type="text" placeholder="Username" class="form-control" [(ngModel)]="username" name="username" required>
+        <input type="text" placeholder="User Name" class="form-control" [(ngModel)]="userName" name="userName" required>
+      </div>
+      <div class="mb-3">
+        <input type="email" placeholder="User Email" class="form-control" [(ngModel)]="userEmail" name="userEmail" required>
       </div>
       <div class="mb-3">
         <input type="password" placeholder="Password" class="form-control" [(ngModel)]="password" name="password" required>
@@ -13,4 +18,4 @@
       </p>
     </form>
   </div>
-  
+</div>
