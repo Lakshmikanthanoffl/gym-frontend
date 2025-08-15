@@ -194,30 +194,20 @@
     </div>
 
     <!-- Gym ID & Gym Name (Superadmin only) -->
-    <div *ngIf="userrole === 'superadmin'">
-      <div class="field mb-2 d-flex align-items-center">
-        <label for="gymId" class="form-label w-40">Gym ID</label>
-        <input
-          pInputText
-          id="gymId"
-          [(ngModel)]="newMember.gymId"
-          name="gymId"
-          class="flex-grow-1"
-          type="number"
-        />
-      </div>
-
-      <div class="field mb-2 d-flex align-items-center">
-        <label for="gymName" class="form-label w-40">Gym Name</label>
-        <input
-          pInputText
-          id="gymName"
-          [(ngModel)]="newMember.gymName"
-          name="gymName"
-          class="flex-grow-1"
-          type="text"
-        />
-      </div>
+    <!-- Gym selection (Superadmin only) -->
+    <div *ngIf="userrole === 'superadmin'" class="field mb-2 d-flex align-items-center">
+      <label for="gymId" class="form-label w-40">Gym</label>
+      <p-dropdown
+        id="gymId"
+        [options]="availableGyms"
+        [(ngModel)]="newMember.gymId"
+        optionLabel="name"
+        optionValue="id"
+        placeholder="Select Gym"
+        class="flex-grow-1"
+        (onChange)="onGymChange($event.value)"
+        name="gymId"
+      ></p-dropdown>
     </div>
     
     <!-- Subscription Type -->
