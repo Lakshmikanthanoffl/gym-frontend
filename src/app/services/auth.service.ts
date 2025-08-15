@@ -7,6 +7,8 @@ export interface Role {
   RoleName: string;
   UserName: string;
   userEmail: string;
+  GymId:number;
+  GymName:string;
 }
 
 @Injectable({
@@ -30,6 +32,8 @@ export class AuthService {
         localStorage.setItem('authToken', 'dummy-token');
         localStorage.setItem('role', role.RoleName);
         localStorage.setItem('username', role.UserName);
+        localStorage.setItem('GymName', role.GymName);
+        localStorage.setItem('GymId', role.GymId.toString());
 
         this.roleSubject.next(role.RoleName);
         this.usernameSubject.next(role.UserName);
