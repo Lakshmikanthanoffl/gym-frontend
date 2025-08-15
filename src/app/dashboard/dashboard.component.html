@@ -1,5 +1,5 @@
 <!-- Summary Cards -->
-<div  class="dashboard-grid" *ngIf="isAdmin">
+<div  class="dashboard-grid" *ngIf="isAdminOrSuperAdmin">
     <p-card header="Total Members">
       <p>{{ totalMembers }}</p>
     </p-card>
@@ -18,7 +18,7 @@
   </div>
   
   <!-- Graph -->
-  <div class="mt-4" *ngIf="isAdmin">
+  <div class="mt-4" *ngIf="isAdminOrSuperAdmin">
     <p-card header="New Members Trend">
       <p-chart type="bar" [data]="memberChartData" [options]="memberChartOptions"></p-chart>
     </p-card>

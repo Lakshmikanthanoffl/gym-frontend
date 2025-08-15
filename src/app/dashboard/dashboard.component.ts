@@ -10,6 +10,8 @@ import { Component, OnInit } from '@angular/core';
 export class DashboardComponent implements OnInit {
   userrole: any;
   isAdmin: boolean=false;
+  isSuperAdmin!: boolean;
+  isAdminOrSuperAdmin!: boolean;
   constructor() {}
 
 
@@ -24,6 +26,10 @@ export class DashboardComponent implements OnInit {
   ngOnInit() {
     this.userrole = localStorage.getItem("role")
     this.isAdmin = this.userrole === 'admin';
+this.isSuperAdmin = this.userrole === 'superadmin';
+
+// or a combined check if you want a single flag for both
+this.isAdminOrSuperAdmin = this.userrole === 'admin' || this.userrole === 'superadmin';
     console.log("this.userrole",this.userrole)
     this.memberChartData = {
       labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],

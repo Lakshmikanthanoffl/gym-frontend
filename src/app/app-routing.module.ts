@@ -27,7 +27,7 @@ const routes: Routes = [
     path: 'members',
     component: MembersComponent,
     canActivate: [AuthGuard],
-    data: { title: 'Members', roles: ['admin'] } // ❗️Only admin
+    data: { title: 'Members', roles: ['admin', 'superadmin'] } // ❗️Only admin
   },
   {
     path: 'plans',
@@ -39,7 +39,7 @@ const routes: Routes = [
     path: 'payments',
     component: PaymentsComponent,
     canActivate: [AuthGuard],
-    data: { title: 'Payments', roles: ['admin'] } // ❗️Only admin
+    data: { title: 'Payments', roles: ['admin', 'superadmin'] } // ❗️Only admin
   },
 
   // Fallback for unknown paths

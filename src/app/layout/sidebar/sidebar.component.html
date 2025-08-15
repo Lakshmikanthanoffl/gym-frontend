@@ -6,7 +6,7 @@
     <span > Dashboard</span>
   </a>
 
-  <a *ngIf="userrole === 'admin'" routerLink="/members" routerLinkActive="active">
+  <a *ngIf="userrole === 'admin' || userrole === 'superadmin'" routerLink="/members" routerLinkActive="active">
     <i class="pi pi-users"></i>
     <span > Members</span>
   </a> 
@@ -16,7 +16,7 @@
     <span > Plans</span>
   </a>
 
-  <a *ngIf="userrole === 'admin'" routerLink="/payments" routerLinkActive="active">
+  <a *ngIf="userrole === 'admin' || userrole === 'superadmin'" routerLink="/payments" routerLinkActive="active">
     <i class="pi pi-credit-card"></i>
     <span > Payments</span>
   </a>

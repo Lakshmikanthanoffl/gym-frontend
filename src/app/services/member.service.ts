@@ -35,4 +35,8 @@ export class MemberService {
    getDefaultGym(): Observable<{ gymId: number; gymName: string }> {
     return this.http.get<{ gymId: number; gymName: string }>(this.gymApiUrl);
   }
+  // ✅ New method to fetch members by GymId and GymName
+  getMembersByGym(gymId: number, gymName: string): Observable<Member[]> {
+    return this.http.get<Member[]>(`${this.apiUrl}/by-gym?gymId=${gymId}&gymName=${gymName}`);
+  }
 }
