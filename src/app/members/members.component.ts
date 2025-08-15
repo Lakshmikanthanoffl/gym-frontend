@@ -18,8 +18,12 @@ interface SubscriptionOption {
 })
 
 export class MembersComponent implements OnInit{
+  gymId!: number;
+  gymname!: string | null;
   constructor(private memberService: MemberService) {}
   otpSent: boolean = false;
+  defaultGymId!: number;      // ✅ add this
+  defaultGymName!: string;    // ✅ add this
 enteredOtp: string = '';
 generatedOtp: string = '';
 isPhoneVerified: boolean = false;
@@ -41,6 +45,8 @@ isAdmin: boolean=false;
     amountPaid: number;
     paidDate: Date;
     validUntil: Date;
+    gymId?: number;           // ✅ add this
+    gymName?: string;         // ✅ add this
   } = {
     name: '',
     email: '',
@@ -54,7 +60,9 @@ isAdmin: boolean=false;
     period: '1 Month',
     amountPaid: 500,
     paidDate: new Date(),
-    validUntil: this.calculateValidUntil('Monthly')
+    validUntil: this.calculateValidUntil('Monthly'),
+    gymId: undefined,         // ✅ initialize
+    gymName: undefined        // ✅ initialize
   };
   
   
@@ -79,6 +87,10 @@ searchTerm: string = '';
     this.userrole = localStorage.getItem("role")
     this.isAdmin = this.userrole === 'admin';
     this.fetchMembersFromAPI(); // 👈 
+    this.defaultGymName = localStorage.getItem('GymName') ?? '';
+    this.defaultGymId = Number(localStorage.getItem('GymId')) || 0;
+    this.defaultGymId = Number(this.gymId) || 0;          // convert string | null to number
+    this.defaultGymName = this.gymname ?? '';             // convert string | null to string
     
   }
   
@@ -106,6 +118,8 @@ searchTerm: string = '';
       amountPaid: member.amountPaid,
       paidDate: member.paidDate,
       validUntil: member.validUntil,
+      gymId: this.defaultGymId,      
+  gymName: this.defaultGymName ?? ''  // ✅ now recognized
     };
   
     this.addDialogVisible = true;
@@ -137,32 +151,32 @@ searchTerm: string = '';
     });
   }
     
-  fetchMembersFromAPI() {
-    this.memberService.getAllMembers().subscribe({
-      next: (data) => {
-        this.members = data.map((m: any) => ({
-          id: m.Id,
-          name: m.Name,
-          email: m.Email,
-          phone: m.Phone,
-          subscriptionType: {
-            label: m.SubscriptionType?.Label || '',
-            value: m.SubscriptionType?.Value || '',
-            period: m.SubscriptionType?.Period || '',
-            price: m.SubscriptionType?.Price || 0,
-          },
-          period: m.Period,
-          amountPaid: m.AmountPaid,
-          paidDate: new Date(m.PaidDate),
-          validUntil: new Date(m.ValidUntil),
-        }));
-        this.filteredMembers = [...this.members]; 
-      },
-      error: (err) => {
-        console.error('Failed to fetch members:', err);
-      }
-    });
-  }
+    fetchMembersFromAPI() {
+      this.memberService.getAllMembers().subscribe({
+        next: (data) => {
+          this.members = data.map((m: any) => ({
+            id: m.Id,
+            name: m.Name,
+            email: m.Email,
+            phone: m.Phone,
+            subscriptionType: {
+              label: m.SubscriptionType?.Label || '',
+              value: m.SubscriptionType?.Value || '',
+              period: m.SubscriptionType?.Period || '',
+              price: m.SubscriptionType?.Price || 0,
+            },
+            period: m.Period,
+            amountPaid: m.AmountPaid,
+            paidDate: new Date(m.PaidDate),
+            validUntil: new Date(m.ValidUntil),
+          }));
+          this.filteredMembers = [...this.members]; 
+        },
+        error: (err) => {
+          console.error('Failed to fetch members:', err);
+        }
+      });
+    }
   filterMembers() {
     const term = this.searchTerm.toLowerCase();
   
@@ -311,6 +325,10 @@ searchTerm: string = '';
     this.isPhoneVerified = false;
     this.otpDialogVisible = false;
   
+    // Get gym info from localStorage
+    const gymId = Number(localStorage.getItem('GymId')) || 0;
+    const gymName = localStorage.getItem('GymName') ?? '';
+  
     // Reset member form fields with valid default values
     this.newMember = {
       name: '',
@@ -325,12 +343,15 @@ searchTerm: string = '';
       period: '1 Month',
       amountPaid: 500,
       paidDate: new Date(),
-      validUntil: this.calculateValidUntil('Monthly')
+      validUntil: this.calculateValidUntil('Monthly'),
+      gymId,     // set gymId
+      gymName    // set gymName
     };
   
     this.isEditMode = false;
     this.selectedMemberId = null;
   }
+  
   
   
   
@@ -383,6 +404,8 @@ searchTerm: string = '';
       amountPaid: defaultOption.price,
       paidDate: now,
       validUntil: this.calculateValidUntil(defaultOption.value, now),
+      gymId: this.defaultGymId,      // ✅ now recognized
+      gymName: this.defaultGymName   // ✅ now recognized
     };
   }
   closeDialog() {
@@ -395,6 +418,10 @@ searchTerm: string = '';
   saveMember() {
     const { subscriptionType, validUntil } = this.newMember;
   
+    // Get gym info from localStorage and ensure proper types
+    const gymId = Number(localStorage.getItem('GymId')) || 0;
+    const gymName = localStorage.getItem('GymName') ?? '';
+  
     if (this.isEditMode && this.selectedMemberId != null) {
       // Edit mode: update existing member by ID
       const index = this.members.findIndex(m => m.id === this.selectedMemberId);
@@ -403,7 +430,9 @@ searchTerm: string = '';
           ...this.newMember,
           id: this.selectedMemberId,
           subscriptionType,
-          validUntil
+          validUntil,
+          gymId,      // include gymId
+          gymName     // include gymName
         };
   
         this.memberService.updateMember(updatedMember).subscribe(() => {
@@ -419,7 +448,9 @@ searchTerm: string = '';
         ...this.newMember,
         id: 0,
         subscriptionType,
-        validUntil
+        validUntil,
+        gymId,      // include gymId
+        gymName     // include gymName
       };
   
       this.memberService.addMember(memberToAdd).subscribe((createdMember: Member) => {
@@ -428,6 +459,7 @@ searchTerm: string = '';
       });
     }
   }
+  
   
   
   

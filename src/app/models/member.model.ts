@@ -8,6 +8,8 @@ export interface Member {
     amountPaid: number;
     paidDate: Date;
     validUntil: Date;
+    gymId?: number;      // ✅ add gymId
+    gymName?: string;    // ✅ add gymName
   }
   
   

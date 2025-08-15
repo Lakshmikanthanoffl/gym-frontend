@@ -9,6 +9,7 @@ import { Member } from '../models/member.model';
 export class MemberService {
   // private apiUrl = 'https://gymmanagementapi-production-offl.up.railway.app/api/members';
   private apiUrl = 'https://gymmanagementapi-production-offl.up.railway.app/api/members';
+  private gymApiUrl = 'https://gymmanagementapi-production-offl.up.railway.app/api/role/bygym';
   constructor(private http: HttpClient) {}
 
   getAllMembers(): Observable<Member[]> {
@@ -29,5 +30,9 @@ export class MemberService {
 
   deleteMember(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
+   // ✅ New method to get default gym info
+   getDefaultGym(): Observable<{ gymId: number; gymName: string }> {
+    return this.http.get<{ gymId: number; gymName: string }>(this.gymApiUrl);
   }
 }
