@@ -18,6 +18,7 @@ interface SubscriptionOption {
 })
 
 export class MembersComponent implements OnInit{
+  availableGyms: { id: number; name: string }[] = [];
   gymId!: number;
   gymname!: string | null;
   constructor(private memberService: MemberService) {}
@@ -186,6 +187,7 @@ searchTerm: string = '';
   }
   
 // Helper method to process members response
+
 private processMembers(data: any[]) {
   this.members = data.map((m: any) => ({
     id: m.Id,
@@ -203,10 +205,29 @@ private processMembers(data: any[]) {
     paidDate: new Date(m.PaidDate),
     validUntil: new Date(m.ValidUntil),
     gymId: m.GymId,
-    gymName: m.GymName || '', // default to empty string if null
+    gymName: m.GymName || '',
   }));
+
   this.filteredMembers = [...this.members];
+
+  // Prepare unique gyms for the dropdown
+  const gymMap = new Map<number, string>();
+  this.members.forEach(m => {
+    if (m.gymId && m.gymName) {
+      gymMap.set(m.gymId, m.gymName);
+    }
+  });
+
+  this.availableGyms = Array.from(gymMap.entries()).map(([id, name]) => ({ id, name }));
 }
+onGymChange(selectedGymId: number) {
+  const gym = this.availableGyms.find(g => g.id === selectedGymId);
+  if (gym) {
+    this.newMember.gymId = gym.id;
+    this.newMember.gymName = gym.name;
+  }
+}
+
 
   
 filterMembers() {
