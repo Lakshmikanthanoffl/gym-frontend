@@ -29,9 +29,11 @@ export class SignupComponent {
       roleName: this.roleName,
       userName: this.userName,
       userEmail: this.userEmail,
-      password: this.password
+      password: this.password,
+      gymId: 0,           // ✅ Added
+      gymName: ""   // ✅ Added
     };
-
+  
     this.http.post(this.apiUrl, signupData).subscribe({
       next: (response) => {
         alert('Signup successful!');
@@ -43,6 +45,7 @@ export class SignupComponent {
       }
     });
   }
+  
  
   togglePasswordVisibility() {
     this.showPassword = !this.showPassword;

@@ -86,11 +86,10 @@ searchTerm: string = '';
   ngOnInit() {
     this.userrole = localStorage.getItem("role")
     this.isAdmin = this.userrole === 'admin';
-    this.fetchMembersFromAPI(); // 👈 
+    
     this.defaultGymName = localStorage.getItem('GymName') ?? '';
     this.defaultGymId = Number(localStorage.getItem('GymId')) || 0;
-    this.defaultGymId = Number(this.gymId) || 0;          // convert string | null to number
-    this.defaultGymName = this.gymname ?? '';             // convert string | null to string
+    this.fetchMembersFromAPI(); // 👈
     
   }
   
@@ -101,6 +100,20 @@ searchTerm: string = '';
   editMember(member: any) {
     this.isEditMode = true;
     this.selectedMemberId = member.id;
+  
+    // Determine gym info based on role
+    let gymId: number;
+    let gymName: string;
+  
+    if (this.userrole === 'superadmin') {
+      // Take from the member object itself
+      gymId = member.gymId || 0;
+      gymName = member.gymName || '';
+    } else {
+      // Use default gym info for admin
+      gymId = this.defaultGymId;
+      gymName = this.defaultGymName ?? '';
+    }
   
     // Deep clone member to avoid live editing and preserve form state
     this.newMember = {
@@ -118,12 +131,13 @@ searchTerm: string = '';
       amountPaid: member.amountPaid,
       paidDate: member.paidDate,
       validUntil: member.validUntil,
-      gymId: this.defaultGymId,      
-  gymName: this.defaultGymName ?? ''  // ✅ now recognized
+      gymId,    // ✅ gym info based on role
+      gymName   // ✅ gym info based on role
     };
   
     this.addDialogVisible = true;
   }
+  
   
   transformMemberForInsert(member: Member): any {
     return {
@@ -151,46 +165,71 @@ searchTerm: string = '';
     });
   }
     
-    fetchMembersFromAPI() {
+  fetchMembersFromAPI() {
+    const userRole = this.userrole; // e.g., 'superadmin' or 'admin'
+    const gymId =  this.defaultGymId ;       // set this if admin
+    const gymName = this.defaultGymName;   // set this if admin
+  
+    if (userRole === 'superadmin') {
+      // Superadmin: fetch all members
       this.memberService.getAllMembers().subscribe({
-        next: (data) => {
-          this.members = data.map((m: any) => ({
-            id: m.Id,
-            name: m.Name,
-            email: m.Email,
-            phone: m.Phone,
-            subscriptionType: {
-              label: m.SubscriptionType?.Label || '',
-              value: m.SubscriptionType?.Value || '',
-              period: m.SubscriptionType?.Period || '',
-              price: m.SubscriptionType?.Price || 0,
-            },
-            period: m.Period,
-            amountPaid: m.AmountPaid,
-            paidDate: new Date(m.PaidDate),
-            validUntil: new Date(m.ValidUntil),
-          }));
-          this.filteredMembers = [...this.members]; 
-        },
-        error: (err) => {
-          console.error('Failed to fetch members:', err);
-        }
+        next: (data) => this.processMembers(data),
+        error: (err) => console.error('Failed to fetch members:', err),
+      });
+    } else if (userRole === 'admin') {
+      // Admin: fetch members by gym
+      this.memberService.getMembersByGym(gymId, gymName).subscribe({
+        next: (data) => this.processMembers(data),
+        error: (err) => console.error('Failed to fetch members:', err),
       });
     }
-  filterMembers() {
-    const term = this.searchTerm.toLowerCase();
-  
-    this.filteredMembers = this.members.filter((member) => {
-      const nameMatch = member.name.toLowerCase().includes(term);
-      const emailMatch = member.email.toLowerCase().includes(term);
-      const phoneMatch = member.phone.toLowerCase().includes(term);
-      const status = this.getStatus(member.validUntil).toLowerCase();
-      const statusMatch = status.includes(term);
-  
-      return nameMatch || emailMatch || phoneMatch || statusMatch;
-    });
   }
   
+// Helper method to process members response
+private processMembers(data: any[]) {
+  this.members = data.map((m: any) => ({
+    id: m.Id,
+    name: m.Name,
+    email: m.Email,
+    phone: m.Phone,
+    subscriptionType: {
+      label: m.SubscriptionType?.Label || '',
+      value: m.SubscriptionType?.Value || '',
+      period: m.SubscriptionType?.Period || '',
+      price: m.SubscriptionType?.Price || 0,
+    },
+    period: m.Period,
+    amountPaid: m.AmountPaid,
+    paidDate: new Date(m.PaidDate),
+    validUntil: new Date(m.ValidUntil),
+    gymId: m.GymId,
+    gymName: m.GymName || '', // default to empty string if null
+  }));
+  this.filteredMembers = [...this.members];
+}
+
+  
+filterMembers() {
+  const term = this.searchTerm.toLowerCase();
+
+  this.filteredMembers = this.members.filter((member) => {
+    const nameMatch = member.name.toLowerCase().includes(term);
+    const emailMatch = member.email.toLowerCase().includes(term);
+    const phoneMatch = member.phone.toLowerCase().includes(term);
+    const status = this.getStatus(member.validUntil).toLowerCase();
+    const statusMatch = status.includes(term);
+
+    let gymMatch = false;
+    if (this.userrole === 'superadmin') {
+      const gymIdStr = member.gymId?.toString() || '';
+      const gymNameStr = member.gymName?.toLowerCase() || '';
+      gymMatch = gymIdStr.includes(term) || gymNameStr.includes(term);
+    }
+
+    return nameMatch || emailMatch || phoneMatch || statusMatch || gymMatch;
+  });
+}
+
   
   onPaidDateChange() {
     const subType = this.newMember.subscriptionType?.value;
@@ -392,7 +431,20 @@ searchTerm: string = '';
   showAddDialog() {
     const defaultOption = this.subscriptionTypes.find(opt => opt.value === 'Monthly')!;
     const now = new Date();
-
+  
+    let gymId: number;
+    let gymName: string;
+  
+    if (this.userrole === 'superadmin') {
+      // For superadmin, keep gym fields empty
+      gymId = 0;
+      gymName = '';
+    } else {
+      // For admin, use default gym info
+      gymId = this.defaultGymId;
+      gymName = this.defaultGymName;
+    }
+  
     this.addDialogVisible = true;
     this.newMember = {
       id: this.members.length + 1,
@@ -404,10 +456,11 @@ searchTerm: string = '';
       amountPaid: defaultOption.price,
       paidDate: now,
       validUntil: this.calculateValidUntil(defaultOption.value, now),
-      gymId: this.defaultGymId,      // ✅ now recognized
-      gymName: this.defaultGymName   // ✅ now recognized
+      gymId,    // ✅ based on role
+      gymName   // ✅ based on role
     };
   }
+  
   closeDialog() {
     this.addDialogVisible = false;
     this.fetchMembersFromAPI();
@@ -418,9 +471,19 @@ searchTerm: string = '';
   saveMember() {
     const { subscriptionType, validUntil } = this.newMember;
   
-    // Get gym info from localStorage and ensure proper types
-    const gymId = Number(localStorage.getItem('GymId')) || 0;
-    const gymName = localStorage.getItem('GymName') ?? '';
+    // Determine gym info based on role
+    let gymId: number;
+    let gymName: string;
+  
+    if (this.userrole === 'superadmin') {
+      // Take values from the dialog inputs for superadmin
+      gymId = Number(this.newMember.gymId) || 0;
+      gymName = this.newMember.gymName ?? '';
+    } else {
+      // Take values from localStorage for admin
+      gymId = Number(localStorage.getItem('GymId')) || 0;
+      gymName = localStorage.getItem('GymName') ?? '';
+    }
   
     if (this.isEditMode && this.selectedMemberId != null) {
       // Edit mode: update existing member by ID
@@ -436,14 +499,14 @@ searchTerm: string = '';
         };
   
         this.memberService.updateMember(updatedMember).subscribe(() => {
-          // Update the member in-place to avoid changing order
+          // Update the member in-place
           this.members[index] = { ...updatedMember };
           this.members = [...this.members]; // Trigger Angular change detection
           this.closeDialog();
         });
       }
     } else {
-      // Add new member: backend will assign ID
+      // Add new member
       const memberToAdd: Member = {
         ...this.newMember,
         id: 0,
@@ -459,6 +522,7 @@ searchTerm: string = '';
       });
     }
   }
+  
   
   
   
