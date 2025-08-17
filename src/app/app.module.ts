@@ -46,6 +46,7 @@ import { LoaderComponent } from './shared/loader/loader.component';  // Adjust p
 
 import { environment } from '../environments/environment';
 import { AdminOnboardComponent } from './admin-onboard/admin-onboard.component';
+import { ContactUsComponent } from './contact-us/contact-us.component';
 
 @NgModule({
   declarations: [
@@ -59,7 +60,8 @@ import { AdminOnboardComponent } from './admin-onboard/admin-onboard.component';
     LoginComponent,
     SignupComponent,
     LoaderComponent,
-    AdminOnboardComponent  // Add LoaderComponent here
+    AdminOnboardComponent,
+    ContactUsComponent,
   ],
   imports: [
     BrowserModule,

@@ -9,7 +9,7 @@ import { LoginComponent } from './auth/login/login.component';
 import { SignupComponent } from './auth/signup/signup.component';
 import { AuthGuard } from './guards/auth.guard';
 import { AdminOnboardComponent } from './admin-onboard/admin-onboard.component'; // Import later
-
+import { ContactUsComponent } from './contact-us/contact-us.component';  // 👈 Import here
 const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
 
@@ -47,6 +47,12 @@ const routes: Routes = [
     component: AdminOnboardComponent, // Create this later
     canActivate: [AuthGuard],
     data: { title: 'Admin Onboard', roles: ['superadmin'] }
+  },
+  {
+    path: 'contact-us',                     // 👈 New Route
+    component: ContactUsComponent,
+    canActivate: [AuthGuard],               // ✅ only logged-in users
+    data: { title: 'Contact Us' }
   },
   // Fallback for unknown paths
   { path: '**', redirectTo: 'login' }

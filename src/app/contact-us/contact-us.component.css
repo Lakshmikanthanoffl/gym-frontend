@@ -1,0 +1,106 @@
+/* Container */
+.contact-container {
+    max-width: 500px;
+    margin: 40px auto;
+    background: #121212; /* Dark background */
+    color: #f5f5f5;     /* Light text */
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  }
+  
+  /* Headings */
+  .contact-container h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #00bcd4; /* Teal accent */
+  }
+  
+  /* Form Styling */
+  .contact-form .form-group {
+    margin-bottom: 18px;
+  }
+  
+  .contact-form label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: bold;
+    color: #ccc;
+  }
+  
+  .contact-form input,
+  .contact-form textarea {
+    width: 100%;
+    padding: 12px;
+    background: #1f1f1f;
+    border: 1px solid #333;
+    border-radius: 6px;
+    color: #f5f5f5;
+    font-size: 14px;
+  }
+  
+  .contact-form input:focus,
+  .contact-form textarea:focus {
+    border-color: #00bcd4;
+    outline: none;
+  }
+  
+  /* Button */
+  .btn-submit {
+    background-color: #00bcd4;
+    color: #121212;
+    font-weight: bold;
+    border: none;
+    padding: 12px 18px;
+    border-radius: 6px;
+    cursor: pointer;
+    width: 100%;
+    transition: background 0.3s ease;
+    position: relative; /* for loader centering */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .btn-submit:hover {
+    background-color: #0097a7;
+  }
+  
+  .btn-submit:disabled {
+    background-color: #555;
+    cursor: not-allowed;
+  }
+  
+  /* Loader inside button */
+  .loader {
+    border: 3px solid #f3f3f3; /* Light grey */
+    border-top: 3px solid #00bcd4; /* Teal accent */
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    animation: spin 0.8s linear infinite;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  /* Contact Info */
+  .contact-info {
+    margin-top: 25px;
+    padding: 15px;
+    background: #1f1f1f;
+    border-radius: 8px;
+    border: 1px solid #333;
+  }
+  
+  .contact-info p {
+    margin: 8px 0;
+    color: #f5f5f5;
+  }
+  
+  .contact-info strong {
+    color: #00bcd4;
+  }
+  
