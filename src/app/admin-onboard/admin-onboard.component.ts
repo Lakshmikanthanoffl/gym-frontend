@@ -138,7 +138,7 @@ filteredRolesList: Role[] = []; // ✅ Filtered list for search
     this.memberService.addRole(payload).subscribe({
       next: (res) => {
         console.log('Admin saved:', res);
-  
+        this.fetchGyms();
         // ✅ Refresh the roles list
         this.loadRoles();
   
@@ -188,6 +188,7 @@ filteredRolesList: Role[] = []; // ✅ Filtered list for search
   
         // ✅ Refresh full list from backend after successful update
         this.loadRoles();
+        this.fetchGyms();
   
         this.showDialog = false;
         this.resetAdmin();
@@ -211,6 +212,8 @@ filteredRolesList: Role[] = []; // ✅ Filtered list for search
           this.deleteDialogVisible = false;
           this.roleToDelete = null;
           this.deleteConfirmationText = '';
+          this.loadRoles();
+          this.fetchGyms();
         },
         error: (err) => {
           console.error('Failed to delete role:', err);
