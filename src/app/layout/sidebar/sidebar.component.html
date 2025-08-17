@@ -3,21 +3,30 @@
 
   <a routerLink="/dashboard" routerLinkActive="active">
     <i class="pi pi-home"></i>
-    <span > Dashboard</span>
+    <span> Dashboard</span>
   </a>
 
   <a *ngIf="userrole === 'admin' || userrole === 'superadmin'" routerLink="/members" routerLinkActive="active">
     <i class="pi pi-users"></i>
-    <span > Members</span>
+    <span> Members</span>
   </a> 
 
   <a routerLink="/plans" routerLinkActive="active">
     <i class="pi pi-book"></i>
-    <span > Plans</span>
+    <span> Plans</span>
   </a>
 
   <a *ngIf="userrole === 'admin' || userrole === 'superadmin'" routerLink="/payments" routerLinkActive="active">
     <i class="pi pi-credit-card"></i>
-    <span > Payments</span>
+    <span> Payments</span>
   </a>
+
+  <!-- Superadmin only section -->
+  <div *ngIf="userrole === 'superadmin'" class="mt-4">
+    <h5 class="mb-2">Admin Onboard</h5>
+    <a routerLink="/admin-onboard" routerLinkActive="active">
+      <i class="pi pi-user-plus"></i>
+      <span> Onboard</span>
+    </a>
+  </div>
 </div>

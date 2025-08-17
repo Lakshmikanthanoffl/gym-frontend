@@ -3,13 +3,15 @@ import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 
 export interface Role {
-  roleId: number;
+  RoleId: number;
   RoleName: string;
   UserName: string;
-  userEmail: string;
-  GymId:number;
-  GymName:string;
+  UserEmail: string;
+  Password: string;
+  GymId: number;
+  GymName: string;
 }
+
 
 @Injectable({
   providedIn: 'root'
@@ -22,7 +24,7 @@ export class AuthService {
   private usernameSubject = new BehaviorSubject<string | null>(localStorage.getItem('username'));
   username$ = this.usernameSubject.asObservable();
 
-  private apiUrl = 'https://gymmanagementapi-production-offl.up.railway.app/api/Role/login'; // adjust if needed
+  private apiUrl = 'https://gymmanagementapi.onrender.com/api/Role/login'; // adjust if needed
 
   constructor(private http: HttpClient) {}
 
