@@ -29,6 +29,8 @@ export class DashboardComponent implements OnInit {
   memberChartOptions: any;
 
   ngOnInit() {
+    this.defaultGymName = localStorage.getItem('GymName') ?? '';
+    this.defaultGymId = Number(localStorage.getItem('GymId')) || 0;
     this.userrole = localStorage.getItem("role");
     this.isAdmin = this.userrole === 'admin';
     this.isSuperAdmin = this.userrole === 'superadmin';
