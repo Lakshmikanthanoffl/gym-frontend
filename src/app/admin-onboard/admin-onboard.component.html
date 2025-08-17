@@ -28,6 +28,7 @@
 
   <!-- ✅ Reusable Dialog -->
   <p-dialog 
+  styleClass="dark-dialog"
   [header]="isEditMode ? 'Edit Admin' : 'Onboard Admin'" 
   [(visible)]="showDialog" 
   [modal]="true" 
@@ -35,6 +36,7 @@
   [closable]="true" 
   [style]="{width: '700px'}" 
   [resizable]="false">
+
 
   <div class="p-fluid">
 
@@ -162,6 +164,7 @@
 
 <!-- ✅ Delete Confirmation Dialog -->
 <p-dialog
+styleClass="delete-dialog"
   header="Confirm Delete"
   [(visible)]="deleteDialogVisible"
   [modal]="true"
