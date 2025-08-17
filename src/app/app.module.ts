@@ -35,7 +35,7 @@ import { DialogModule } from 'primeng/dialog';
 import { CardModule } from 'primeng/card';
 import { ChartModule } from 'primeng/chart';
 import { CalendarModule } from 'primeng/calendar';
-
+import { RecaptchaModule } from 'ng-recaptcha';
 // Auth components
 import { LoginComponent } from './auth/login/login.component';
 import { SignupComponent } from './auth/signup/signup.component';
@@ -81,7 +81,7 @@ import { ContactUsComponent } from './contact-us/contact-us.component';
     CardModule,
     ChartModule,
     CalendarModule,
-
+    RecaptchaModule,
     AngularFireModule.initializeApp(environment.firebase),
     AngularFireAuthModule,
   ],

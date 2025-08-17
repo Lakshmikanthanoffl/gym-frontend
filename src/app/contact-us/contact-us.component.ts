@@ -5,39 +5,73 @@ import emailjs, { EmailJSResponseStatus } from 'emailjs-com';
   selector: 'app-contact-us',
   standalone: false,
   templateUrl: './contact-us.component.html',
-  styleUrls: ['./contact-us.component.css'] // ✅ fixed typo
+  styleUrls: ['./contact-us.component.css']
 })
 export class ContactUsComponent {
   formData = {
-    from_name: '',   // ✅ must match EmailJS variable
-    reply_to: '',    // ✅ must match EmailJS variable
-    message: ''      // ✅ must match EmailJS variable
+    from_name: '',
+    reply_to: '',
+    message: ''
   };
   isLoading = false;
   submitted = false;
 
+  // ✅ reCAPTCHA token
+  recaptchaToken: string | null = null;
+
+  // ✅ When captcha is resolved, save the token
+  onCaptchaResolved(token: string | null) {
+    this.recaptchaToken = token;
+  }
+  
+
+  // ✅ simple email regex check
+  private isValidEmail(email: string): boolean {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(email);
+  }
+
   public sendEmail(e: Event) {
     e.preventDefault();
+
+    // 1️⃣ Validate before sending
+    if (!this.formData.from_name.trim()) {
+      alert("Please enter your name.");
+      return;
+    }
+    if (!this.isValidEmail(this.formData.reply_to)) {
+      alert("Please enter a valid email address.");
+      return;
+    }
+    if (!this.formData.message.trim()) {
+      alert("Please enter your message.");
+      return;
+    }
+    if (!this.recaptchaToken) {
+      alert("⚠️ Please verify you are not a robot.");
+      return;
+    }
+
     this.isLoading = true;
     this.submitted = true;
 
-    // 1️⃣ Send mail to Admin (your inbox)
+    // 2️⃣ Send mail to Admin
     emailjs.send(
       'service_lru3z9o',   // Service ID
       'template_yky09qo',  // Admin Template ID
-      this.formData,       // ✅ directly send mapped object
+      this.formData,
       'JGLahuBchSiLeVlp7'  // Public Key
     ).then((result: EmailJSResponseStatus) => {
         console.log("✅ Admin email sent:", result.text);
 
-        // 2️⃣ Send Auto-Reply to User
+        // 3️⃣ Send Auto-Reply to User
         return emailjs.send(
           'service_lru3z9o',
-          'template_kvf6n1n', // 🔹 your auto-reply template ID
+          'template_kvf6n1n', // Auto-reply template
           {
-            from_name: "Your Company",        // 👈 sender name in auto-reply
-            to_name: this.formData.from_name, // recipient's name
-            reply_to: this.formData.reply_to, // recipient's email
+            from_name: "Your Company",
+            to_name: this.formData.from_name,
+            reply_to: this.formData.reply_to,
             message: `Hi ${this.formData.from_name}, thanks for contacting us! We’ll get back to you shortly.`
           },
           'JGLahuBchSiLeVlp7'
@@ -57,5 +91,6 @@ export class ContactUsComponent {
     this.formData = { from_name: '', reply_to: '', message: '' };
     this.isLoading = false;
     this.submitted = false;
+    this.recaptchaToken = null; // reset captcha too
   }
 }
