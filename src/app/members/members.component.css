@@ -47,25 +47,22 @@
   flex-grow: 1;
 }
 
-/* Search Input - Dark Theme */
-.custom-search-input {
-  border-radius: 30px !important;
-  font-weight: 500;
-  padding: 0.5rem 1rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  border: 1px solid #444;
-  background-color: #1f1f1f !important;
-  color: #fff !important;
+.search-bar input {
+  background-color:#1f1f1f ;
+  color: #fff;
+  border: none;
 }
 
-::ng-deep .custom-search-input::placeholder {
-  color: #aaa;
+.search-bar .p-inputgroup-addon {
+  background-color: #1a1919; /* slightly darker than input */
+  color: #fff;
+  border: none;
 }
 
-/* Container around the search input */
-.search-input-wrapper {
-  max-width: 400px;
+.search-bar input::placeholder {
+  color: #ccc;
 }
+
 
 /* Calendar Mini Adjustments */
 ::ng-deep .calendar-sm .p-datepicker {
