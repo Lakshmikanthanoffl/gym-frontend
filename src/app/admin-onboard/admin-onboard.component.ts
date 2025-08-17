@@ -56,7 +56,7 @@ filteredRolesList: Role[] = []; // ✅ Filtered list for search
   ];
 
   ngOnInit() {
-    this.fetchGyms();
+    
     this.loadRoles();
 
   }
@@ -75,15 +75,7 @@ filteredRolesList: Role[] = []; // ✅ Filtered list for search
     this.deleteDialogVisible = true;
     this.deleteConfirmationText = '';
   }
-  // Fetch gyms dynamically (like fetchMembersFromAPI)
-  fetchGyms() {
-    if (this.userrole === 'superadmin') {
-      this.memberService.getAllrole().subscribe({
-        next: (data: any[]) => this.processGyms(data),
-        error: (err) => console.error('Failed to fetch members:', err),
-      });
-    }
-  }
+
 
 
   private processGyms(data: any[]) {
@@ -138,7 +130,7 @@ filteredRolesList: Role[] = []; // ✅ Filtered list for search
     this.memberService.addRole(payload).subscribe({
       next: (res) => {
         console.log('Admin saved:', res);
-        this.fetchGyms();
+        
         // ✅ Refresh the roles list
         this.loadRoles();
   
@@ -187,8 +179,7 @@ filteredRolesList: Role[] = []; // ✅ Filtered list for search
         this.rolesList.sort((a, b) => a.roleId - b.roleId);
   
         // ✅ Refresh full list from backend after successful update
-        this.loadRoles();
-        this.fetchGyms();
+        this.loadRoles();      ``
   
         this.showDialog = false;
         this.resetAdmin();
@@ -213,7 +204,7 @@ filteredRolesList: Role[] = []; // ✅ Filtered list for search
           this.roleToDelete = null;
           this.deleteConfirmationText = '';
           this.loadRoles();
-          this.fetchGyms();
+          
         },
         error: (err) => {
           console.error('Failed to delete role:', err);
@@ -228,7 +219,7 @@ filteredRolesList: Role[] = []; // ✅ Filtered list for search
     this.memberService.getRoles().subscribe({
       next: (data: any[]) => {
         console.log('API response:', data);
-  
+        this.processGyms(data)
         this.rolesList = data.map(r => ({
           roleId: r.roleId ?? r.RoleId,
           roleName: r.roleName ?? r.RoleName,
