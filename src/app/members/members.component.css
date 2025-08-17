@@ -1,4 +1,6 @@
-/* Wrapper Styling */
+/* ============================= */
+/* Wrapper Styling               */
+/* ============================= */
 .table-wrapper {
   background-color: #2e2e2e;
   border-radius: 12px;
@@ -8,7 +10,9 @@
   margin: 1rem 0;
 }
 
-/* DataTable Styling */
+/* ============================= */
+/* DataTable Styling             */
+/* ============================= */
 ::ng-deep .dark-table .p-datatable-wrapper,
 ::ng-deep .dark-table .p-datatable-thead > tr > th,
 ::ng-deep .dark-table .p-datatable-tbody > tr > td,
@@ -18,14 +22,12 @@
   border-color: #444;
 }
 
-
-::ng-deep .p-paginator .p-highlight {
-  background-color: #333 !important;
-  color: #fff !important;
-  border-color: #333 !important;
+::ng-deep .dark-table .p-datatable {
+  border-radius: 12px;
 }
 
-::ng-deep .dark-table .p-paginator {
+/* Paginator Styling */
+::ng-deep .p-paginator {
   justify-content: flex-end !important;
   padding: 0.75rem 1rem;
   border-top: 1px solid #444;
@@ -33,69 +35,6 @@
   border-bottom-right-radius: 12px;
 }
 
-::ng-deep .dark-table .p-datatable {
-  border-radius: 12px;
-  
-}
-
-/* Input + Button Row Layout Helpers */
-.w-40 {
-  width: 40%;
-  min-width: 130px;
-}
-.flex-grow-1 {
-  flex-grow: 1;
-}
-
-.search-bar input {
-  background-color:#1f1f1f ;
-  color: #fff;
-  border: none;
-}
-
-.search-bar .p-inputgroup-addon {
-  background-color: #1a1919; /* slightly darker than input */
-  color: #fff;
-  border: none;
-}
-
-.search-bar input::placeholder {
-  color: #ccc;
-}
-
-
-/* Calendar Mini Adjustments */
-::ng-deep .calendar-sm .p-datepicker {
-  font-size: 0.75rem !important;
-  width: 240px !important;
-  padding: 0.5rem !important;
-  background-color: #2e2e2e;
-  color: #fff;
-  border: 1px solid #444;
-}
-
-::ng-deep .calendar-sm .p-timepicker {
-  font-size: 0.75rem !important;
-}
-
-::ng-deep .calendar-sm .p-datepicker table td {
-  padding: 0.25rem !important;
-}
-
-::ng-deep .calendar-sm .p-datepicker-header,
-::ng-deep .calendar-sm .p-datepicker-buttonbar {
-  padding: 0.5rem !important;
-  background-color: #2e2e2e;
-  color: #fff;
-  border-bottom: 1px solid #444;
-}
-
-/* Dialog Overlay */
-::ng-deep .p-dialog .p-component-overlay {
-  overflow: visible !important;
-}
-
-/* Pagination Buttons */
 ::ng-deep .p-paginator .p-highlight {
   background-color: #333 !important;
   color: #fff !important;
@@ -107,24 +46,75 @@
   color: #fff !important;
 }
 
-/* Dropdown Styling */
-::ng-deep .p-paginator .p-dropdown {
-  background-color: #2c2c2c !important;
-  color: #fff !important;
-  border-color: #444 !important;
+/* ============================= */
+/* Search Bar                    */
+/* ============================= */
+.search-bar input {
+  background-color:#1f1f1f;
+  color: #fff;
+  border: 1px solid #444;
 }
 
+.search-bar .p-inputgroup-addon {
+  background-color: #1a1919;
+  color: #fff;
+  border: 1px solid #444;
+}
+
+.search-bar input::placeholder {
+  color: #ccc;
+}
+
+/* ============================= */
+/* Input + Dropdown + Calendar   */
+/* ============================= */
+.w-40 {
+  width: 40%;
+  min-width: 130px;
+}
+
+.flex-grow-1 {
+  flex-grow: 1;
+}
+
+::ng-deep .p-inputtext,
+::ng-deep .p-dropdown,
+::ng-deep .p-calendar input,
+::ng-deep .p-inputtextarea {
+  background-color: #1f1f1f !important;
+  color: #fff !important;
+  border: 1px solid #444 !important;
+  border-radius: 6px !important;
+}
+
+::ng-deep .p-inputtext::placeholder,
+::ng-deep .p-inputtextarea::placeholder {
+  color: #bbb !important;
+}
+
+::ng-deep .p-inputtext:focus,
+::ng-deep .p-dropdown:focus,
+::ng-deep .p-calendar input:focus,
+::ng-deep .p-inputtextarea:focus {
+  border-color: #666 !important;
+  box-shadow: 0 0 4px rgba(255, 255, 255, 0.2);
+}
+
+/* Dropdown panel */
 ::ng-deep .p-dropdown-panel {
   background-color: #2c2c2c !important;
+  border: 1px solid #444 !important;
+}
+
+::ng-deep .p-dropdown-items .p-dropdown-item {
   color: #fff !important;
 }
 
-::ng-deep .p-dropdown-item:hover {
+::ng-deep .p-dropdown-items .p-dropdown-item:hover {
   background-color: #444 !important;
-  color: #fff !important;
 }
 
-::ng-deep .p-dropdown-item.p-highlight {
+::ng-deep .p-dropdown-items .p-dropdown-item.p-highlight {
   background-color: #333 !important;
   color: #fff !important;
 }
@@ -133,6 +123,193 @@
   color: #aaa !important;
 }
 
-::ng-deep .p-dropdown.p-component {
+/* ============================= */
+/* Calendar Mini Adjustments     */
+/* ============================= */
+::ng-deep .calendar-sm .p-datepicker {
+  font-size: 0.75rem !important;
+  width: 240px !important;
+  padding: 0.5rem !important;
+  background-color: #1f1f1f !important;
+  color: #fff !important;
   border: 1px solid #444 !important;
+  border-radius: 6px !important;
+}
+
+/* Calendar Popup / Panel */
+::ng-deep .p-datepicker {
+  background-color: #2c2c2c !important;
+  color: #fff !important;
+  border: 1px solid #444 !important;
+  box-shadow: 0 0 12px rgba(0,0,0,0.5);
+  border-radius: 6px !important;
+}
+
+/* Calendar header */
+::ng-deep .p-datepicker-header {
+  background-color: #2e2e2e !important;
+  color: #fff !important;
+  border-bottom: 1px solid #444 !important;
+}
+
+/* Calendar day cells */
+::ng-deep .p-datepicker td,
+::ng-deep .p-datepicker td span {
+  color: #24f3fa !important;
+}
+
+::ng-deep .p-datepicker td.p-highlight,
+::ng-deep .p-datepicker td.p-datepicker-today {
+  background-color: #444 !important;
+  color: #ffffff !important;
+  border-radius: 4px !important;
+}
+
+/* Calendar footer / buttons */
+::ng-deep .p-datepicker-buttonbar {
+  background-color: #2e2e2e !important;
+  border-top: 1px solid #444 !important;
+  color: #fff !important;
+}
+
+/* Timepicker */
+::ng-deep .p-timepicker {
+  background-color: #1f1f1f !important;
+  color: #fff !important;
+  border: 1px solid #444 !important;
+}
+/* ============================= */
+/* Calendar Selected + Focused   */
+/* ============================= */
+
+/* Selected date (active) */
+::ng-deep .p-datepicker td.p-highlight > span,
+::ng-deep .p-datepicker td.p-highlight.p-focus > span {
+  background-color: #000000 !important; /* Black */
+  color: #00aaff !important;            /* Blue text */
+  border-radius: 6px !important;
+  border: 1px solid #00aaff !important; /* Blue border */
+}
+
+/* Today (if not selected) */
+::ng-deep .p-datepicker td.p-datepicker-today > span:not(.p-highlight) {
+  background-color: #000000 !important; /* Black */
+  color: #00aaff !important;
+  border: 1px solid #00aaff !important;
+  border-radius: 6px !important;
+}
+
+/* Hover */
+::ng-deep .p-datepicker td > span:hover {
+  background-color: #000000 !important;
+  color: #00aaff !important;
+  border: 1px solid #00aaff !important;
+  border-radius: 6px !important;
+  cursor: pointer;
+}
+/* Selected date (when clicked) */
+::ng-deep .p-datepicker td.p-highlight {
+  background-color: #000 !important;   /* black */
+  color: #00e0ff !important;          /* blue text */
+  border: 1px solid #00e0ff !important;
+  border-radius: 6px !important;
+}
+
+/* Today’s date (even when not selected) */
+::ng-deep .p-datepicker td.p-datepicker-today {
+  background-color: #000 !important;   /* black */
+  color: #00e0ff !important;          /* blue text */
+  border: 1px solid #00e0ff !important;
+  border-radius: 6px !important;
+}
+
+/* Prevent white circle override */
+::ng-deep .p-datepicker td.p-highlight.p-datepicker-today {
+  background-color: #000 !important;   /* same as selected */
+  color: #00e0ff !important;
+  border: 1px solid #00e0ff !important;
+}
+
+/* ============================= */
+/* Buttons                       */
+/* ============================= */
+::ng-deep .p-button {
+  border-radius: 25px !important;
+  font-weight: 500 !important;
+}
+
+::ng-deep .p-button-success {
+  background-color: #28a745 !important;
+  border: none !important;
+  color: #fff !important;
+}
+
+::ng-deep .p-button-secondary {
+  background-color: #6c757d !important;
+  border: none !important;
+  color: #fff !important;
+}
+
+::ng-deep .p-button-secondary:hover {
+  background-color: #5a6268 !important;
+}
+
+/* ============================= */
+/* Dialogs (Add/Edit/Delete/OTP) */
+/* ============================= */
+::ng-deep .p-dialog {
+  background-color: #2e2e2e !important;
+  color: #fff !important;
+  border-radius: 12px !important;
+  border: 1px solid #444 !important;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.6) !important;
+}
+
+::ng-deep .p-dialog .p-dialog-header {
+  background-color: #2c2c2c !important;
+  color: #fff !important;
+  border-bottom: 1px solid #444 !important;
+  font-weight: 500;
+  padding: 1rem;
+}
+
+::ng-deep .p-dialog .p-dialog-content {
+  background-color: #2e2e2e !important;
+  color: #eee !important;
+  padding: 1rem;
+}
+
+::ng-deep .p-dialog .p-dialog-footer {
+  background-color: #2c2c2c !important;
+  border-top: 1px solid #444 !important;
+  padding: 0.75rem 1rem;
+}
+
+/* OTP Input Styling */
+::ng-deep .p-dialog .p-fluid input#otp {
+  letter-spacing: 3px;
+  font-size: 1.1rem;
+  text-align: center;
+  padding: 0.5rem;
+  background-color: #1f1f1f !important;
+  border: 1px solid #555 !important;
+  color: #fff !important;
+}
+
+/* ============================= */
+/* Status Badges (Optional)      */
+/* ============================= */
+.status-active {
+  color: #28a745;
+  font-weight: 600;
+}
+
+.status-expired {
+  color: #dc3545;
+  font-weight: 600;
+}
+
+.status-soon {
+  color: #ffc107;
+  font-weight: 600;
 }
