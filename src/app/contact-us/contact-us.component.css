@@ -103,4 +103,15 @@
   .contact-info strong {
     color: #00bcd4;
   }
+  .contact-link {
+    color: #00aaff;
+    text-decoration: none;
+    transition: color 0.3s, transform 0.2s;
+  }
+  
+  .contact-link:hover {
+    color: #ffaa00;
+    transform: scale(1.05);
+  }
+  
   
