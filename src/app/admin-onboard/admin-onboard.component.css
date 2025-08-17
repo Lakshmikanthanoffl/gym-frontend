@@ -91,4 +91,22 @@
   ::ng-deep .dark-table .p-datatable {
     border-radius: 12px;
   }
-  
+
+
+.search-bar input {
+  background-color:#1f1f1f ;
+  color: #fff;
+  border: none;
+}
+
+.search-bar .p-inputgroup-addon {
+  background-color: #1a1919; /* slightly darker than input */
+  color: #fff;
+  border: none;
+}
+
+.search-bar input::placeholder {
+  color: #ccc;
+}
+
+

@@ -32,6 +32,9 @@ showPasswordDialog: boolean = false;
 deleteDialogVisible: boolean = false;
 roleToDelete: any = null;
 deleteConfirmationText: string = '';
+filteredRolesList: Role[] = []; // ✅ Filtered list for search
+
+  searchTerm: string = '';         // ✅ Search input 
 
   admin = {
     roleId: 0,             // optional, 0 for new
@@ -232,11 +235,32 @@ deleteConfirmationText: string = '';
           gymId: r.gymId ?? r.GymId,
           gymName: r.gymName ?? r.GymName
         })).sort((a, b) => a.roleId - b.roleId); // 👈 numeric sort
+        this.filteredRolesList = [...this.rolesList];
       },
       error: err => console.error('Failed to fetch roles', err)
     });
   }
+  filterRoles() {
+    this.applySearch();
+  }
+
+  private applySearch() {
+    const term = this.searchTerm.trim().toLowerCase();
   
-    
+    if (!term) {
+      // If search is empty, show all roles
+      this.filteredRolesList = [...this.rolesList];
+      return;
+    }
+  
+    this.filteredRolesList = this.rolesList.filter(role =>
+      role.roleName?.toLowerCase().includes(term) ||
+      role.userName?.toLowerCase().includes(term) ||
+      role.userEmail?.toLowerCase().includes(term) ||
+      (role.gymId !== null ? role.gymId.toString().includes(term) : false) ||
+      role.gymName?.toLowerCase().includes(term)
+    );
+  }
+  
   
 }
