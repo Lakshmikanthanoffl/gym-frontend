@@ -45,6 +45,7 @@ import { LoadingInterceptor } from './interceptors/loading.interceptor';
 import { LoaderComponent } from './shared/loader/loader.component';  // Adjust path if needed
 
 import { environment } from '../environments/environment';
+import { AdminOnboardComponent } from './admin-onboard/admin-onboard.component';
 
 @NgModule({
   declarations: [
@@ -57,7 +58,8 @@ import { environment } from '../environments/environment';
     HeaderComponent,
     LoginComponent,
     SignupComponent,
-    LoaderComponent  // Add LoaderComponent here
+    LoaderComponent,
+    AdminOnboardComponent  // Add LoaderComponent here
   ],
   imports: [
     BrowserModule,

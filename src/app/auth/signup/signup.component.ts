@@ -19,7 +19,7 @@ export class SignupComponent {
   showConfirmPassword = false;
   isPasswordStrong = false;
 
-  private apiUrl = 'https://gymmanagementapi-production-offl.up.railway.app/api/Role'; // your signup API endpoint
+  private apiUrl = 'https://gymmanagementapi.onrender.com/api/Role'; // your signup API endpoint
 
   constructor(private router: Router, private http: HttpClient) {}
 

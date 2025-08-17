@@ -8,6 +8,7 @@ import { PaymentsComponent } from './payments/payments.component';
 import { LoginComponent } from './auth/login/login.component';
 import { SignupComponent } from './auth/signup/signup.component';
 import { AuthGuard } from './guards/auth.guard';
+import { AdminOnboardComponent } from './admin-onboard/admin-onboard.component'; // Import later
 
 const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -41,7 +42,12 @@ const routes: Routes = [
     canActivate: [AuthGuard],
     data: { title: 'Payments', roles: ['admin', 'superadmin'] } // ❗️Only admin
   },
-
+  {
+    path: 'admin-onboard',
+    component: AdminOnboardComponent, // Create this later
+    canActivate: [AuthGuard],
+    data: { title: 'Admin Onboard', roles: ['superadmin'] }
+  },
   // Fallback for unknown paths
   { path: '**', redirectTo: 'login' }
 ];

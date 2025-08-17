@@ -1,0 +1,94 @@
+.page-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .page-header h2 {
+    margin: 0;
+  }
+  
+  .ml-3 {
+    margin-left: 1rem;
+  }
+  
+  /* Flex row for label and input */
+  .field-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.75rem;
+  }
+  .field-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.75rem;
+  }
+  
+  .field-row label {
+    width: 120px; /* or use w-40 if using a utility class */
+    margin-right: 1rem;
+    font-weight: 500;
+  }
+  
+  .flex-grow-1 {
+    flex: 1; /* input/dropdown takes remaining width */
+  }
+  
+  .field-row label {
+    width: 120px; /* fixed width for all labels */
+    margin-right: 1rem;
+    font-weight: 500;
+  }
+  
+  .field-row input {
+    flex: 1; /* input takes remaining space */
+  }
+  
+  .text-right {
+    text-align: right;
+  }
+  
+  .mt-3 {
+    margin-top: 1rem;
+  }
+  /* Wrapper Styling */
+.table-wrapper {
+    background-color: #2e2e2e;
+    border-radius: 12px;
+    padding: 1rem;
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.4);
+    border: 1px solid #444;
+    margin: 1rem 0;
+  }
+  
+  /* DataTable Styling */
+  ::ng-deep .dark-table .p-datatable-wrapper,
+  ::ng-deep .dark-table .p-datatable-thead > tr > th,
+  ::ng-deep .dark-table .p-datatable-tbody > tr > td,
+  ::ng-deep .dark-table .p-paginator {
+    background-color: #2e2e2e;
+    color: white;
+    border-color: #444;
+  }
+  
+  /* Paginator highlight */
+  ::ng-deep .p-paginator .p-highlight {
+    background-color: #333 !important;
+    color: #fff !important;
+    border-color: #333 !important;
+  }
+  
+  /* Paginator layout */
+  ::ng-deep .dark-table .p-paginator {
+    justify-content: flex-end !important;
+    padding: 0.75rem 1rem;
+    border-top: 1px solid #444;
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+  }
+  
+  /* Table border radius */
+  ::ng-deep .dark-table .p-datatable {
+    border-radius: 12px;
+  }
+  

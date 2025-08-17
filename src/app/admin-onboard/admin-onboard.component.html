@@ -1,0 +1,185 @@
+<div class="page-header">
+  <button pButton 
+          type="button" 
+          label="Add Admin" 
+          icon="pi pi-plus" 
+          class="ml-3" 
+          (click)="openAddAdminDialog()">
+  </button>
+</div>
+
+  
+  <!-- ✅ Reusable Dialog -->
+  <p-dialog 
+  [header]="isEditMode ? 'Edit Admin' : 'Onboard Admin'" 
+  [(visible)]="showDialog" 
+  [modal]="true" 
+  [dismissableMask]="true"  
+  [closable]="true" 
+  [style]="{width: '700px'}" 
+  [baseZIndex]="10000"
+  [resizable]="false">
+
+  <div class="p-fluid">
+
+    <!-- Role -->
+    <div class="field-row">
+      <label class="w-30">Role</label>
+      <p-dropdown 
+        [options]="rolesDropdown" 
+        optionLabel="label" 
+        optionValue="value" 
+        [(ngModel)]="admin.roleName" 
+        class="flex-grow-1">
+      </p-dropdown>
+    </div>
+
+    <!-- Username -->
+    <div class="field-row">
+      <label class="w-30" for="userName">Username</label>
+      <input id="userName" type="text" pInputText [(ngModel)]="admin.userName" class="flex-grow-1"/>
+    </div>
+
+    <!-- Email -->
+    <div class="field-row">
+      <label class="w-30" for="userEmail">Email ID</label>
+      <input id="userEmail" type="email" pInputText [(ngModel)]="admin.email" class="flex-grow-1"/>
+    </div>
+
+    <!-- Password -->
+    <div class="field-row">
+      <label class="w-30" for="password">Password</label>
+      <div class="flex-grow-1 d-flex align-items-center">
+        <input 
+          id="password"
+          [type]="passwordVisible ? 'text' : 'password'"
+          pInputText
+          [(ngModel)]="admin.password"
+          class="flex-grow-1"
+        />
+        <button 
+          pButton 
+          type="button"
+          class="p-button-rounded p-button-secondary ml-2"
+          [icon]="passwordVisible ? 'pi pi-eye' : 'pi pi-eye-slash'"
+          (click)="passwordVisible = !passwordVisible">
+        </button>
+      </div>
+    </div>
+
+    <!-- Gym selection (Superadmin only) -->
+    <div *ngIf="userrole === 'superadmin'" class="field-row d-flex align-items-center">
+      <label class="form-label w-30">Gym</label>
+      
+      <ng-container *ngIf="!manualGymEntry; else manualGym">
+        <p-dropdown
+          id="gymId"
+          [options]="availableGyms"
+          [(ngModel)]="admin.gymId"
+          optionLabel="name"
+          optionValue="id"
+          placeholder="Select Gym"
+          class="flex-grow-1"
+          appendTo="body" 
+          (onChange)="onGymChange($event.value)">
+        </p-dropdown>
+        <button pButton type="button" icon="pi pi-plus" class="p-button-rounded p-button-success ml-2" 
+                title="Add New Gym" (click)="manualGymEntry = true"></button>
+      </ng-container>
+    
+      <ng-template #manualGym>
+        <input id="gymId" type="text" pInputText [(ngModel)]="admin.gymId" placeholder="Enter Gym ID" class="flex-grow-1 mr-2"/>
+        <input id="gymName" type="text" pInputText [(ngModel)]="admin.gymName" placeholder="Enter Gym Name" class="flex-grow-1"/>
+        <button pButton type="button" icon="pi pi-arrow-left" class="p-button-rounded p-button-secondary ml-2" 
+                title="Back" (click)="manualGymEntry = false"></button>
+      </ng-template>
+    </div>
+
+    <!-- Save / Update -->
+    <div class="text-right mt-3">
+      <button pButton 
+              type="button" 
+              [label]="isEditMode ? 'Update' : 'Save'" 
+              icon="pi pi-check" 
+              (click)="isEditMode ? updateAdmin() : saveAdmin()">
+      </button>
+    </div>
+
+  </div>
+</p-dialog>
+
+
+ <!-- ✅ Table -->
+ <div class="table-wrapper">
+  <p-table class="dark-table" [value]="rolesList" [paginator]="true" [rows]="10" [responsiveLayout]="'scroll'">
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Role ID</th>
+        <th>Role Name</th>
+        <th>Username</th>
+        <th>Email</th>
+        <th>Gym ID</th>
+        <th>Gym Name</th>
+        <th>Actions</th>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-role>
+      <tr>
+        <td>{{ role.roleId }}</td>
+        <td>{{ role.roleName }}</td>
+        <td>{{ role.userName }}</td>
+        <td>{{ role.userEmail }}</td>
+        <td>{{ role.gymId }}</td>
+        <td>{{ role.gymName }}</td>
+        <td>
+          <button pButton icon="pi pi-pencil" class="p-button-rounded p-button-text" 
+                  (click)="editRole(role)"></button>
+          <button pButton icon="pi pi-trash" class="p-button-rounded p-button-danger p-button-text" 
+                  (click)="confirmDeleteRole(role)"></button>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+<!-- ✅ Delete Confirmation Dialog -->
+<p-dialog
+  header="Confirm Delete"
+  [(visible)]="deleteDialogVisible"
+  [modal]="true"
+  [closable]="false"
+  [style]="{ width: '400px' }"
+>
+  <p class="mb-3">
+    Are you sure you want to delete the role 
+    <b>{{ roleToDelete?.roleName }}</b> for user 
+    <b>{{ roleToDelete?.userName }}</b>?<br />
+    Type <b>delete</b> in the box below to confirm.
+  </p>
+
+  <input
+    type="text"
+    pInputText
+    [(ngModel)]="deleteConfirmationText"
+    placeholder="Type 'delete' to confirm"
+    class="w-full mb-3"
+  />
+
+  <div class="d-flex justify-content-end gap-2">
+    <button
+      pButton
+      type="button"
+      label="Cancel"
+      class="p-button-secondary"
+      (click)="deleteDialogVisible = false; deleteConfirmationText = ''"
+    ></button>
+    <button
+      pButton
+      type="button"
+      label="Delete"
+      class="p-button-danger"
+      (click)="deleteRole()"
+      [disabled]="deleteConfirmationText.trim().toLowerCase() !== 'delete'"
+    ></button>
+  </div>
+</p-dialog>
