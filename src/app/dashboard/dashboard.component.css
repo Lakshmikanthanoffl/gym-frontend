@@ -1,41 +1,166 @@
+/* ---------------- Dashboard Grid ---------------- */
 .dashboard-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+/* ---------------- PrimeNG Card ---------------- */
+::ng-deep p-card {
+  background-color: #1e1e1e !important;
+  color: #e0e0e0 !important;
+  border: 1px solid #333;
+  border-radius: 10px;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.6);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Card Header */
+::ng-deep p-card > .p-card-header {
+  background-color: #2a2a2a !important;
+  color: #ffffff !important;
+  font-weight: 600;
+  font-size: 1rem;
+  border-bottom: 1px solid #333;
+  padding: 0.5rem 0.75rem;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+}
+
+/* Card Body */
+::ng-deep p-card .p-card-body {
+  background-color: #1e1e1e !important;
+  color: #e0e0e0 !important;
+  font-size: 1.1rem;
+  text-align: center;
+  font-weight: 500;
+  padding: 0.75rem;
+  line-height: 1.4;
+}
+
+/* ---------------- PrimeNG Charts ---------------- */
+::ng-deep .p-chart {
+  background-color: #1e1e1e !important;
+  padding: 0.75rem;
+  border-radius: 10px;
+  color: #e0e0e0 !important;
+}
+
+/* ---------------- Tables inside cards ---------------- */
+::ng-deep table.table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #1e1e1e;
+  color: #e0e0e0;
+  font-size: 0.9rem;
+  line-height: 1.3;
+  table-layout: fixed;       /* keeps columns aligned */
+  margin: 0;
+}
+
+/* Table headers */
+::ng-deep table.table th {
+  background-color: #2a2a2a;
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #333;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Table body cells */
+::ng-deep table.table td {
+  border: 1px solid #333;
+  padding: 0.35rem 0.5rem;
+  text-align: left;
+  white-space: nowrap;       /* prevent overflow */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 150px;          /* adjust as needed */
+}
+
+/* Optional wrap for certain columns */
+::ng-deep td.wrap-text {
+  white-space: normal;
+  word-break: break-word;
+}
+
+/* Striping and hover */
+::ng-deep table.table tbody tr:nth-child(even) {
+  background-color: #252525;
+}
+
+::ng-deep table.table tbody tr:hover {
+  background-color: #333333;
+}
+
+/* Scrollable body */
+::ng-deep table.table tbody {
+  display: block;
+  max-height: 250px;
+  overflow-y: auto;
+}
+
+::ng-deep table.table thead {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+
+::ng-deep table.table tbody tr {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+
+/* Scrollbar for dark theme tables */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1e1e1e;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #555;
+  border-radius: 3px;
+  border: 1px solid #1e1e1e;
+}
+
+/* ---------------- Utility classes ---------------- */
+.mt-4 {
+  margin-top: 1.5rem;
+}
+
+.text-center {
+  text-align: center;
+}
+
+/* Optional small spacing for card paragraphs */
+::ng-deep p-card p {
+  margin: 0.25rem 0;
+}
+
+/* Responsive adjustments for smaller screens */
+@media screen and (max-width: 768px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
   }
-  
-  /* Styling p-card */
-  ::ng-deep p-card {
-    background-color: #2e2e2e !important;
-    color: #ffffff !important;
-    border: 1px solid #333;
-    border-radius: 8px;
+
+  ::ng-deep table.table td,
+  ::ng-deep table.table th {
+    max-width: 120px;
+    font-size: 0.85rem;
+    padding: 0.25rem 0.4rem;
   }
-  
-  /* Styling p-card content */
+
   ::ng-deep p-card .p-card-body {
-    background-color: #2e2e2e !important;
-    color: #ffffff !important;
+    font-size: 1rem;
   }
-  
-  /* Styling text inside the card */
-  ::ng-deep p-card p {
-    font-size: 1.5rem;
-    text-align: center;
-    font-weight: bold;
-    color: #ffffff !important;
-  }
-  
-  /* Optional: styling graphs (PrimeNG charts) */
-  ::ng-deep .p-chart {
-    background-color: #2e2e2e !important;
-    padding: 1rem;
-    border-radius: 8px;
-    color: #ffffff !important;
-  }
-  
-  /* Margin top class */
-  .mt-4 {
-    margin-top: 2rem;
-  }
-  
+}
