@@ -1,25 +1,58 @@
 <!-- Summary Cards -->
-<div  class="dashboard-grid" *ngIf="isAdminOrSuperAdmin">
-    <p-card header="Total Members">
-      <p>{{ totalMembers }}</p>
-    </p-card>
-  
-    <p-card header="Active Members">
-      <p>{{ activeMembers }}</p>
-    </p-card>
-  
-    <p-card header="Expired Members">
-      <p>{{ expiredMembers }}</p>
-    </p-card>
-  
-    <p-card header="New This Month">
-      <p>{{ newMembersThisMonth }}</p>
-    </p-card>
-  </div>
-  
-  <!-- Graph -->
-  <div class="mt-4" *ngIf="isAdminOrSuperAdmin">
-    <p-card header="New Members Trend">
+<div class="dashboard-grid" *ngIf="isAdminOrSuperAdmin">
+  <p-card header="Total Members">
+    <p>{{ totalMembers }}</p>
+  </p-card>
+
+  <p-card header="Active Members">
+    <p>{{ activeMembers }}</p>
+  </p-card>
+
+  <p-card header="Expired Members">
+    <p>{{ expiredMembers }}</p>
+  </p-card>
+
+  <p-card header="New This Month">
+    <p>{{ newMembersThisMonth }}</p>
+  </p-card>
+</div>
+
+<!-- Graph -->
+<div class="mt-4" *ngIf="isAdminOrSuperAdmin">
+  <p-card [header]="isSuperAdmin ? 'Members per Admin' : 'New Members Trend'">
+    <div class="chart-container">
       <p-chart type="bar" [data]="memberChartData" [options]="memberChartOptions"></p-chart>
-    </p-card>
-  </div>
+    </div>
+  </p-card>
+</div>
+
+
+<div class="mt-4" *ngIf="isSuperAdmin && rolesList.length">
+  <p-card *ngFor="let role of rolesList" [header]="role.userName + ' (' + role.gymName + ')'">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Member Name</th>
+          <th>Email</th>
+          <th>Phone</th>
+          <th>Subscription</th>
+          <th>Valid Until</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let member of adminMembersMap[role.gymId]">
+          <td>{{ member.Name }}</td>
+          <td>{{ member.Email }}</td>
+          <td>{{ member.Phone }}</td>
+          <td>{{ member.SubscriptionType?.Label }} ({{ member.AmountPaid }})</td>
+          <td>{{ member.ValidUntil | date:'dd-MM-yyyy' }}</td>
+        </tr>
+        <tr *ngIf="!adminMembersMap[role.gymId]?.length">
+          <td colspan="5" class="text-center">No members</td>
+        </tr>
+      </tbody>
+    </table>
+  </p-card>
+</div>
+
+
