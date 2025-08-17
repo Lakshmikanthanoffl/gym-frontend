@@ -91,6 +91,7 @@ searchTerm: string = '';
     this.defaultGymName = localStorage.getItem('GymName') ?? '';
     this.defaultGymId = Number(localStorage.getItem('GymId')) || 0;
     this.fetchMembersFromAPI(); // 👈
+    this.getgymname();
     
   }
   
@@ -218,6 +219,23 @@ private processMembers(data: any[]) {
     }
   });
 
+  
+}
+getgymname(){
+  if (this.userrole === 'superadmin') {
+    this.memberService.getAllrole().subscribe({
+      next: (data: any[]) => this.processGyms(data),
+      error: (err) => console.error('Failed to fetch members:', err),
+    });
+  }
+}
+private processGyms(data: any[]) {
+  const gymMap = new Map<number, string>();
+  data.forEach(m => {
+    if (m.GymId && m.GymName) {
+      gymMap.set(m.GymId, m.GymName);
+    }
+  });
   this.availableGyms = Array.from(gymMap.entries()).map(([id, name]) => ({ id, name }));
 }
 onGymChange(selectedGymId: number) {
