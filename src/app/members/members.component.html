@@ -63,8 +63,30 @@
       <td>{{ member.phone }}</td>
 
       <!-- Superadmin-only data -->
-      <td *ngIf="userrole === 'superadmin'">{{ member.gymId }}</td>
-      <td *ngIf="userrole === 'superadmin'">{{ member.gymName }}</td>
+      <!-- Gym ID -->
+<td *ngIf="userrole === 'superadmin'">
+  <ng-container *ngIf="isValidGym(member.gymId); else showOldGymId">
+    {{ member.gymId }}
+  </ng-container>
+  <ng-template #showOldGymId>
+    <span class="p-tag p-tag-danger">
+      {{ member.gymId ? member.gymId : 'No Gym' }}
+    </span>
+  </ng-template>
+</td>
+
+<!-- Gym Name -->
+<td *ngIf="userrole === 'superadmin'">
+  <ng-container *ngIf="isValidGym(member.gymId); else showOldGymName">
+    {{ member.gymName }}
+  </ng-container>
+  <ng-template #showOldGymName>
+    <span class="p-tag p-tag-danger">
+      {{ member.gymName ? member.gymName : 'Not Assigned' }}
+    </span>
+  </ng-template>
+</td>
+
 
       <td>
         <span [ngClass]="getStatusClass(member.validUntil)">
