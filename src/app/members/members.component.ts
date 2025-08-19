@@ -186,6 +186,10 @@ searchTerm: string = '';
       });
     }
   }
+  isValidGym(gymId: number | null): boolean {
+    if (!gymId) return false;
+    return this.availableGyms.some(g => g.id === gymId);
+  }
   
 // Helper method to process members response
 
@@ -249,27 +253,44 @@ onGymChange(selectedGymId: number) {
 
   
 filterMembers() {
-  const term = this.searchTerm.toLowerCase();
+  const term = this.searchTerm?.trim().toLowerCase() || '';
 
   this.filteredMembers = this.members.filter((member) => {
-    const nameMatch = member.name.toLowerCase().includes(term);
-    const emailMatch = member.email.toLowerCase().includes(term);
-    const phoneMatch = member.phone.toLowerCase().includes(term);
+    const nameMatch = member.name?.toLowerCase().includes(term);
+    const emailMatch = member.email?.toLowerCase().includes(term);
+    const phoneMatch = member.phone?.toLowerCase().includes(term);
     const status = this.getStatus(member.validUntil).toLowerCase();
     const statusMatch = status.includes(term);
 
     let gymMatch = false;
-    if (this.userrole === 'superadmin') {
+    if (this.userrole?.toLowerCase() === 'superadmin') {
       const gymIdStr = member.gymId?.toString() || '';
       const gymNameStr = member.gymName?.toLowerCase() || '';
+
+      // Normal gym search
       gymMatch = gymIdStr.includes(term) || gymNameStr.includes(term);
+
+      // Special unassigned keywords
+      if ((term === 'unassigned' || term === 'no gym' || term === 'not assigned' ||term === '!') 
+          && this.isUnassignedGym(member)) {
+        gymMatch = true;
+      }
     }
 
     return nameMatch || emailMatch || phoneMatch || statusMatch || gymMatch;
   });
 }
 
-  
+
+isUnassignedGym(member: any): boolean {
+  // Case 1: No gymId or gymName at all
+  if (!member.gymId || !member.gymName) return true;
+
+  // Case 2: GymId exists but not in availableGyms list
+  const valid = this.availableGyms?.some(g => g.id === member.gymId);
+  return !valid;
+}
+
   onPaidDateChange() {
     const subType = this.newMember.subscriptionType?.value;
     if (subType) {

@@ -1,6 +1,14 @@
 /* ================================
    ✅ Page Header
 ================================ */
+.table-wrapper {
+  background-color: #2e2e2e;
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.4);
+  border: 1px solid #444;
+  margin: 1rem 0;
+}
 .page-header {
   display: flex;
   align-items: center;

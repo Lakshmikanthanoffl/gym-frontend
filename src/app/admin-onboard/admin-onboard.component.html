@@ -1,3 +1,4 @@
+<div class="table-wrapper">
 <div class="page-header d-flex align-items-center justify-content-between mb-3">
   <!-- Search input (left) -->
   <div class="p-inputgroup search-bar" style="flex: 0 0 400px;">
@@ -129,7 +130,7 @@
 
  <!-- ✅ Table -->
  <!-- ✅ Table -->
-<div class="table-wrapper">
+
   <p-table class="dark-table" [value]="filteredRolesList" [paginator]="true" [rows]="10" [responsiveLayout]="'scroll'">
     <ng-template pTemplate="header">
       <tr>
@@ -160,8 +161,8 @@
       </tr>
     </ng-template>
   </p-table>
-</div>
 
+</div>
 <!-- ✅ Delete Confirmation Dialog -->
 <p-dialog
 styleClass="delete-dialog"
