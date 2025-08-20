@@ -3,7 +3,16 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Member } from '../models/member.model';
 import { Role } from './auth.service';
-
+export interface Payment {
+  id?: number;
+  userName: string;
+  plan: string;
+  price: number;
+  paymentDate: string;
+  screenshot: string;
+  gymId: number;
+  gymName: string;
+}
 @Injectable({
   providedIn: 'root'
 })
@@ -11,9 +20,32 @@ export class MemberService {
   private apiUrl = 'https://gymmanagementapi.onrender.com/api/members';
   private roleApiUrl = 'https://gymmanagementapi.onrender.com/api/Role';
   private gymApiUrl = 'https://gymmanagementapi.onrender.com/api/role/bygym';
-
+  private apiUrlpayments = 'https://gymmanagementapi.onrender.com/api/Payment';
   constructor(private http: HttpClient) {}
+ // ✅ Get all payments (SuperAdmin)
+ getAllPayments(): Observable<Payment[]> {
+  return this.http.get<Payment[]>(`${this.apiUrlpayments}/all`);
+}
+// ✅ Get payments by gymId & gymName (Admin)
+getPaymentsByGym(gymId: number, gymName: string): Observable<Payment[]> {
+  return this.http.get<Payment[]>(`${this.apiUrlpayments}/gym-payments`, {
+    params: {
+      gymId: gymId,
+      gymName: gymName
+    }
+  });
+}
 
+
+// ✅ Save a payment
+addPayment(payment: FormData): Observable<Payment> {
+  return this.http.post<Payment>(this.apiUrlpayments, payment);
+}
+
+// ✅ Optional: Get a single payment
+getPaymentById(id: number): Observable<Payment> {
+  return this.http.get<Payment>(`${this.apiUrlpayments}/${id}`);
+}
   // ✅ Members
   getAllMembers(): Observable<Member[]> {
     return this.http.get<Member[]>(this.apiUrl);
