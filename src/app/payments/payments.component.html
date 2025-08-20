@@ -1,24 +1,34 @@
 <h2 class="text-white text-center mt-4">Completed Payments</h2>
 
 <div class="search-filters mb-3">
-  <input type="text" pInputText placeholder="Search by name" [(ngModel)]="nameFilter" />
-  <input type="text" pInputText placeholder="Search by plan" [(ngModel)]="planFilter" />
-  <input type="text" pInputText placeholder="Search by date" [(ngModel)]="dateFilter" />
+  <input 
+    type="text" 
+    pInputText 
+    placeholder="Search payments..." 
+    [(ngModel)]="globalFilter" 
+  />
 </div>
 
-<div class="dashboard-grid">
+<!-- Loader -->
+<div *ngIf="loading" class="text-center my-4">
+  <i class="pi pi-spin pi-spinner" style="font-size: 2em;"></i>
+  <p>Loading payments...</p>
+</div>
+
+<div class="dashboard-grid" *ngIf="!loading && filteredPayments.length > 0">
   <p-card *ngFor="let payment of filteredPayments" class="dark-card" header="{{ payment.userName }}">
     <p><strong>Plan:</strong> {{ payment.plan }}</p>
     <p><strong>Amount:</strong> ₹{{ payment.price }}</p>
-    <p><strong>Date:</strong> {{ payment.paymentDate }}</p>
+    <p><strong>Date:</strong> {{ payment.paymentDate | date:'dd-MM-yyyy' }}</p>
+    <p><strong>Gym:</strong> {{ payment.gymName }} (ID: {{ payment.gymId }})</p>
 
     <div class="text-center mt-2">
-      <img 
-        [src]="payment.screenshot" 
-        alt="Screenshot" 
-        class="screenshot-img"
-        (click)="openScreenshot(payment.screenshot)"
-      />
+      <button pButton type="button" label="View Proof" (click)="openScreenshot(payment.screenshot)"></button>
     </div>
   </p-card>
+</div>
+
+<!-- No data message -->
+<div *ngIf="!loading && filteredPayments.length === 0" class="text-center mt-4 text-white">
+  No payments found.
 </div>

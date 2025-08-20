@@ -1,97 +1,91 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { MemberService, Payment } from '../services/member.service';
+import { AuthService } from '../services/auth.service';
+import { finalize } from 'rxjs/operators';
 
 @Component({
   selector: 'app-payments',
   standalone: false,
   templateUrl: './payments.component.html',
-  styleUrl: './payments.component.css'
+  styleUrls: ['./payments.component.css']
 })
-export class PaymentsComponent {
-  paymentRecords = [
-    {
-      userName: 'John Doe',
-      plan: 'Monthly',
-      price: 999,
-      paymentDate: '2025-08-05 10:30 AM',
-      screenshot: 'assets/screenshots/john.png'
-    },
-    {
-      userName: 'Jane Smith',
-      plan: 'Yearly',
-      price: 8999,
-      paymentDate: '2025-08-04 02:15 PM',
-      screenshot: 'assets/screenshots/jane.png'
-    },
-    {
-      userName: 'Raj Kumar',
-      plan: 'Quarterly',
-      price: 2499,
-      paymentDate: '2025-08-03 11:00 AM',
-      screenshot: 'assets/screenshots/raj.png'
-    },
-    {
-      userName: 'Emily Johnson',
-      plan: 'Monthly',
-      price: 999,
-      paymentDate: '2025-08-02 04:45 PM',
-      screenshot: 'assets/screenshots/emily.png'
-    },
-    {
-      userName: 'Mohammed Ali',
-      plan: 'Yearly',
-      price: 8999,
-      paymentDate: '2025-08-01 09:10 AM',
-      screenshot: 'assets/screenshots/ali.png'
-    },
-    {
-      userName: 'Samantha Lee',
-      plan: 'Quarterly',
-      price: 2499,
-      paymentDate: '2025-07-30 06:25 PM',
-      screenshot: 'assets/screenshots/samantha.png'
-    },
-    {
-      userName: 'Vikram Singh',
-      plan: 'Monthly',
-      price: 999,
-      paymentDate: '2025-07-29 01:55 PM',
-      screenshot: 'assets/screenshots/vikram.png'
-    },
-    {
-      userName: 'Lily Parker',
-      plan: 'Yearly',
-      price: 8999,
-      paymentDate: '2025-07-28 12:00 PM',
-      screenshot: 'assets/screenshots/lily.png'
-    },
-    {
-      userName: 'Anand Mehta',
-      plan: 'Monthly',
-      price: 999,
-      paymentDate: '2025-07-27 10:10 AM',
-      screenshot: 'assets/screenshots/anand.png'
-    },
-    {
-      userName: 'Sophia Chen',
-      plan: 'Quarterly',
-      price: 2499,
-      paymentDate: '2025-07-26 03:35 PM',
-      screenshot: 'assets/screenshots/sophia.png'
-    }
-  ];
-  // Filter inputs
+export class PaymentsComponent implements OnInit {
+  paymentRecords: Payment[] = [];
   nameFilter: string = '';
   planFilter: string = '';
   dateFilter: string = '';
-  get filteredPayments() {
+  gymFilter: string = '';
+gymIdFilter: string = '';
+globalFilter: string = '';
+
+
+  loading: boolean = false;
+
+  userrole: string | null = null;
+  gymId!: number;
+  gymName!: string;
+
+  constructor(
+    private paymentService: MemberService,
+    private authService: AuthService
+  ) {}
+
+  ngOnInit(): void {
+    this.userrole = localStorage.getItem('role');
+    this.gymId = Number(localStorage.getItem('GymId')) || 0;
+    this.gymName = localStorage.getItem('GymName') ?? '';
+
+    this.loadPayments();
+  }
+
+  loadPayments(): void {
+    this.loading = true;
+
+    if (this.userrole === 'superadmin') {
+      this.paymentService.getAllPayments()
+        .pipe(finalize(() => this.loading = false))
+        .subscribe(payments => {
+          this.paymentRecords = payments.map(p => this.mapPayment(p));
+        });
+    } else if (this.userrole === 'admin') {
+      this.paymentService.getPaymentsByGym(this.gymId, this.gymName)
+        .pipe(finalize(() => this.loading = false))
+        .subscribe(payments => {
+          this.paymentRecords = payments.map(p => this.mapPayment(p));
+        });
+    } else {
+      this.loading = false;
+    }
+  }
+
+  // Map API response to camelCase
+  private mapPayment(p: any): Payment {
+    return {
+      userName: p.UserName,
+      plan: p.Plan,
+      price: p.Price,
+      paymentDate: p.PaymentDate,
+      gymId: p.GymId,
+      gymName: p.GymName,
+      screenshot: p.Screenshot
+    };
+  }
+
+  get filteredPayments(): Payment[] {
+    const search = (this.globalFilter ?? '').toLowerCase(); // single search box
     return this.paymentRecords.filter(record =>
-      record.userName.toLowerCase().includes(this.nameFilter.toLowerCase()) &&
-      record.plan.toLowerCase().includes(this.planFilter.toLowerCase()) &&
-      record.paymentDate.toLowerCase().includes(this.dateFilter.toLowerCase())
+      (record.userName ?? '').toLowerCase().includes(search) ||
+      (record.plan ?? '').toLowerCase().includes(search) ||
+      (record.paymentDate ? (new Date(record.paymentDate)).toLocaleDateString() : '').toLowerCase().includes(search) ||
+      (record.price ?? 0).toString().includes(search) ||
+      (record.gymName ?? '').toLowerCase().includes(search) ||
+      (record.gymId ?? 0).toString().includes(search)
     );
-  }  
+  }
+  
+  
+
   openScreenshot(url: string): void {
     window.open(url, '_blank');
   }
-  
 }

@@ -1,35 +1,110 @@
 .dashboard-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1rem;
-    padding: 1rem;
-  }
-  
-  .dark-card ::ng-deep .p-card {
-    background-color: #202020 !important;
-    color: #ffffff !important;
-    border: 1px solid #333;
-    border-radius: 8px;
-  }
-  
-  .dark-card ::ng-deep .p-card-body {
-    background-color: #202020 !important;
-    color: #ffffff !important;
-    border-radius: 10px;
-  }
-  
-  .dark-card ::ng-deep p {
-    font-size: 1.2rem;
-    text-align: center;
-    font-weight: 500;
-    color: #ffffff;
-  }
-  
-  .mt-4 {
-    margin-top: 2rem;
-  }
-  
-  .mt-3 {
-    margin-top: 1rem;
-  }
-  
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+/* Card Styling */
+.pricing-card {
+  position: relative;
+  background: #1e1e1e;
+  color: #f5f5f5;
+  border-radius: 14px;
+  padding: 2rem 1.5rem;
+  text-align: center;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.6);
+  min-height: 450px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Hover - like lifting a dumbbell */
+.pricing-card:hover {
+  transform: translateY(-12px) scale(1.05) rotate(-1deg);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.8);
+}
+
+/* Price Styling - Big & Bold */
+.price-tag {
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: #ffcc00;
+  margin-bottom: 1rem;
+}
+
+.price-tag .per {
+  font-size: 1rem;
+  font-weight: 400;
+  color: #aaa;
+  display: block;
+  margin-top: 0.3rem;
+}
+
+/* Plan Title */
+.plan-title {
+  font-size: 1.6rem;
+  margin: 1rem 0;
+  font-weight: bold;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+/* Features */
+.plan-features {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0;
+  flex-grow: 1;
+}
+
+.plan-features li {
+  display: flex;
+  justify-content: space-between;
+  margin: 0.6rem 0;
+  font-size: 1rem;
+}
+
+.check {
+  color: #4caf50;
+  font-weight: bold;
+}
+
+.cross {
+  color: #f44336;
+  font-weight: bold;
+}
+
+/* Purchase Button */
+.purchase-btn {
+  margin-top: 1.5rem;
+  background: linear-gradient(135deg, #ff5722, #ff9800) !important;
+  border: none !important;
+  color: white !important;
+  padding: 0.9rem 1.5rem;
+  border-radius: 10px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  width: 100%;
+  transition: transform 0.2s ease, background 0.3s ease;
+}
+
+.purchase-btn:hover {
+  transform: scale(1.08);
+  background: linear-gradient(135deg, #ff9800, #ff5722) !important;
+}
+
+/* === Animations === */
+
+/* Price flexing like a bicep curl */
+@keyframes flexPump {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.15); color: #ffd700; }
+}
+
+/* Button bounce - like jumping rope */
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
