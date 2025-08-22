@@ -1,12 +1,13 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-signup',
   standalone: false,
   templateUrl: './signup.component.html',
-  styleUrls: ['./signup.component.css']  // corrected typo
+  styleUrls: ['./signup.component.css']
 })
 export class SignupComponent {
   roleId = 0;
@@ -19,7 +20,7 @@ export class SignupComponent {
   showConfirmPassword = false;
   isPasswordStrong = false;
 
-  private apiUrl = 'https://gymmanagementapi.onrender.com/api/Role'; // your signup API endpoint
+  private apiUrl = 'https://gymmanagementapi.onrender.com/api/Role';
 
   constructor(private router: Router, private http: HttpClient) {}
 
@@ -30,23 +31,37 @@ export class SignupComponent {
       userName: this.userName,
       userEmail: this.userEmail,
       password: this.password,
-      gymId: 0,           // ✅ Added
-      gymName: ""   // ✅ Added
+      gymId: 0,
+      gymName: ""
     };
   
     this.http.post(this.apiUrl, signupData).subscribe({
-      next: (response) => {
-        alert('Signup successful!');
-        this.router.navigate(['/login']);
+      next: () => {
+        Swal.fire({
+          icon: 'success',
+          title: 'Signup Successful',
+          text: 'Your account has been created successfully!',
+          background: '#1e1e1e',   // dark theme
+          color: '#f1f1f1',
+          confirmButtonColor: '#3085d6'
+        }).then(() => {
+          this.router.navigate(['/login']);
+        });
       },
       error: (error) => {
-        alert('Signup failed, please try again.');
+        Swal.fire({
+          icon: 'error',
+          title: 'Signup Failed',
+          text: 'Something went wrong. Please try again.',
+          background: '#1e1e1e',
+          color: '#f1f1f1',
+          confirmButtonColor: '#d33'
+        });
         console.error('Signup error:', error);
       }
     });
   }
   
- 
   togglePasswordVisibility() {
     this.showPassword = !this.showPassword;
   }
