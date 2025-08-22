@@ -3,8 +3,10 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Member } from '../models/member.model';
 import { Role } from './auth.service';
+
 export interface Payment {
   id?: number;
+  PaymentId: number;
   userName: string;
   plan: string;
   price: number;
@@ -13,6 +15,7 @@ export interface Payment {
   gymId: number;
   gymName: string;
 }
+
 @Injectable({
   providedIn: 'root'
 })
@@ -21,36 +24,53 @@ export class MemberService {
   private roleApiUrl = 'https://gymmanagementapi.onrender.com/api/Role';
   private gymApiUrl = 'https://gymmanagementapi.onrender.com/api/role/bygym';
   private apiUrlpayments = 'https://gymmanagementapi.onrender.com/api/Payment';
+
   constructor(private http: HttpClient) {}
- // ✅ Get all payments (SuperAdmin)
- getAllPayments(): Observable<Payment[]> {
-  return this.http.get<Payment[]>(`${this.apiUrlpayments}/all`);
-}
-// ✅ Get payments by gymId & gymName (Admin)
-getPaymentsByGym(gymId: number, gymName: string): Observable<Payment[]> {
-  return this.http.get<Payment[]>(`${this.apiUrlpayments}/gym-payments`, {
-    params: {
-      gymId: gymId,
-      gymName: gymName
-    }
-  });
-}
 
+  // =========================
+  // Payments
+  // =========================
 
-// ✅ Save a payment
-addPayment(payment: FormData): Observable<Payment> {
-  return this.http.post<Payment>(this.apiUrlpayments, payment);
-}
+  // Get all payments (SuperAdmin)
+  getAllPayments(): Observable<Payment[]> {
+    return this.http.get<Payment[]>(`${this.apiUrlpayments}/all`);
+  }
 
-// ✅ Optional: Get a single payment
-getPaymentById(id: number): Observable<Payment> {
-  return this.http.get<Payment>(`${this.apiUrlpayments}/${id}`);
-}
-  // ✅ Members
+  // Get payments by gymId & gymName (Admin)
+  getPaymentsByGym(gymId: number, gymName: string): Observable<Payment[]> {
+    return this.http.get<Payment[]>(`${this.apiUrlpayments}/gym-payments`, {
+      params: { gymId: gymId, gymName: gymName }
+    });
+  }
+
+  // Add new payment
+  addPayment(payment: FormData): Observable<Payment> {
+    return this.http.post<Payment>(`${this.apiUrlpayments}/save`, payment);
+  }
+
+  // Update existing payment
+  updatePayment(paymentId: number, payment: FormData): Observable<Payment> {
+    return this.http.put<Payment>(`${this.apiUrlpayments}/update/${paymentId}`, payment);
+  }
+
+  // Get single payment by id
+  getPaymentById(id: number): Observable<Payment> {
+    return this.http.get<Payment>(`${this.apiUrlpayments}/${id}`);
+  }
+
+  // Delete a payment
+  deletePayment(paymentId: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrlpayments}/${paymentId}`);
+  }
+
+  // =========================
+  // Members
+  // =========================
+
   getAllMembers(): Observable<Member[]> {
     return this.http.get<Member[]>(this.apiUrl);
   }
-  // ✅ Members
+
   getAllrole(): Observable<Member[]> {
     return this.http.get<Member[]>(this.roleApiUrl);
   }
@@ -71,7 +91,10 @@ getPaymentById(id: number): Observable<Payment> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 
-  // ✅ Roles
+  // =========================
+  // Roles
+  // =========================
+
   addRole(role: any): Observable<any> {
     return this.http.post<any>(this.roleApiUrl, role);
   }
@@ -80,21 +103,22 @@ getPaymentById(id: number): Observable<Payment> {
     return this.http.get<any[]>(this.roleApiUrl);
   }
 
-  // 🔹 NEW: Get Role by ID
   getRoleById(roleId: number): Observable<any> {
     return this.http.get<any>(`${this.roleApiUrl}/${roleId}`);
   }
 
-  // member.service.ts
-updateRole(roleId: number, role: any): Observable<Role> {
-  return this.http.put<Role>(`${this.roleApiUrl}/${roleId}`, role);
-}
+  updateRole(roleId: number, role: any): Observable<Role> {
+    return this.http.put<Role>(`${this.roleApiUrl}/${roleId}`, role);
+  }
 
-  
   deleteRole(roleId: number): Observable<void> {
     return this.http.delete<void>(`${this.roleApiUrl}/${roleId}`);
   }
-  // ✅ Gym Info
+
+  // =========================
+  // Gym Info
+  // =========================
+
   getDefaultGym(): Observable<{ gymId: number; gymName: string }> {
     return this.http.get<{ gymId: number; gymName: string }>(this.gymApiUrl);
   }

@@ -3,7 +3,25 @@
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 1.5rem;
 }
+/* ============================= */
+/* Search Filters                */
+/* ============================= */
+.search-filters {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  padding: 1.5rem; /* more breathing space */
+  flex-wrap: wrap;
+}
 
+.search-filters input {
+  padding: 0.6rem 0.8rem;
+  border-radius: 8px;
+  border: 1px solid #444;
+  width: 220px;
+  background-color: #1f1f1f;
+  color: #fff;
+}
 /* Card Styling */
 .pricing-card {
   position: relative;
