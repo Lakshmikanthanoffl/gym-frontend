@@ -1,77 +1,60 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 
 @Component({
   selector: 'app-plans',
   standalone: false,
   templateUrl: './plans.component.html',
-  styleUrl: './plans.component.css'
+  styleUrls: ['./plans.component.css']
 })
-export class PlansComponent {
-  plans = [
-    { 
-      name: 'Monthly', 
-      price: 600, 
-      duration: '1 Month', 
-      currency: '₹',
-      features: [
-        { text: "Access to Gym Equipment", available: true },
-        { text: "1 Personal Training Session", available: false }
-      ]
-    },
-    { 
-      name: 'Quarterly', 
-      price: 1500, 
-      duration: '3 Months', 
-      currency: '₹',
-      features: [
-        { text: "Access to Gym Equipment", available: true },
-        { text: "3 Personal Training Sessions", available: true },
-        { text: "Group Classes (Yoga/Zumba)", available: true }
-      ]
-    },
-    { 
-      name: 'Half-yearly', 
-      price: 3200, 
-      duration: '6 Months', 
-      currency: '₹',
-      features: [
-        { text: "Access to Gym Equipment", available: true },
-        { text: "6 Personal Training Sessions", available: true },
-        { text: "Group Classes (Yoga/Zumba)", available: true },
-        { text: "Diet Consultation", available: false }
-      ]
-    },
-    { 
-      name: 'Yearly', 
-      price: 6000, 
-      duration: '12 Months', 
-      currency: '₹',
-      features: [
-        { text: "Access to Gym Equipment", available: true },
-        { text: "12 Personal Training Sessions", available: true },
-        { text: "Group Classes (Yoga/Zumba)", available: true },
-        { text: "Diet Consultation", available: true },
-        { text: "Free Merchandise (T-shirt/Shaker)", available: true }
-      ]
-    }
-  ];
+export class PlansComponent implements OnInit {
+
+  allPlans = [
+    // Existing vetrigym plans
+    { gymId: '679', gymName: 'fitgyms', name: 'Monthly', price: 600, duration: '1 Month', currency: '₹', features: [ { text: "Access to Gym Equipment", available: true }, { text: "1 Personal Training Session", available: false } ] },
+    { gymId: '679', gymName: 'fitgyms', name: 'Quarterly', price: 1500, duration: '3 Months', currency: '₹', features: [ { text: "Access to Gym Equipment", available: true }, { text: "3 Personal Training Sessions", available: true }, { text: "Group Classes (Yoga/Zumba)", available: true } ] },
   
+    // New fitgyms plans
+    { gymId: '679', gymName: 'fitgyms', name: 'Monthly', price: 650, duration: '1 Month', currency: '₹', features: [ { text: "Access to Gym Equipment", available: true }, { text: "2 Personal Training Sessions", available: true } ] },
+    { gymId: '679', gymName: 'fitgyms', name: 'Quarterly', price: 1700, duration: '3 Months', currency: '₹', features: [ { text: "Access to Gym Equipment", available: true }, { text: "4 Personal Training Sessions", available: true } ] },
+  ];
+  searchText: string = ''; // for SuperAdmin search
+filteredPlans: any[] = [];
 
-  selectedPlan: any = null;
-  checkoutVisible: boolean = false;
+  plans: any[] = [];
+  gymName: string = '';
 
-  openCheckout(plan: any) {
-    this.selectedPlan = plan;
-    this.checkoutVisible = true;
+  ngOnInit() {
+    const gymId = localStorage.getItem('GymId');
+    const gymName = localStorage.getItem('GymName');
+    const role = localStorage.getItem('role'); // SuperAdmin or User
+  
+    if (role === 'superadmin') {
+      // Group plans by gym
+      const gyms = new Map<string, { gymName: string, plans: any[] }>();
+      this.allPlans.forEach(plan => {
+        if (!gyms.has(plan.gymId)) {
+          gyms.set(plan.gymId, { gymName: plan.gymName, plans: [] });
+        }
+        gyms.get(plan.gymId)?.plans.push(plan);
+      });
+      this.plans = Array.from(gyms.values());
+      this.filteredPlans = this.plans; // initially show all
+      this.gymName = 'All Gyms';
+    } else if (gymId && gymName) {
+      // Normal user – just show plans as a flat array
+      this.plans = this.allPlans.filter(plan => plan.gymId === gymId && plan.gymName === gymName);
+      this.gymName = gymName;
+    }
   }
-
-  confirmPayment() {
-    alert(`Payment successful for ${this.selectedPlan.name} plan!`);
-    this.checkoutVisible = false;
+  
+  get isSuperAdminView(): boolean {
+    return this.plans.length > 0 && !!this.plans[0].plans;
   }
-
-  cancelCheckout() {
-    this.checkoutVisible = false;
-    this.selectedPlan = null;
+  
+  // Call this on input change
+  filterGyms() {
+    this.filteredPlans = this.plans.filter(gym =>
+      gym.gymName.toLowerCase().includes(this.searchText.toLowerCase())
+    );
   }
 }

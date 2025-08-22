@@ -1,11 +1,16 @@
-<div class="app-wrapper d-flex">
+<div *ngIf="isMaintenanceMode" class="maintenance-screen">
+  <div class="maintenance-content">
+    <h1>🚧 Site Under Maintenance 🚧</h1>
+    <p>We're currently performing scheduled maintenance to improve our services.</p>
+    <p>Expected downtime: 2 hours</p>
+  </div>
+</div>
+
+<div *ngIf="!isMaintenanceMode" class="app-wrapper d-flex">
   <app-sidebar></app-sidebar>
   <div class="main-content">
     <app-header></app-header>
-
-    <!-- Loader shown globally -->
     <app-loader></app-loader>
-
     <div class="content-wrapper p-3">
       <router-outlet></router-outlet>
     </div>

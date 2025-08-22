@@ -1,5 +1,18 @@
 <h2 class="text-white text-center mt-4">Completed Payments</h2>
 
+<!-- Add Payment Button -->
+<div class="text-end mb-3">
+  <button 
+    pButton 
+    label="Add Payment" 
+    icon="pi pi-plus" 
+    class="p-button-rounded p-button-success p-button-outlined px-4 py-2 shadow-sm"
+    style="border-radius: 30px; font-weight: 500;" 
+    (click)="openAddPaymentDialog()">
+  </button>
+</div>
+
+<!-- Search -->
 <div class="search-filters mb-3">
   <input 
     type="text" 
@@ -15,20 +28,188 @@
   <p>Loading payments...</p>
 </div>
 
-<div class="dashboard-grid" *ngIf="!loading && filteredPayments.length > 0">
-  <p-card *ngFor="let payment of filteredPayments" class="dark-card" header="{{ payment.userName }}">
+<!-- Payment Cards -->
+<div class="dashboard-grid" *ngIf="filteredPayments.length > 0">
+  <p-card *ngFor="let payment of filteredPayments" class="dark-card">
+    <!-- Card header with icons -->
+    <div class="card-header">
+      <span class="card-title">{{ payment.userName }}</span>
+      <div class="card-icons">
+        <i
+          class="pi pi-pencil text-warning"
+          title="Edit Payment"
+          (click)="openEditPaymentDialog(payment)"
+        ></i>
+        <i
+          class="pi pi-trash text-danger"
+          title="Delete Payment"
+          (click)="openDeleteDialog(payment)"
+        ></i>
+      </div>
+    </div>
+
+    <!-- Card content -->
     <p><strong>Plan:</strong> {{ payment.plan }}</p>
     <p><strong>Amount:</strong> ₹{{ payment.price }}</p>
     <p><strong>Date:</strong> {{ payment.paymentDate | date:'dd-MM-yyyy' }}</p>
-    <p><strong>Gym:</strong> {{ payment.gymName }} (ID: {{ payment.gymId }})</p>
+    <p *ngIf="userrole === 'superadmin'">
+      <strong>Gym:</strong> {{ payment.gymName }} (ID: {{ payment.gymId }})
+    </p>
 
-    <div class="text-center mt-2">
+    <div class="mt-2">
       <button pButton type="button" label="View Proof" (click)="openScreenshot(payment.screenshot)"></button>
     </div>
   </p-card>
 </div>
 
-<!-- No data message -->
+
+<!-- No data -->
 <div *ngIf="!loading && filteredPayments.length === 0" class="text-center mt-4 text-white">
   No payments found.
 </div>
+
+<!-- Add Payment Dialog -->
+<p-dialog 
+  [header]="isEditMode ? 'Edit Payment' : 'Add Payment'" 
+  styleClass="dark-dialog"
+  [(visible)]="showAddDialog" 
+  [modal]="true" 
+  [dismissableMask]="true"
+  [style]="{width: '500px'}" 
+  [closable]="true">
+
+  <form [formGroup]="paymentForm" (ngSubmit)="savePayment()">
+    <div class="p-fluid">
+  
+      <div class="p-field">
+        <label>User Name</label>
+        <input pInputText formControlName="userName" />
+      </div>
+  
+      <!-- Plan (Subscription Type Dropdown) -->
+      <div class="p-field">
+        <label for="plan" class="form-label w-40">Plan</label>
+        <p-dropdown 
+          id="plan"
+          [options]="subscriptionTypes"
+          formControlName="plan"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Select Plan"
+          class="flex-grow-1"
+          (onChange)="onPlanChange($event.value)"
+          appendTo="body"
+        ></p-dropdown>
+      </div>
+
+      <!-- Price (Auto-updated) -->
+      <div class="p-field">
+        <label for="price" class="form-label w-40">Price</label>
+        <input 
+          pInputText 
+          id="price" 
+          type="number"
+          formControlName="price"
+          class="flex-grow-1" 
+          readonly
+        />
+      </div>
+
+      <div class="p-field">
+        <label for="paymentDate">Payment Date</label>
+        <p-calendar
+          id="paymentDate"
+          formControlName="paymentDate"
+          [showTime]="true"
+          dateFormat="M d, yy"
+          hourFormat="12"
+          [showIcon]="true"
+          [showButtonBar]="true"
+          [monthNavigator]="true"
+          [yearNavigator]="true"
+          yearRange="2000:2035"
+          appendTo="body"
+        ></p-calendar>
+      </div>
+  
+      <div *ngIf="userrole === 'superadmin'" class="p-field">
+        <label for="gymId" class="form-label w-40">Gym</label>
+        <p-dropdown
+          id="gymId"
+          [options]="availableGyms"
+          formControlName="gymId"
+          optionLabel="name"
+          optionValue="id"
+          placeholder="Select Gym"
+          class="flex-grow-1"
+          (onChange)="onGymChange($event.value)"
+          appendTo="body"   
+        ></p-dropdown>
+      </div>
+
+      <div class="p-field">
+        <label>Screenshot</label>
+        <input type="file" (change)="onFileChange($event)" />
+        <!-- Show note only in Add mode -->
+        <small *ngIf="isEditMode" class="text-danger d-block mt-1">
+          * Please re-upload a screenshot. This is required when adding a payment.
+        </small>
+      </div>
+      
+      <!-- Save button full width -->
+      <div class="form-actions">
+        <button 
+          icon="pi pi-check" 
+          pButton 
+          type="submit" 
+          [label]="isEditMode ? 'Update' : 'Save'" 
+          class="p-button-success">
+        </button>
+      </div>
+  
+    </div>
+  </form>
+</p-dialog>
+
+
+
+<!-- Delete Confirmation Dialog -->
+<p-dialog
+  header="Confirm Delete"
+  styleClass="delete-dialog"
+  [(visible)]="deleteDialogVisible"
+  [modal]="true"
+  [closable]="false"
+  [style]="{ width: '400px' }"
+>
+  <p class="mb-3">
+    Are you sure you want to delete the payment for <b>{{ paymentToDelete?.userName }}</b>-<b>{{ paymentToDelete?.gymName }}</b>?<br />
+    Type <b>delete</b> in the box below to confirm.
+  </p>
+
+  <input
+    type="text"
+    pInputText
+    [(ngModel)]="deleteConfirmationText"
+    placeholder="Type 'delete' to confirm"
+    class="w-full mb-3"
+  />
+
+  <div class="d-flex justify-content-end gap-2">
+    <button
+      pButton
+      type="button"
+      label="Cancel"
+      class="p-button-secondary"
+      (click)="deleteDialogVisible = false; deleteConfirmationText=''; paymentToDelete=null"
+    ></button>
+    <button
+      pButton
+      type="button"
+      label="Delete"
+      class="p-button-danger"
+      (click)="confirmDeletePayment()"
+      [disabled]="deleteConfirmationText.trim().toLowerCase() !== 'delete'"
+    ></button>
+  </div>
+</p-dialog>

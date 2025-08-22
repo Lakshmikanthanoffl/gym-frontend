@@ -1,3 +1,37 @@
 *{
     background-color: rgb(42, 42, 42);
 }
+.maintenance-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: #1e1e1e; /* dark professional background */
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    z-index: 9999;
+    padding: 2rem;
+}
+
+.maintenance-content {
+    max-width: 600px; /* slightly wider to fit heading */
+}
+
+.maintenance-screen h1 {
+    font-size: 2.2rem; /* reduce slightly if needed */
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #ffd700; /* subtle professional accent */
+    white-space: nowrap; /* prevent breaking */
+}
+
+.maintenance-screen p {
+    font-size: 1.2rem;
+    margin: 0.5rem 0;
+    color: #ccc;
+    line-height: 1.5;
+}

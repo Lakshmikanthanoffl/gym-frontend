@@ -1,27 +1,59 @@
 <h2 class="text-center text-white mt-4">Gym Membership Plans</h2>
 
-<div class="dashboard-grid mt-4">
-  <div *ngFor="let plan of plans" class="pricing-card dark-theme">
-    <div class="price-tag">
-      {{ plan.currency }}{{ plan.price }}
-      <span class="per">/month</span>
+<!-- SuperAdmin view -->
+<div *ngIf="isSuperAdminView; else normalView">
+  
+  <!-- Search input -->
+  <div class="search-filters mb-3">
+    <input
+      type="text"
+      pInputText
+      placeholder="Search Gym..."
+      [(ngModel)]="searchText"
+      (input)="filterGyms()"
+      class="w-50"
+    />
+  </div>
+
+  <div *ngFor="let gym of filteredPlans">
+    <h3 class="text-white mt-3">{{ gym.gymName }}</h3>
+    <div class="dashboard-grid mt-2">
+      <div *ngFor="let plan of gym.plans" class="pricing-card dark-theme">
+        <div class="price-tag">
+          {{ plan.currency }}{{ plan.price }}
+          <span class="per">/month</span>
+        </div>
+        <h3 class="plan-title">{{ plan.name }}</h3>
+        <ul class="plan-features">
+          <li *ngFor="let feature of plan.features">
+            <span>{{ feature.text }}</span>
+            <span [ngClass]="feature.available ? 'check' : 'cross'">
+              {{ feature.available ? '✔' : '✘' }}
+            </span>
+          </li>
+        </ul>
+      </div>
     </div>
-    <h3 class="plan-title">{{ plan.name }}</h3>
-
-    <ul class="plan-features">
-      <li *ngFor="let feature of plan.features">
-        <span>{{ feature.text }}</span>
-        <span [ngClass]="feature.available ? 'check' : 'cross'">
-          {{ feature.available ? '✔' : '✘' }}
-        </span>
-      </li>
-    </ul>
-
-    <!-- <button 
-      pButton 
-      label="Purchase" 
-      class="purchase-btn"
-      (click)="openCheckout(plan)">
-    </button> -->
   </div>
 </div>
+
+<!-- Normal user view -->
+<ng-template #normalView>
+  <div class="dashboard-grid mt-4">
+    <div *ngFor="let plan of plans" class="pricing-card dark-theme">
+      <div class="price-tag">
+        {{ plan.currency }}{{ plan.price }}
+        <span class="per">/month</span>
+      </div>
+      <h3 class="plan-title">{{ plan.name }}</h3>
+      <ul class="plan-features">
+        <li *ngFor="let feature of plan.features">
+          <span>{{ feature.text }}</span>
+          <span [ngClass]="feature.available ? 'check' : 'cross'">
+            {{ feature.available ? '✔' : '✘' }}
+          </span>
+        </li>
+      </ul>
+    </div>
+  </div>
+</ng-template>
