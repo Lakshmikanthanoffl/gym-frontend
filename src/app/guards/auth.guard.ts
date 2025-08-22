@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { CanActivate, Router, ActivatedRouteSnapshot } from '@angular/router';
-
+import Swal from 'sweetalert2';
 @Injectable({
   providedIn: 'root'
 })
@@ -14,14 +14,32 @@ export class AuthGuard implements CanActivate {
     const requiredRoles = route.data['roles'] as string[]; // Optional role check
 
     if (!isLoggedIn) {
-      this.router.navigate(['/login']);
+      Swal.fire({
+        icon: 'warning',
+        title: 'Not Logged In',
+        text: 'Please login to continue.',
+        confirmButtonText: 'OK',
+        background: '#1e1e1e',   // black background
+        color: '#f1f1f1',        // light text
+        confirmButtonColor: '#3085d6'
+      }).then(() => {
+        this.router.navigate(['/login']);
+      });
       return false;
     }
 
-    // Check role access if defined
     if (requiredRoles && !requiredRoles.includes(userRole || '')) {
-      alert('Access denied. You do not have permission to access this page.');
-      this.router.navigate(['/dashboard']);
+      Swal.fire({
+        icon: 'error',
+        title: 'Access Denied',
+        text: 'You do not have permission to access this page.',
+        confirmButtonText: 'Go Back',
+        background: '#1e1e1e',
+        color: '#f1f1f1',
+        confirmButtonColor: '#d33'
+      }).then(() => {
+        this.router.navigate(['/dashboard']);
+      });
       return false;
     }
 
