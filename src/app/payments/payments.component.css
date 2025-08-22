@@ -70,6 +70,14 @@
 .mb-3 {
   margin-bottom: 1.25rem !important;
 }
+/* Make SweetAlert always appear on top of PrimeNG dialogs */
+.swal2-container {
+  z-index: 9999 !important;
+}
+/* Lower dialog below SweetAlert */
+::ng-deep .p-dialog {
+  z-index: 1050 !important;
+}
 
 /* ============================= */
 /* Delete Dialog                  */

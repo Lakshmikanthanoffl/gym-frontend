@@ -1,6 +1,7 @@
 import { Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service'; // adjust the path
+import Swal from 'sweetalert2';
 
 import {
   trigger,
@@ -86,10 +87,50 @@ export class HeaderComponent implements OnInit {
   }
 
   logout() {
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('role');
-    this.router.navigate(['/login']);
+    Swal.fire({
+      title: 'Are you sure?',
+      text: 'You will be logged out!',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, Logout!',
+      cancelButtonText: 'Cancel',
+      background: '#1e1e1e', // dark background
+      color: '#ffffff',       // white text
+      customClass: {
+        popup: 'dark-popup',
+        title: 'dark-title',
+        confirmButton: 'dark-confirm',
+        cancelButton: 'dark-cancel'
+      }
+    }).then((result) => {
+      if (result.isConfirmed) {
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('role');
+      
+        Swal.fire({
+          title: 'Logged Out',
+          text: 'You have successfully logged out.',
+          icon: 'success',
+          background: '#1e1e1e',   // Dark popup background
+          color: '#ffffff',        // White text
+          showConfirmButton: false,
+          timer: 2000,
+          timerProgressBar: true,
+          backdrop: `
+            rgba(0, 0, 0, 0.95)   /* Black overlay background */
+          `,
+          customClass: {
+            popup: 'dark-popup'    // For extra styling if needed
+          }
+        }).then(() => {
+          this.router.navigate(['/login']);
+        });
+      }
+    });
   }
+  
 
   isLoggedIn(): boolean {
     return !!localStorage.getItem('authToken');

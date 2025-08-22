@@ -1,2 +1,22 @@
-
+.dark-popup {
+    border-radius: 12px;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+  }
+  
+  .dark-title {
+    color: #ffcc00 !important; /* yellowish title */
+  }
+  
+  .dark-confirm {
+    background-color: #3085d6 !important;
+    color: #fff !important;
+    border-radius: 8px;
+  }
+  
+  .dark-cancel {
+    background-color: #d33 !important;
+    color: #fff !important;
+    border-radius: 8px;
+  }
+  
   
