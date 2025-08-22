@@ -199,9 +199,9 @@ export class PaymentsComponent implements OnInit {
       formData.append('paymentDate', new Date(rawDate).toISOString());
     }
   
-    formData.append('gymId', this.paymentForm.get('gymId')?.value ?? 0);
-    formData.append('gymName', this.paymentForm.get('gymName')?.value ?? '');
-  
+     // ✅ Bind from component variables (set in onGymChange)
+      formData.append('gymId', this.gymId.toString());
+      formData.append('gymName', this.gymName);
     if (this.selectedFile) {
       formData.append('screenshotFile', this.selectedFile);
     }
