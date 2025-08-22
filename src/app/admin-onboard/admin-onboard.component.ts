@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { MemberService } from '../services/member.service'; 
+import Swal from 'sweetalert2';
+
 export interface Role {
   roleId: number;
   roleName: string;
@@ -113,15 +115,22 @@ filteredRolesList: Role[] = []; // ✅ Filtered list for search
 
   saveAdmin() {
     if (!this.admin.roleName || !this.admin.userName || !this.admin.email || !this.admin.password || !this.admin.gymName) {
-      alert('Please fill all required fields');
+      Swal.fire({
+        icon: 'error',
+        title: 'Validation Error',
+        text: 'Please fill all required fields.',
+        background: '#1e1e1e',
+        color: '#f5f5f5',
+        confirmButtonColor: '#d63031'
+      });
       return;
     }
   
     const payload = {
-      roleId: 0,                    // new admin
+      roleId: 0,
       roleName: this.admin.roleName,
       userName: this.admin.userName,
-      userEmail: this.admin.email, // ✅ matches Swagger
+      userEmail: this.admin.email,
       password: this.admin.password,
       gymId: this.admin.gymId,
       gymName: this.admin.gymName
@@ -129,65 +138,63 @@ filteredRolesList: Role[] = []; // ✅ Filtered list for search
   
     this.memberService.addRole(payload).subscribe({
       next: (res) => {
-        console.log('Admin saved:', res);
-        
-        // ✅ Refresh the roles list
         this.loadRoles();
-  
         this.showDialog = false;
+        this.resetAdmin();
   
-        // Reset form
-        this.admin = { 
-          roleId: 0, 
-          roleName: '', 
-          userName: '', 
-          email: '', 
-          password: '', 
-          gymId: null, 
-          gymName: '' 
-        };
+        Swal.fire({
+          icon: 'success',
+          title: 'Admin Added!',
+          text: 'The admin has been created successfully.',
+          background: '#1e1e1e',
+          color: '#f5f5f5',
+          confirmButtonColor: '#00b894',
+          timer: 2000,
+          showConfirmButton: false
+        });
       },
-      error: (err) => console.error('Failed to save admin:', err)
+      error: (err) => {
+        this.handleError(err, 'Failed to save admin');
+      }
     });
   }
+  
   
   updateAdmin() {
     const payload = {
       roleId: this.admin.roleId,
       roleName: this.admin.roleName,
       userName: this.admin.userName,
-      userEmail: this.admin.email,  // ✅ keep consistent
+      userEmail: this.admin.email,
       password: this.admin.password,
       gymId: this.admin.gymId,
       gymName: this.admin.gymName
     };
-    
+  
     this.memberService.updateRole(this.admin.roleId, payload).subscribe({
-      next: (res: any) => {
-        // 👇 map backend response to Role interface
-        const updatedRole = {
-          roleId: res.RoleId,
-          roleName: res.RoleName,
-          userName: res.UserName,
-          userEmail: res.UserEmail,
-          gymId: res.GymId,
-          gymName: res.GymName
-        } as Role;
-  
-        const index = this.rolesList.findIndex(r => r.roleId === this.admin.roleId);
-        if (index !== -1) this.rolesList[index] = updatedRole;
-        this.rolesList.sort((a, b) => a.roleId - b.roleId);
-  
-        // ✅ Refresh full list from backend after successful update
-        this.loadRoles();      ``
-  
+      next: () => {
+        this.loadRoles();
         this.showDialog = false;
         this.resetAdmin();
         this.isEditMode = false;
+  
+        Swal.fire({
+          icon: 'success',
+          title: 'Admin Updated!',
+          text: 'The admin details were updated successfully.',
+          background: '#1e1e1e',
+          color: '#f5f5f5',
+          confirmButtonColor: '#00b894',
+          timer: 2000,
+          showConfirmButton: false
+        });
       },
-      error: (err) => console.error('Failed to update admin:', err)
+      error: (err) => {
+        this.handleError(err, 'Failed to update admin');
+      }
     });
   }
+  
   
   
 
@@ -196,22 +203,53 @@ filteredRolesList: Role[] = []; // ✅ Filtered list for search
     if (this.deleteConfirmationText.trim().toLowerCase() === 'delete') {
       this.memberService.deleteRole(this.roleToDelete.roleId).subscribe({
         next: () => {
-          // Remove from local list
           this.rolesList = this.rolesList.filter(r => r.roleId !== this.roleToDelete.roleId);
-  
-          // Reset dialog
           this.deleteDialogVisible = false;
           this.roleToDelete = null;
           this.deleteConfirmationText = '';
           this.loadRoles();
-          
+  
+          Swal.fire({
+            icon: 'success',
+            title: 'Role Deleted!',
+            text: 'The role has been deleted successfully.',
+            background: '#1e1e1e',
+            color: '#f5f5f5',
+            confirmButtonColor: '#00b894',
+            timer: 2000,
+            showConfirmButton: false
+          });
         },
         error: (err) => {
-          console.error('Failed to delete role:', err);
+          this.handleError(err, 'Failed to delete role');
         }
       });
     }
   }
+  private handleError(err: any, fallbackMessage: string) {
+    let messages: string[] = [];
+  
+    if (err.error?.errors) {
+      messages = Object.values(err.error.errors)
+        .flat()
+        .map(e => String(e));
+    } else if (err.error?.title) {
+      messages = [err.error.title];
+    } else {
+      messages = [fallbackMessage];
+    }
+  
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      html: messages.join('<br>'),
+      background: '#1e1e1e',
+      color: '#f5f5f5',
+      confirmButtonColor: '#d63031',
+      customClass: { popup: 'swal2-popup-front' }
+    });
+  }
+  
   private resetAdmin() {
     this.admin = { roleId: 0, roleName: 'admin', userName: '', email: '', password: '', gymId: null, gymName: '' };
   }

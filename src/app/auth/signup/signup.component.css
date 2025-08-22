@@ -1,32 +1,79 @@
-.password-wrapper {
-    position: relative;
-    display: flex;
-    align-items: center;
-  }
-  
-  .password-wrapper input.form-control {
-    padding-right: 2.5rem; /* space for eye button */
-    flex-grow: 1;
-    height: 2.5rem; /* fixed height */
-    min-height: 2.5rem;
-  }
-  
-  .toggle-btn {
-    position: absolute;
-    right: 0.5rem;
-    top: 50%;
-    transform: translateY(-50%);
-    padding: 0.25rem 0.5rem;
-    height: auto;
-    border-radius: 0.25rem;
-    cursor: pointer;
-    background: transparent;
-    border: none;
-    color: #555;
-  }
-  
-  .toggle-btn:focus {
-    outline: none;
-    box-shadow: 0 0 0 2px #007bff;
-  }
-  
+/* Background */
+.login-container {
+  background: linear-gradient(135deg, #0a0a0a, #1a1a1a);
+  overflow: hidden;
+  color: #eaeaea;
+}
+
+/* Card */
+.login-card-dark {
+  max-width: 420px;
+  width: 100%;
+  border-radius: 1rem;
+  background: #111;
+  color: #eaeaea;
+  border: 1px solid #222;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.6);
+}
+
+/* Inputs */
+.dark-input {
+  background: #1a1a1a;
+  border: 1px solid #333;
+  color: #eaeaea;
+  padding: 0.9rem 1rem;
+  transition: all 0.3s ease-in-out;
+}
+
+.dark-input:focus {
+  border-color: #00d084;
+  box-shadow: 0 0 12px rgba(0, 208, 132, 0.6);
+  outline: none;
+}
+
+/* Eye icon button */
+.toggle-eye {
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #888;
+}
+
+.toggle-eye:hover {
+  color: #00d084;
+}
+
+/* Button */
+.gym-btn {
+  background: linear-gradient(135deg, #00d084, #0072ff);
+  border: none;
+  color: #fff;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease-in-out;
+}
+
+.gym-btn:hover {
+  background: linear-gradient(135deg, #00b36b, #0055cc);
+  transform: scale(1.03);
+}
+
+/* Signup link */
+.text-accent {
+  color: #00d084;
+}
+
+.text-accent:hover {
+  text-decoration: underline;
+}
+
+/* Override autofill */
+.dark-input:-webkit-autofill,
+.dark-input:-webkit-autofill:hover,
+.dark-input:-webkit-autofill:focus,
+.dark-input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px #1a1a1a inset !important;
+  -webkit-text-fill-color: #eaeaea !important;
+  caret-color: #eaeaea !important;
+  transition: background-color 9999s ease-in-out 0s;
+}

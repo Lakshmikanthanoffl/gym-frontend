@@ -101,6 +101,11 @@ html, body {
     z-index: 999;
     min-width: 150px;
   }
+  /* Ensure SweetAlert2 always appears above PrimeNG dialogs */
+.swal2-container {
+  z-index: 99999 !important;
+}
+
   
   .custom-popup-menu ul {
     list-style: none;

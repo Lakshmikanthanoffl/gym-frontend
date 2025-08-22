@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup } from '@angular/forms';
 import { MemberService, Payment } from '../services/member.service';
 import { AuthService } from '../services/auth.service';
 import { finalize } from 'rxjs/operators';
+import Swal from 'sweetalert2';
 interface SubscriptionOption {
   label: string;
   value: string;
@@ -189,43 +190,82 @@ export class PaymentsComponent implements OnInit {
   }
   savePayment() {
     const formData = new FormData();
-    formData.append('userName', this.paymentForm.get('userName')?.value);
-    formData.append('plan', this.paymentForm.get('plan')?.value);
-    formData.append('price', this.paymentForm.get('price')?.value);
+    formData.append('userName', this.paymentForm.get('userName')?.value ?? '');
+    formData.append('plan', this.paymentForm.get('plan')?.value ?? '');
+    formData.append('price', this.paymentForm.get('price')?.value ?? 0);
   
     const rawDate = this.paymentForm.get('paymentDate')?.value;
     if (rawDate) {
       formData.append('paymentDate', new Date(rawDate).toISOString());
     }
   
-    formData.append('gymId', this.paymentForm.get('gymId')?.value);
-    formData.append('gymName', this.paymentForm.get('gymName')?.value);
+    formData.append('gymId', this.paymentForm.get('gymId')?.value ?? 0);
+    formData.append('gymName', this.paymentForm.get('gymName')?.value ?? '');
   
     if (this.selectedFile) {
       formData.append('screenshotFile', this.selectedFile);
     }
   
-    if (this.selectedPaymentId) {
-      // Edit mode -> PUT request
-      this.paymentService.updatePayment(this.selectedPaymentId, formData).subscribe({
-        next: () => {
-          this.showAddDialog = false;
-          this.selectedPaymentId = null;
-          this.loadPayments();
-        },
-        error: (err) => console.error('Error updating payment', err)
-      });
-    } else {
-      // Add mode -> POST request
-      this.paymentService.addPayment(formData).subscribe({
-        next: () => {
-          this.showAddDialog = false;
-          this.loadPayments();
-        },
-        error: (err) => console.error('Error saving payment', err)
-      });
-    }
+    const saveObservable = this.selectedPaymentId
+      ? this.paymentService.updatePayment(this.selectedPaymentId, formData)
+      : this.paymentService.addPayment(formData);
+  
+    saveObservable.subscribe({
+      next: () => {
+        this.showAddDialog = false;
+        this.loadPayments();
+        Swal.fire({
+          icon: 'success',
+          title: this.isEditMode ? 'Payment Updated!' : 'Payment Added!',
+          text: 'Operation completed successfully.',
+          background: '#1e1e1e',
+          color: '#f5f5f5',
+          confirmButtonColor: '#00b894',
+          timer: 2000,
+          timerProgressBar: true,
+          showConfirmButton: false
+        });
+      },
+      error: (err) => {
+        let messages: string[] = [];
+      
+        if (err.error?.errors) {
+          // Flatten all error messages from backend
+          messages = Object.values(err.error.errors)
+            .flat()
+            .map(e => String(e));
+        } else if (err.error?.title) {
+          messages = [err.error.title];
+        } else {
+          messages = ['An unexpected error occurred.'];
+        }
+      
+        // 🔹 Show in SweetAlert (works if z-index fix applied)
+        Swal.fire({
+          icon: 'error',
+          title: 'Validation Error',
+          html: messages.join('<br>'), // show all errors line by line
+          background: '#1e1e1e',
+          color: '#f5f5f5',
+          confirmButtonColor: '#d63031',
+          customClass: {
+            popup: 'swal2-popup-front'
+          }
+        });
+      
+        // OR 🔹 Show in PrimeNG Toast (better UX with dialogs)
+        // messages.forEach(msg => {
+        //   this.messageService.add({
+        //     severity: 'error',
+        //     summary: 'Validation Error',
+        //     detail: msg
+        //   });
+        // });
+      }
+      
+    });
   }
+  
   
 
   // Delete Payment
@@ -237,15 +277,54 @@ export class PaymentsComponent implements OnInit {
 
   confirmDeletePayment() {
     if (!this.paymentToDelete) return;
-
+  
     this.paymentService.deletePayment(this.paymentToDelete.PaymentId).subscribe({
       next: () => {
         this.loadPayments();
         this.deleteDialogVisible = false;
         this.paymentToDelete = null;
         this.deleteConfirmationText = '';
+  
+        // ✅ Success popup
+        Swal.fire({
+          icon: 'success',
+          title: 'Payment Deleted!',
+          text: 'The payment has been deleted successfully.',
+          background: '#1e1e1e',
+          color: '#f5f5f5',
+          confirmButtonColor: '#00b894',
+          timer: 2000,
+          timerProgressBar: true,
+          showConfirmButton: false
+        });
       },
-      error: (err) => console.error('Error deleting payment', err)
+      error: (err) => {
+        let messages: string[] = [];
+  
+        if (err.error?.errors) {
+          messages = Object.values(err.error.errors)
+            .flat()
+            .map(e => String(e));
+        } else if (err.error?.title) {
+          messages = [err.error.title];
+        } else {
+          messages = ['An unexpected error occurred while deleting the payment.'];
+        }
+  
+        // ❌ Error popup
+        Swal.fire({
+          icon: 'error',
+          title: 'Delete Failed',
+          html: messages.join('<br>'),
+          background: '#1e1e1e',
+          color: '#f5f5f5',
+          confirmButtonColor: '#d63031',
+          customClass: {
+            popup: 'swal2-popup-front'
+          }
+        });
+      }
     });
   }
+  
 }

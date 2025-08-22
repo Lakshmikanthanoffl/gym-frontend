@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import Swal from 'sweetalert2';
 
 import { MemberService } from '../services/member.service';
 import { Member } from '../models/member.model';
@@ -369,13 +370,23 @@ isUnassignedGym(member: any): boolean {
       this.memberToDelete
     ) {
       this.memberService.deleteMember(this.memberToDelete.id).subscribe(() => {
-        // Remove from UI after successful deletion
         this.members = this.members.filter(m => m.id !== this.memberToDelete.id);
         this.memberToDelete = null;
         this.deleteDialogVisible = false;
         this.fetchMembersFromAPI();
+  
+        Swal.fire({
+          icon: 'success',
+          title: 'Deleted!',
+          text: 'The member has been removed successfully.',
+          background: '#1e1e1e',
+          color: '#f5f5f5',
+          confirmButtonColor: '#d63031',
+          timer: 2000,
+          showConfirmButton: false,
+          timerProgressBar: true
+        });
       });
-     
     }
   }
   
@@ -563,6 +574,17 @@ isUnassignedGym(member: any): boolean {
           this.members[index] = { ...updatedMember };
           this.members = [...this.members]; // Trigger Angular change detection
           this.closeDialog();
+          Swal.fire({
+            icon: 'success',
+            title: 'Member Updated!',
+            text: `${updatedMember.name} has been updated successfully.`,
+            background: '#1e1e1e',
+            color: '#f5f5f5',
+            confirmButtonColor: '#00b894',
+            timer: 2000,
+            showConfirmButton: false,
+            timerProgressBar: true
+          });
         });
       }
     } else {
@@ -579,6 +601,18 @@ isUnassignedGym(member: any): boolean {
       this.memberService.addMember(memberToAdd).subscribe((createdMember: Member) => {
         this.members = [...this.members, createdMember]; // Append to list
         this.closeDialog();
+
+        Swal.fire({
+          icon: 'success',
+          title: 'Member Added!',
+          text: `${this.newMember.name} has been added successfully.`,   
+          background: '#1e1e1e',
+          color: '#f5f5f5',
+          confirmButtonColor: '#00b894',
+          timer: 2000,
+          showConfirmButton: false,
+          timerProgressBar: true
+        });
       });
     }
   }

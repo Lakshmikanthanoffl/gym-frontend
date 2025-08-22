@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service'; // Adjust path if needed
+import Swal from 'sweetalert2';
+
 @Component({
   selector: 'app-login',
   standalone: false,
@@ -22,7 +24,7 @@ export class LoginComponent implements OnInit {
 
   login() {
     const loginData = {
-      email: this.UserEmail, // or this.email if you renamed the field
+      email: this.UserEmail,
       password: this.password
     };
   
@@ -30,16 +32,42 @@ export class LoginComponent implements OnInit {
       next: (role) => {
         this.authService.setRole(role.RoleName);
         this.router.navigate(['/dashboard']);
+        
+        Swal.fire({
+          icon: 'success',
+          title: 'Welcome Back!',
+          text: 'Login successful.',
+          background: '#1a1a1a',
+          color: '#eaeaea',
+          showConfirmButton: false,
+          timer: 2000,
+          timerProgressBar: true
+        });
       },
       error: (err) => {
         if (err.status === 401) {
-          alert('Invalid credentials');
+          Swal.fire({
+            icon: 'error',
+            title: 'Invalid Credentials',
+            text: 'Please check your email and password.',
+            background: '#1a1a1a',
+            color: '#eaeaea',
+            confirmButtonColor: '#ff4d4d'
+          });
         } else {
-          alert('Login failed. Please try again.');
+          Swal.fire({
+            icon: 'warning',
+            title: 'Login Failed',
+            text: 'Something went wrong. Please try again.',
+            background: '#1a1a1a',
+            color: '#eaeaea',
+            confirmButtonColor: '#ff9900'
+          });
         }
       }
     });
   }
+  
   
   
 
