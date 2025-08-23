@@ -114,3 +114,12 @@
     right: 10px;
   }
 }
+.swal-popup-professional {
+  border-radius: 12px;
+  padding: 25px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.swal-title-professional {
+  color: #ffffff;
+}

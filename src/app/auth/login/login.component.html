@@ -39,6 +39,12 @@
       <button type="submit" class="btn gym-btn w-100 btn-lg rounded-3 shadow-sm">
         Login
       </button>
+<!-- Contact Us Link (only shows on subscription error) -->
+<div *ngIf="showContactUs" class="text-center mt-3">
+  <a (click)="openContactUsPopup()" class="fw-semibold text-accent text-decoration-none" style="cursor: pointer;">
+    Contact Us
+  </a>
+</div>
 
       <!-- Signup Link -->
       <!-- <p class="mt-4 text-center text-secondary">
