@@ -2,6 +2,7 @@ import { Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service'; // adjust the path
 import Swal from 'sweetalert2';
+import QRCode from 'qrcode';
 
 import {
   trigger,
@@ -45,10 +46,19 @@ export class HeaderComponent implements OnInit {
   
   popupVisible = false;
 
+  upiId = 'lakshmikanthan.b.2001-1@okhdfcbank';
+
+  subscriptionPlans = [
+    { name: 'Monthly', amount: 3000 },
+    { name: '3 Months', amount: 9000 },
+    { name: '6 Months', amount: 18000 },
+    { name: 'Yearly', amount: 36000 }
+  ];
+  aymentReceived: boolean = false; // Track if payment is done
   @ViewChild('logoutItem') logoutItem!: ElementRef;
   userrole: any;
   username: any;
- 
+  subscriptionExpiring: boolean = false;
   constructor(private router: Router, private activatedRoute: ActivatedRoute,private authService: AuthService) {
     this.router.events
       .pipe(
@@ -74,6 +84,7 @@ export class HeaderComponent implements OnInit {
     this.authService.username$.subscribe(username => {
       this.username = username;
     });
+    this.checkSubscriptionExpiry();
   }
   
   togglePopup() {
@@ -85,7 +96,166 @@ export class HeaderComponent implements OnInit {
       }, 0);
     }
   }
-
+  checkSubscriptionExpiry() {
+    const validUntilStr = localStorage.getItem('validUntil');
+    if (validUntilStr) {
+      const today = new Date();
+      const expiryDate = new Date(validUntilStr);
+  
+      const diffDays = Math.ceil((expiryDate.getTime() - today.getTime()) / (1000 * 3600 * 24));
+  
+      this.subscriptionExpiring = diffDays <= 7 && diffDays >= 0;
+    }
+  }
+  async showSubscriptionPopup() {
+    const validUntilStr = localStorage.getItem('validUntil');
+    const expiryDate = validUntilStr ? new Date(validUntilStr) : null;
+  
+    // Format date and time as "DD/MM/YYYY, hh:mm AM/PM"
+    const formattedDateTime = expiryDate
+      ? expiryDate.toLocaleString('en-GB', { 
+          day: '2-digit', 
+          month: '2-digit', 
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: true
+        })
+      : 'N/A';
+  
+    const { isConfirmed } = await Swal.fire({
+      title: '<strong style="color:#ffcc00;">⚠ Subscription Expiry</strong>',
+      html: `
+        <div style="font-size:16px; color:#f0f0f0; font-family:'Segoe UI', Tahoma, sans-serif; text-align:left;">
+          <p>Your subscription is going to expire soon.</p>
+          <p><strong>Expiry Date & Time:</strong> ${formattedDateTime}</p>
+        </div>
+      `,
+      background: '#1f1f1f',
+      color: '#f0f0f0',
+      showCloseButton: true,
+      showConfirmButton: true,
+      confirmButtonText: 'Renew Now',
+      confirmButtonColor: '#0d6efd',
+      focusConfirm: false,
+      customClass: {
+        popup: 'dark-popup',
+        title: 'dark-title',
+        confirmButton: 'dark-confirm'
+      }
+    });
+  
+    if (isConfirmed) {
+      this.showPaymentPopup();
+    }
+  }
+  
+  async showPaymentPopup() {
+    let selectedPlan = this.subscriptionPlans[0]; // default Monthly
+    let qrDataUrl = '';
+  
+    // generate initial QR
+    qrDataUrl = await this.generateUpiQr(selectedPlan.amount);
+  
+    const gymName = localStorage.getItem('GymName') || 'Gym';
+    const validUntilStr = localStorage.getItem('validUntil');
+    const expiryDate = validUntilStr ? new Date(validUntilStr) : null;
+  
+    await Swal.fire({
+      title: '<strong style="color:#ffcc00;">Renew Subscription</strong>',
+      html: `
+        <div style="color:#f0f0f0; font-family:'Segoe UI', Tahoma, sans-serif; text-align:left;">
+          <label for="planSelect">Select Plan:</label>
+          <select id="planSelect" style="margin-top:5px; padding:5px; width:100%; border-radius:6px;">
+            ${this.subscriptionPlans.map(p => `<option value="${p.amount}" data-name="${p.name}">${p.name} - ₹${p.amount}</option>`).join('')}
+          </select>
+  
+          <div style="margin-top:15px; text-align:center;">
+            <img id="upiQrImg" src="${qrDataUrl}" style="width:180px; height:180px;" />
+          </div>
+  
+          <div id="emailNote" style="margin-top:10px; text-align:center; cursor:pointer;" title="Click here to send payment email">
+            <p style="color:#f0f0f0; text-decoration:underline; font-weight:500; margin:0;">
+              lakshmikanthan.b.2001@gmail.com
+            </p>
+            <p style="font-size:12px; color:#cccccc; margin-top:5px;">
+              Note: Please pay using <span style="color:#ffcc00; font-weight:bold;">GPay</span>, <span style="color:#ffcc00; font-weight:bold;">PhonePe</span>, or <span style="color:#ffcc00; font-weight:bold;">Paytm</span> and upload the paid screenshot to this mail.
+            </p>
+            <p style="font-size:12px; color:#cccccc; margin-top:2px;">
+              It may take 5 to 10 minutes to reflect.
+            </p>
+            <p id="countdown" style="font-size:14px; color:#ffcc00; margin-top:8px; font-weight:bold;">
+              ${expiryDate ? 'Time left: calculating...' : ''}
+            </p>
+          </div>
+        </div>
+      `,
+      showCloseButton: true,
+      showConfirmButton: false,
+      background: '#1f1f1f',
+      color: '#f0f0f0',
+      didOpen: () => {
+        const selectEl: HTMLSelectElement = document.getElementById('planSelect') as HTMLSelectElement;
+        const qrImgEl: HTMLImageElement = document.getElementById('upiQrImg') as HTMLImageElement;
+        const countdownEl: HTMLElement = document.getElementById('countdown') as HTMLElement;
+        const emailNote: HTMLElement = document.getElementById('emailNote') as HTMLElement;
+  
+        // Gmail link generator
+        const getEmailLink = (planName: string, amount: number) =>
+          `https://mail.google.com/mail/?view=cm&fs=1&to=lakshmikanthan.b.2001@gmail.com&su=${encodeURIComponent('Subscription Renew - ' + gymName)}&body=${encodeURIComponent(`Gym: ${gymName}\nPlan: ${planName}\nAmount: ₹${amount}\nPlease pay using GPay, PhonePe, or Paytm and attach the paid screenshot.`)}`;
+  
+        // Open Gmail when user clicks anywhere in the emailNote div
+        emailNote.addEventListener('click', () => {
+          const amount = Number(selectEl.value);
+          const planName = selectEl.selectedOptions[0].getAttribute('data-name') || 'Plan';
+          const link = getEmailLink(planName, amount);
+          window.open(link, '_blank');
+        });
+  
+        // Update QR dynamically when plan changes
+        selectEl.addEventListener('change', async (event: any) => {
+          const amount = Number(event.target.value);
+          const planName = selectEl.selectedOptions[0].getAttribute('data-name') || 'Plan';
+          qrImgEl.src = await this.generateUpiQr(amount);
+        });
+  
+        // Start live countdown
+        if (expiryDate) {
+          const interval = setInterval(() => {
+            const now = new Date().getTime();
+            const distance = expiryDate.getTime() - now;
+  
+            if (distance <= 0) {
+              countdownEl.innerHTML = '<strong>Subscription expired!</strong>';
+              clearInterval(interval);
+              return;
+            }
+  
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+  
+            countdownEl.innerHTML = `<strong>Time left:</strong> ${days}d ${hours}h ${minutes}m ${seconds}s`;
+          }, 1000);
+        }
+      }
+    });
+  }
+  
+  
+  
+  // QR generation helper
+  async generateUpiQr(amount: number) {
+    const upiString = `upi://pay?pa=${this.upiId}&pn=techzy&am=${amount}&cu=INR`;
+    try {
+      return await QRCode.toDataURL(upiString, { width: 300 });
+    } catch (err) {
+      console.error(err);
+      return '';
+    }
+  }  
+  
   logout() {
     Swal.fire({
       title: 'Are you sure?',

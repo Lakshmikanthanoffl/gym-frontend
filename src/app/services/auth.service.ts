@@ -10,8 +10,10 @@ export interface Role {
   Password: string;
   GymId: number;
   GymName: string;
-  IsActive: boolean;   // ✅ Subscription status
+  IsActive: boolean;
+  ValidUntil: string;  // ✅ Add this (as string from API)
 }
+
 
 @Injectable({
   providedIn: 'root'
@@ -30,7 +32,6 @@ export class AuthService {
 
   constructor(private http: HttpClient) {}
 
-  // Login and store user info + subscription status
   login(loginData: { email: string; password: string }): Observable<Role> {
     return this.http.post<Role>(this.apiUrl, loginData).pipe(
       tap(role => {
@@ -39,13 +40,18 @@ export class AuthService {
         localStorage.setItem('username', role.UserName);
         localStorage.setItem('GymName', role.GymName);
         localStorage.setItem('GymId', role.GymId.toString());
-
+  
+        if (role.ValidUntil) {
+          localStorage.setItem('validUntil', role.ValidUntil.toString()); // ✅ corrected
+        }
+  
         this.roleSubject.next(role.RoleName);
         this.usernameSubject.next(role.UserName);
         this.gymNameSubject.next(role.GymName);
       })
     );
   }
+  
 
   // Set role manually
   setRole(role: string) {

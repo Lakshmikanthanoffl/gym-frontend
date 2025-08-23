@@ -1,22 +1,29 @@
-<div *ngIf="isLoggedIn()" class="header d-flex justify-content-between align-items-center px-3 py-3" style="background-color: #2e2e2e; color: white;">
+<div *ngIf="isLoggedIn()" 
+     class="header d-flex justify-content-between align-items-center px-3 py-3" 
+     style="background-color: #2e2e2e; color: white;">
+  
   <h5 class="m-0">{{ headerTitle }}</h5>
 
   <div class="d-flex align-items-center position-relative" style="cursor: pointer;">
     <span class="me-2">{{ username }}</span>
-    <i class="pi pi-user" style="font-size: 1.2rem;" (click)="togglePopup()" tabindex="0"></i>
+
+    <!-- 🔔 Notification if subscription is expiring -->
+    <ng-container *ngIf="subscriptionExpiring">
+      <div class="notification-wrapper me-2" (click)="showSubscriptionPopup()">
+        <i class="pi pi-bell notification-bell" 
+           title="Your subscription is about to expire"></i>
+        <span class="pulse-dot"></span>
+      </div>
+    </ng-container>
+    
+
+    <i class="pi pi-user" style="font-size: 1.2rem;" 
+       (click)="togglePopup()" tabindex="0"></i>
 
     <!-- Custom Popup -->
-    <div
-    
-      class="custom-popup-menu"
-      [@popupAnimation]="popupVisible ? 'visible' : 'hidden'"
-    >
+    <div class="custom-popup-menu" [@popupAnimation]="popupVisible ? 'visible' : 'hidden'">
       <ul>
-        <li
-          (click)="logout()"
-          tabindex="0"
-          #logoutItem
-        >
+        <li (click)="logout()" tabindex="0" #logoutItem>
           <i class="pi pi-sign-out me-2"></i> Logout
         </li>
       </ul>
