@@ -39,7 +39,6 @@ export class AuthService {
         localStorage.setItem('username', role.UserName);
         localStorage.setItem('GymName', role.GymName);
         localStorage.setItem('GymId', role.GymId.toString());
-        localStorage.setItem('isActive', role.IsActive ? 'true' : 'false');
 
         this.roleSubject.next(role.RoleName);
         this.usernameSubject.next(role.UserName);
@@ -63,11 +62,6 @@ export class AuthService {
   // Get username
   getUsername(): string | null {
     return localStorage.getItem('username');
-  }
-
-  // Check if user is active
-  isActiveUser(): boolean {
-    return localStorage.getItem('isActive') === 'true';
   }
 
   // Logout / clear auth
