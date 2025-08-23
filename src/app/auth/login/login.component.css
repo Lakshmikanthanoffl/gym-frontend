@@ -1,78 +1,116 @@
 /* Background */
 .login-container {
-    background: linear-gradient(135deg, #0a0a0a, #1a1a1a);
-    overflow: hidden;
-    color: #eaeaea;
-  }
-  
-  /* Card */
-  .login-card-dark {
-    max-width: 420px;
-    width: 100%;
-    border-radius: 1rem;
-    background: #111;
-    color: #eaeaea;
-    border: 1px solid #222;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.6);
-  }
-  
-  /* Inputs */
-  .dark-input {
-    background: #1a1a1a;
-    border: 1px solid #333;
-    color: #eaeaea;
-    padding: 0.9rem 1rem;
-    transition: all 0.3s ease-in-out;
-  }
-  
-  .dark-input:focus {
-    border-color: #00d084;
-    box-shadow: 0 0 12px rgba(0, 208, 132, 0.6);
-    outline: none;
-  }
-  
-  /* Eye icon button */
-  .toggle-eye {
-    right: 15px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #888;
-  }
-  
-  .toggle-eye:hover {
-    color: #00d084;
-  }
-  
-  /* Button */
-  .gym-btn {
-    background: linear-gradient(135deg, #00d084, #0072ff);
-    border: none;
-    color: #fff;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-    transition: all 0.3s ease-in-out;
-  }
-  
-  .gym-btn:hover {
-    background: linear-gradient(135deg, #00b36b, #0055cc);
-    transform: scale(1.03);
-  }
-  
-  /* Signup link */
-  .text-accent {
-    color: #00d084;
-  }
-  
-  .text-accent:hover {
-    text-decoration: underline;
-  }
-  /* Override autofill styles for dark theme */
+  background: linear-gradient(135deg, #0a0a0a, #1a1a1a);
+  overflow: hidden;
+  color: #eaeaea;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 1rem; /* extra space on mobile */
+}
+
+/* Card */
+.login-card-dark {
+  max-width: 420px;
+  width: 100%;
+  border-radius: 1rem;
+  background: #111;
+  color: #eaeaea;
+  border: 1px solid #222;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.6);
+  padding: 2rem;
+  box-sizing: border-box;
+}
+
+/* Inputs */
+.dark-input {
+  background: #1a1a1a;
+  border: 1px solid #333;
+  color: #eaeaea;
+  padding: 0.9rem 1rem;
+  width: 100%;
+  margin-bottom: 1rem;
+  transition: all 0.3s ease-in-out;
+  box-sizing: border-box;
+}
+
+.dark-input:focus {
+  border-color: #00d084;
+  box-shadow: 0 0 12px rgba(0, 208, 132, 0.6);
+  outline: none;
+}
+
+/* Eye icon button */
+.toggle-eye {
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #888;
+  position: absolute;
+  cursor: pointer;
+}
+
+.toggle-eye:hover {
+  color: #00d084;
+}
+
+/* Button */
+.gym-btn {
+  background: linear-gradient(135deg, #00d084, #0072ff);
+  border: none;
+  color: #fff;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  padding: 0.9rem 1.5rem;
+  width: 100%;
+  transition: all 0.3s ease-in-out;
+  border-radius: 0.5rem;
+}
+
+.gym-btn:hover {
+  background: linear-gradient(135deg, #00b36b, #0055cc);
+  transform: scale(1.03);
+}
+
+/* Signup link */
+.text-accent {
+  color: #00d084;
+}
+
+.text-accent:hover {
+  text-decoration: underline;
+}
+
+/* Override autofill styles for dark theme */
 .dark-input:-webkit-autofill,
 .dark-input:-webkit-autofill:hover,
 .dark-input:-webkit-autofill:focus,
 .dark-input:-webkit-autofill:active {
-  -webkit-box-shadow: 0 0 0 1000px #1a1a1a inset !important; /* dark bg */
-  -webkit-text-fill-color: #eaeaea !important; /* light text */
-  caret-color: #eaeaea !important; /* cursor visible */
-  transition: background-color 9999s ease-in-out 0s; /* prevent flash */
+  -webkit-box-shadow: 0 0 0 1000px #1a1a1a inset !important;
+  -webkit-text-fill-color: #eaeaea !important;
+  caret-color: #eaeaea !important;
+  transition: background-color 9999s ease-in-out 0s;
+}
+
+/* Responsive Mobile Layout */
+@media (max-width: 600px) {
+  .login-card-dark {
+    padding: 1.5rem 1rem;
+    max-width: 95%;
+  }
+
+  .gym-btn {
+    padding: 1rem;
+    font-size: 1rem;
+  }
+
+  .dark-input {
+    padding: 0.8rem;
+    font-size: 0.95rem;
+  }
+
+  .toggle-eye {
+    right: 10px;
+  }
 }
