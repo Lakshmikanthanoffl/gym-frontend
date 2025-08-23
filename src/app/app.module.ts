@@ -37,6 +37,8 @@ import { ChartModule } from 'primeng/chart';
 import { CalendarModule } from 'primeng/calendar';
 import { RecaptchaModule } from 'ng-recaptcha';
 import { TabViewModule } from 'primeng/tabview';
+import { InputNumberModule } from 'primeng/inputnumber';
+import { InputSwitchModule } from 'primeng/inputswitch';
 // Auth components
 import { LoginComponent } from './auth/login/login.component';
 import { SignupComponent } from './auth/signup/signup.component';
@@ -74,6 +76,8 @@ import { ContactUsComponent } from './contact-us/contact-us.component';
 
     TableModule,
     TabViewModule,
+    InputNumberModule,     // ✅ PrimeNG inputNumber
+    InputSwitchModule,     // ✅ PrimeNG inputSwitch
     ButtonModule,
     DropdownModule,
     SplitButtonModule,

@@ -31,29 +31,72 @@ export class LoginComponent implements OnInit {
     this.authService.login(loginData).subscribe({
       next: (role) => {
         this.authService.setRole(role.RoleName);
-        this.router.navigate(['/dashboard']);
-        
-        Swal.fire({
-          icon: 'success',
-          title: 'Welcome Back!',
-          text: 'Login successful.',
-          background: '#1a1a1a',
-          color: '#eaeaea',
-          showConfirmButton: false,
-          timer: 2000,
-          timerProgressBar: true
-        });
+  
+        // ✅ If subscription expired but role is superadmin, allow login
+        if (role.RoleName === 'superadmin') {
+          this.router.navigate(['/dashboard']);
+          Swal.fire({
+            icon: 'success',
+            title: 'Welcome Back, Super Admin!',
+            text: 'Login successful.',
+            background: '#1a1a1a',
+            color: '#eaeaea',
+            showConfirmButton: false,
+            timer: 2000,
+            timerProgressBar: true
+          });
+        } else {
+          // Normal users
+          this.router.navigate(['/dashboard']);
+          Swal.fire({
+            icon: 'success',
+            title: 'Welcome Back!',
+            text: 'Login successful.',
+            background: '#1a1a1a',
+            color: '#eaeaea',
+            showConfirmButton: false,
+            timer: 2000,
+            timerProgressBar: true
+          });
+        }
       },
       error: (err) => {
         if (err.status === 401) {
-          Swal.fire({
-            icon: 'error',
-            title: 'Invalid Credentials',
-            text: 'Please check your email and password.',
-            background: '#1a1a1a',
-            color: '#eaeaea',
-            confirmButtonColor: '#ff4d4d'
-          });
+          if (err.error?.message === 'Invalid email or password') {
+            Swal.fire({
+              icon: 'error',
+              title: 'Invalid Credentials',
+              text: err.error.message,
+              background: '#1a1a1a',
+              color: '#eaeaea',
+              confirmButtonColor: '#ff4d4d'
+            });
+          } else if (err.error?.message === 'Account expired. Please renew subscription.') {
+            // ✅ Block only non-superadmins
+            const role = this.authService.getRole();
+            if (role !== 'superadmin') {
+              Swal.fire({
+                icon: 'warning',
+                title: 'Subscription Expired',
+                text: err.error.message,
+                background: '#1a1a1a',
+                color: '#eaeaea',
+                confirmButtonColor: '#ff9900'
+              });
+            } else {
+              // let superadmin continue to dashboard
+              this.router.navigate(['/dashboard']);
+            }
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Unauthorized',
+              text: 'Unauthorized access. Please try again.',
+              background: '#1a1a1a',
+              color: '#eaeaea',
+              confirmButtonColor: '#ff4d4d'
+            });
+          }
         } else {
           Swal.fire({
             icon: 'warning',
@@ -67,6 +110,7 @@ export class LoginComponent implements OnInit {
       }
     });
   }
+  
   
   
   

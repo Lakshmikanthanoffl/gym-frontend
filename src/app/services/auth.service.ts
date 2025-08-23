@@ -10,8 +10,8 @@ export interface Role {
   Password: string;
   GymId: number;
   GymName: string;
+  IsActive: boolean;   // ✅ Subscription status
 }
-
 
 @Injectable({
   providedIn: 'root'
@@ -20,15 +20,17 @@ export class AuthService {
   private roleSubject = new BehaviorSubject<string | null>(localStorage.getItem('role'));
   role$ = this.roleSubject.asObservable();
 
-  // Add username BehaviorSubject and Observable
   private usernameSubject = new BehaviorSubject<string | null>(localStorage.getItem('username'));
   username$ = this.usernameSubject.asObservable();
+
   private gymNameSubject = new BehaviorSubject<string | null>(localStorage.getItem('GymName'));
   gymName$ = this.gymNameSubject.asObservable();
-  private apiUrl = 'https://gymmanagementapi.onrender.com/api/Role/login'; // adjust if needed
+
+  private apiUrl = 'https://gymmanagementapi.onrender.com/api/Role/login'; // adjust API URL
 
   constructor(private http: HttpClient) {}
 
+  // Login and store user info + subscription status
   login(loginData: { email: string; password: string }): Observable<Role> {
     return this.http.post<Role>(this.apiUrl, loginData).pipe(
       tap(role => {
@@ -37,6 +39,7 @@ export class AuthService {
         localStorage.setItem('username', role.UserName);
         localStorage.setItem('GymName', role.GymName);
         localStorage.setItem('GymId', role.GymId.toString());
+        localStorage.setItem('isActive', role.IsActive ? 'true' : 'false');
 
         this.roleSubject.next(role.RoleName);
         this.usernameSubject.next(role.UserName);
@@ -45,25 +48,43 @@ export class AuthService {
     );
   }
 
+  // Set role manually
   setRole(role: string) {
     localStorage.setItem('authToken', 'dummy-token');
     localStorage.setItem('role', role);
     this.roleSubject.next(role);
   }
 
+  // Get role
   getRole(): string | null {
     return localStorage.getItem('role');
   }
 
+  // Get username
+  getUsername(): string | null {
+    return localStorage.getItem('username');
+  }
+
+  // Check if user is active
+  isActiveUser(): boolean {
+    return localStorage.getItem('isActive') === 'true';
+  }
+
+  // Logout / clear auth
   clearAuth() {
     localStorage.removeItem('authToken');
     localStorage.removeItem('role');
     localStorage.removeItem('username');
+    localStorage.removeItem('GymName');
+    localStorage.removeItem('GymId');
+    localStorage.removeItem('isActive');
 
     this.roleSubject.next(null);
     this.usernameSubject.next(null);
+    this.gymNameSubject.next(null);
   }
 
+  // Check if logged in
   isLoggedIn(): boolean {
     return !!localStorage.getItem('authToken');
   }
