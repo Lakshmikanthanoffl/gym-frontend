@@ -77,7 +77,6 @@ recentPayments = [
     this.isAdminOrSuperAdmin = this.isAdmin || this.isSuperAdmin;
 
     this.fetchMembersFromAPI();
-    this.checkSubscription();
   }
 
   fetchMembersFromAPI() {
@@ -187,25 +186,6 @@ recentPayments = [
   }
 
 
-  checkSubscription() {
-    const isActive = this.authService.isActiveUser(); // implement this to return boolean
-    const role = this.authService.getRole();
-
-    // Only logout non-superadmin users if inactive
-    if (!isActive && role !== 'superadmin') {
-      this.authService.clearAuth();
-      Swal.fire({
-        icon: 'warning',
-        title: 'Subscription Ended',
-        text: 'Your subscription has ended. Please renew to continue.',
-        background: '#1a1a1a',
-        color: '#eaeaea',
-        confirmButtonColor: '#ff9900'
-      }).then(() => {
-        this.router.navigate(['/login']); // redirect to login page
-      });
-    }
-  }
 // Generates real UPI QR code for admin (UPI ID only)
 getUpiQrUrl(gymId: number, gymName: string): string {
   const gymInfo = this.gymUpiMap[gymId] || { 
