@@ -13,6 +13,7 @@ export class LoginComponent implements OnInit {
   UserEmail = '';
   password = '';
   showPassword = false;
+  showContactUs = false; // ✅ Flag to show Contact Us link
 
   constructor(private router: Router, private authService: AuthService) {}
 
@@ -31,8 +32,8 @@ export class LoginComponent implements OnInit {
     this.authService.login(loginData).subscribe({
       next: (role) => {
         this.authService.setRole(role.RoleName);
-  
-        // ✅ If subscription expired but role is superadmin, allow login
+        this.showContactUs = false; // reset flag on successful login
+
         if (role.RoleName === 'superadmin') {
           this.router.navigate(['/dashboard']);
           Swal.fire({
@@ -46,7 +47,6 @@ export class LoginComponent implements OnInit {
             timerProgressBar: true
           });
         } else {
-          // Normal users
           this.router.navigate(['/dashboard']);
           Swal.fire({
             icon: 'success',
@@ -72,7 +72,7 @@ export class LoginComponent implements OnInit {
               confirmButtonColor: '#ff4d4d'
             });
           } else if (err.error?.message === 'Account expired. Please renew subscription.') {
-            // ✅ Block only non-superadmins
+            this.showContactUs = true; // ✅ Show Contact Us link for non-superadmins
             const role = this.authService.getRole();
             if (role !== 'superadmin') {
               Swal.fire({
@@ -84,7 +84,6 @@ export class LoginComponent implements OnInit {
                 confirmButtonColor: '#ff9900'
               });
             } else {
-              // let superadmin continue to dashboard
               this.router.navigate(['/dashboard']);
             }
           } else {
@@ -110,12 +109,74 @@ export class LoginComponent implements OnInit {
       }
     });
   }
-  
-  
-  
-  
 
   togglePasswordVisibility() {
     this.showPassword = !this.showPassword;
   }
+
+  // ✅ New method to show Contact Us popup
+  openContactUsPopup() {
+    Swal.fire({
+      title: `<strong style="font-size: 24px; font-weight:600; color:#ffffff;">Contact Us</strong>`,
+      html: `
+        <div style="text-align: left; margin-top: 15px; font-size: 17px; line-height: 1.8; font-family: 'Segoe UI', Tahoma, sans-serif;">
+          
+          <p style="margin: 8px 0;">
+            <strong style="color:#0d6efd;">Email:</strong><br>
+            <a href="https://mail.google.com/mail/?view=cm&fs=1&to=lakshmikanthan.b.2001@gmail.com" 
+               target="_blank"
+               style="color:#f0f0f0; text-decoration:none; font-weight:500; margin-right:10px;">
+              lakshmikanthan.b.2001&#64;gmail.com
+            </a>
+            <button id="copyEmailBtn"
+              style="padding:3px 8px; font-size:12px; background:#0d6efd; color:#fff; border:none; border-radius:6px; cursor:pointer;">
+              Copy
+            </button>
+          </p>
+          
+          <p style="margin: 12px 0;">
+            <strong style="color:#0d6efd;">Phone:</strong><br>
+            <a href="tel:+919025275948" 
+               style="color:#f0f0f0; text-decoration:none; font-weight:500;">
+              +91 9025275948
+            </a>
+          </p>
+  
+        </div>
+      `,
+      background: '#1f1f1f',
+      color: '#f0f0f0',
+      showCloseButton: true,
+      showConfirmButton: true,
+      confirmButtonText: 'Close',
+      confirmButtonColor: '#0d6efd',
+      focusConfirm: false,
+      customClass: {
+        popup: 'swal-popup-professional',
+        title: 'swal-title-professional'
+      },
+      didOpen: () => {
+        const copyBtn = document.getElementById("copyEmailBtn");
+        if (copyBtn) {
+          copyBtn.addEventListener("click", async () => {
+            await navigator.clipboard.writeText("lakshmikanthan.b.2001@gmail.com");
+            Swal.fire({
+              toast: true,
+              position: 'top-end',
+              icon: 'success',
+              title: 'Email copied!',
+              background: '#2b2b2b',   // Dark toast background
+              color: '#f0f0f0',        // Light text
+              iconColor: '#0d6efd',    // Blue success icon
+              showConfirmButton: false,
+              timer: 1500,
+              timerProgressBar: true,
+            });
+          });
+        }
+      }
+    });
+  }
+  
+  
 }
