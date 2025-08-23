@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { MemberService } from '../services/member.service'; // make sure this exists
+import { MemberService } from '../services/member.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -12,13 +12,49 @@ export class DashboardComponent implements OnInit {
   isAdmin: boolean = false;
   isSuperAdmin!: boolean;
   isAdminOrSuperAdmin!: boolean;
-  adminMemberCounts: { [gymId: number]: number } = {};
-  defaultGymId: number | null = null;    // for admin
-  defaultGymName: string | null = null;  // for admin
+// Hardcoded UPI IDs and display names for each gym
+// Hardcode UPI IDs for each gym
+// Gym UPI / Phone Map
+// Gym UPI / Phone Map
+// Gym UPI mapping
+gymUpiMap: { [gymId: number]: { upi?: string; phone?: string; name: string } } = {
+  1234: { 
+    upi: 'vetrikanthan.b.2006@okhdfcbank', 
+    phone: '9361701413',   // ignored
+    name: 'vetrigym' 
+  },
+  679: { 
+    upi: 'lakshmikanthan.b.2001-1@okhdfcbank', 
+    phone: '9025275948',   // ignored
+    // No UPI ID, phone is ignored
+    name: 'fitgyms' 
+  }
+};
 
-  members: any[] = [];       // store fetched members
-  rolesList: any[] = [];     // store fetched admins
 
+  defaultGymId: number | null = null;
+  defaultGymName: string | null = null;
+
+  members: any[] = [];
+  rolesList: any[] = [];
+
+
+// Dummy data for Revenue tab
+totalRevenue: number = 125000;
+
+// Dummy data for Top Gyms tab
+topGyms = [
+  { name: 'Gold Gym', revenue: 50000 },
+  { name: 'Fitness First', revenue: 35000 },
+  { name: 'Anytime Fitness', revenue: 25000 }
+];
+
+// Dummy data for Payments tab
+recentPayments = [
+  { user: 'John Doe', amount: 2000, date: '2025-08-20' },
+  { user: 'Jane Smith', amount: 1500, date: '2025-08-21' },
+  { user: 'Alex Johnson', amount: 1800, date: '2025-08-22' }
+];
   totalMembers = 0;
   activeMembers = 0;
   expiredMembers = 0;
@@ -26,7 +62,8 @@ export class DashboardComponent implements OnInit {
 
   memberChartData: any;
   memberChartOptions: any;
-  adminMembersMap: { [gymId: number]: any[] } = {}; // gymId -> array of members
+  adminMembersMap: { [gymId: number]: any[] } = {};
+
   constructor(private memberService: MemberService) {}
 
   ngOnInit() {
@@ -41,12 +78,7 @@ export class DashboardComponent implements OnInit {
   }
 
   fetchMembersFromAPI() {
-    const userRole = this.userrole;
-    const gymId = this.defaultGymId;
-    const gymName = this.defaultGymName;
-
-    if (userRole === 'superadmin') {
-      // Fetch admins first
+    if (this.userrole === 'superadmin') {
       this.memberService.getRoles().subscribe({
         next: (rolesData: any[]) => {
           this.rolesList = rolesData.map(r => ({
@@ -54,10 +86,9 @@ export class DashboardComponent implements OnInit {
             roleName: r.RoleName,
             userName: r.UserName,
             gymId: r.GymId,
-            gymName: r.GymName
+            gymName: r.GymName,
+            upiVpa: r.UpiVpa || 'demo@upi'
           }));
-
-          // Then fetch all members
           this.memberService.getAllMembers().subscribe({
             next: (data: any[]) => this.processMembersSuperAdmin(data),
             error: (err) => console.error('Failed to fetch members:', err),
@@ -65,8 +96,8 @@ export class DashboardComponent implements OnInit {
         },
         error: err => console.error('Failed to fetch roles:', err)
       });
-    } else if (userRole === 'admin') {
-      this.memberService.getMembersByGym(gymId!, gymName!).subscribe({
+    } else if (this.userrole === 'admin') {
+      this.memberService.getMembersByGym(this.defaultGymId!, this.defaultGymName!).subscribe({
         next: (data: any[]) => this.processMembers(data),
         error: (err) => console.error('Failed to fetch members:', err),
       });
@@ -75,8 +106,8 @@ export class DashboardComponent implements OnInit {
 
   processMembers(data: any[]) {
     this.members = data || [];
-
     const now = new Date();
+
     this.totalMembers = this.members.length;
     this.activeMembers = this.members.filter(m => new Date(m.ValidUntil) >= now).length;
     this.expiredMembers = this.members.filter(m => new Date(m.ValidUntil) < now).length;
@@ -85,7 +116,6 @@ export class DashboardComponent implements OnInit {
       return joined.getMonth() === now.getMonth() && joined.getFullYear() === now.getFullYear();
     }).length;
 
-    // Count members joined in each month
     const monthCounts = Array(12).fill(0);
     this.members.forEach(member => {
       const paidDate = new Date(member.PaidDate);
@@ -106,17 +136,16 @@ export class DashboardComponent implements OnInit {
     this.memberChartOptions = {
       responsive: true,
       plugins: {
-        legend: { position: 'top' },
-        title: { display: true, text: 'Members Joined per Month' }
+        legend: { position: 'top', labels: { color: '#e0e0e0' } },
+        title: { display: true, text: 'Members Joined per Month', color: '#e0e0e0' }
       }
     };
   }
 
-  // Superadmin: process members and map to admins
   processMembersSuperAdmin(data: any[]) {
     this.members = data || [];
-
     const now = new Date();
+
     this.totalMembers = this.members.length;
     this.activeMembers = this.members.filter(m => new Date(m.ValidUntil) >= now).length;
     this.expiredMembers = this.members.filter(m => new Date(m.ValidUntil) < now).length;
@@ -125,7 +154,6 @@ export class DashboardComponent implements OnInit {
       return joined.getMonth() === now.getMonth() && joined.getFullYear() === now.getFullYear();
     }).length;
 
-    // Chart: members per admin
     const labels = this.rolesList.map(r => r.userName);
     const counts = this.rolesList.map(r => this.members.filter(m => m.GymId === r.gymId).length);
 
@@ -143,16 +171,39 @@ export class DashboardComponent implements OnInit {
     this.memberChartOptions = {
       responsive: true,
       plugins: {
-        legend: { position: 'top' },
-        title: { display: true, text: 'Members per Admin' }
+        legend: { position: 'top', labels: { color: '#e0e0e0' } },
+        title: { display: true, text: 'Members per Admin', color: '#e0e0e0' }
       }
     };
-    // Map each admin's gymId to member count
-// Map each admin's gymId to their members
-this.adminMembersMap = {};
-this.rolesList.forEach(role => {
-  this.adminMembersMap[role.gymId] = this.members.filter(m => m.GymId === role.gymId);
-});
 
+    // Map members to their gyms
+    this.adminMembersMap = {};
+    this.rolesList.forEach(role => {
+      this.adminMembersMap[role.gymId] = this.members.filter(m => m.GymId === role.gymId);
+    });
   }
+
+
+
+// Generates real UPI QR code for admin (UPI ID only)
+getUpiQrUrl(gymId: number, gymName: string): string {
+  const gymInfo = this.gymUpiMap[gymId] || { 
+    upi: '', 
+    name: gymName 
+  };
+
+  const payeeAddress = gymInfo.upi?.trim();
+
+  // If no UPI ID, use a default dummy UPI
+  const finalPayeeAddress = payeeAddress || 'lakshmikanthan.b.2001-1@okhdfcbank';
+  const payeeName = gymInfo.name || gymName;
+
+  const upiString = `upi://pay?pa=${encodeURIComponent(finalPayeeAddress)}&pn=${encodeURIComponent(payeeName)}&tn=${encodeURIComponent('Gym Payment for ' + gymName)}&cu=INR`;
+
+  return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(upiString)}`;
+}
+
+
+
+
 }

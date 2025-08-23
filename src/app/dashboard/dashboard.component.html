@@ -1,34 +1,60 @@
 <!-- Summary Cards -->
 <div class="dashboard-grid" *ngIf="isAdminOrSuperAdmin">
-  <p-card header="Total Members">
-    <p>{{ totalMembers }}</p>
-  </p-card>
-
-  <p-card header="Active Members">
-    <p>{{ activeMembers }}</p>
-  </p-card>
-
-  <p-card header="Expired Members">
-    <p>{{ expiredMembers }}</p>
-  </p-card>
-
-  <p-card header="New This Month">
-    <p>{{ newMembersThisMonth }}</p>
-  </p-card>
+  <p-card header="Total Members"><p>{{ totalMembers }}</p></p-card>
+  <p-card header="Active Members"><p>{{ activeMembers }}</p></p-card>
+  <p-card header="Expired Members"><p>{{ expiredMembers }}</p></p-card>
+  <p-card header="New This Month"><p>{{ newMembersThisMonth }}</p></p-card>
 </div>
 
-<!-- Graph -->
+<!-- Graph + QR -->
 <div class="mt-4" *ngIf="isAdminOrSuperAdmin">
-  <p-card [header]="isSuperAdmin ? 'Members per Admin' : 'New Members Trend'">
-    <div class="chart-container">
+  <div class="grid-layout">
+    <p-card [header]="isSuperAdmin ? 'Members per Admin' : 'New Members Trend'" class="full-height">
       <p-chart type="bar" [data]="memberChartData" [options]="memberChartOptions"></p-chart>
-    </div>
-  </p-card>
+    </p-card>
+
+    <!-- Admin QR Only -->
+    <p-card header="Payments" class="full-height qr-box" *ngIf="!isSuperAdmin && isAdmin">
+      <div class="qr-container">
+        <img 
+          [src]="getUpiQrUrl(defaultGymId!, defaultGymName!)" 
+          alt="QR Code" 
+          class="qr-image"
+        />
+
+        <p class="mt-2 text-center font-semibold text-green-600">
+          ✅ Pay to: {{ defaultGymName }}
+        </p>
+
+        <div class="upi-logos" *ngIf="userrole === 'admin'">
+          <img src="assets/logos/paytm.png" alt="Paytm">
+          <img src="assets/logos/phonepe.png" alt="PhonePe">
+          <img src="assets/logos/gpay.png" alt="Google Pay">
+        </div>
+        
+        
+        
+      </div>
+    </p-card>
+  </div>
 </div>
 
-
+<!-- SuperAdmin: Admin-wise Members with QR -->
 <div class="mt-4" *ngIf="isSuperAdmin && rolesList.length">
   <p-card *ngFor="let role of rolesList" [header]="role.userName + ' (' + role.gymName + ')'">
+    
+    <div class="qr-container mb-3">
+      <img [src]="getUpiQrUrl(role.gymId, role.gymName)" class="qr-image" alt="QR Code">
+      <p class="mt-2 text-center font-semibold text-green-600">
+        ✅ Pay to: {{ role.gymName }}
+      </p>
+      <!-- <div class="upi-logos">
+        <img src="assets/logos/paytm.png" alt="Paytm">
+        <img src="assets/logos/gpay.png" alt="Google Pay">
+        <img src="assets/logos/phonepe.png" alt="PhonePe">
+      </div> -->
+    </div>
+
     <table class="table">
       <thead>
         <tr>
@@ -54,5 +80,3 @@
     </table>
   </p-card>
 </div>
-
-

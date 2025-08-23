@@ -540,72 +540,173 @@ isUnassignedGym(member: any): boolean {
   }
   
   saveMember() {
-    const { subscriptionType, validUntil } = this.newMember;
+    const { name, email, phone, subscriptionType, validUntil } = this.newMember;
   
-    // Determine gym info based on role
+    // ✅ Field Validations
+    if (!name?.trim()) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Validation Error',
+        text: 'Please enter the member name.',
+        background: '#1e1e1e',
+        color: '#f5f5f5',
+        confirmButtonColor: '#d63031'
+      });
+      return;
+    }
+  
+    if (!email?.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Validation Error',
+        text: 'Please enter a valid email address.',
+        background: '#1e1e1e',
+        color: '#f5f5f5',
+        confirmButtonColor: '#d63031'
+      });
+      return;
+    }
+  
+    if (!phone?.trim() || phone.length < 10) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Validation Error',
+        text: 'Please enter a valid phone number (10 digits).',
+        background: '#1e1e1e',
+        color: '#f5f5f5',
+        confirmButtonColor: '#d63031'
+      });
+      return;
+    }
+  
+    if (!subscriptionType) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Validation Error',
+        text: 'Please select a subscription type.',
+        background: '#1e1e1e',
+        color: '#f5f5f5',
+        confirmButtonColor: '#d63031'
+      });
+      return;
+    }
+  
+    if (!this.newMember.amountPaid || this.newMember.amountPaid <= 0) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Validation Error',
+        text: 'Please enter a valid amount paid.',
+        background: '#1e1e1e',
+        color: '#f5f5f5',
+        confirmButtonColor: '#d63031'
+      });
+      return;
+    }
+  
+    if (!validUntil) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Validation Error',
+        text: 'Please provide a valid end date.',
+        background: '#1e1e1e',
+        color: '#f5f5f5',
+        confirmButtonColor: '#d63031'
+      });
+      return;
+    }
+  
+    // ✅ Duplicate Validation (skip self in edit mode)
+    const duplicatePhone = this.members.some(
+      m => m.phone === phone && m.id !== this.selectedMemberId
+    );
+    if (duplicatePhone) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Duplicate Found',
+        text: `Phone number ${phone} is already registered.`,
+        background: '#1e1e1e',
+        color: '#f5f5f5',
+        confirmButtonColor: '#d63031'
+      });
+      return;
+    }
+  
+    const duplicateEmail = this.members.some(
+      m => m.email.toLowerCase() === email.toLowerCase() && m.id !== this.selectedMemberId
+    );
+    if (duplicateEmail) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Duplicate Found',
+        text: `Email ${email} is already registered.`,
+        background: '#1e1e1e',
+        color: '#f5f5f5',
+        confirmButtonColor: '#d63031'
+      });
+      return;
+    }
+  
+    // ✅ Gym info based on role
     let gymId: number;
     let gymName: string;
   
     if (this.userrole === 'superadmin') {
-      // Take values from the dialog inputs for superadmin
       gymId = Number(this.newMember.gymId) || 0;
       gymName = this.newMember.gymName ?? '';
     } else {
-      // Take values from localStorage for admin
       gymId = Number(localStorage.getItem('GymId')) || 0;
       gymName = localStorage.getItem('GymName') ?? '';
     }
   
+    // ✅ Edit mode
     if (this.isEditMode && this.selectedMemberId != null) {
-      // Edit mode: update existing member by ID
-      const index = this.members.findIndex(m => m.id === this.selectedMemberId);
-      if (index !== -1) {
-        const updatedMember: Member = {
-          ...this.newMember,
-          id: this.selectedMemberId,
-          subscriptionType,
-          validUntil,
-          gymId,      // include gymId
-          gymName     // include gymName
-        };
+      const updatedMember: Member = {
+        ...this.newMember,
+        id: this.selectedMemberId,
+        subscriptionType,
+        validUntil,
+        gymId,
+        gymName
+      };
   
-        this.memberService.updateMember(updatedMember).subscribe(() => {
-          // Update the member in-place
+      this.memberService.updateMember(updatedMember).subscribe(() => {
+        const index = this.members.findIndex(m => m.id === this.selectedMemberId);
+        if (index !== -1) {
           this.members[index] = { ...updatedMember };
-          this.members = [...this.members]; // Trigger Angular change detection
-          this.closeDialog();
-          Swal.fire({
-            icon: 'success',
-            title: 'Member Updated!',
-            text: `${updatedMember.name} has been updated successfully.`,
-            background: '#1e1e1e',
-            color: '#f5f5f5',
-            confirmButtonColor: '#00b894',
-            timer: 2000,
-            showConfirmButton: false,
-            timerProgressBar: true
-          });
+          this.members = [...this.members];
+        }
+        this.closeDialog();
+        Swal.fire({
+          icon: 'success',
+          title: 'Member Updated!',
+          text: `${updatedMember.name} has been updated successfully.`,
+          background: '#1e1e1e',
+          color: '#f5f5f5',
+          confirmButtonColor: '#00b894',
+          timer: 2000,
+          showConfirmButton: false,
+          timerProgressBar: true
         });
-      }
+      });
     } else {
-      // Add new member
+      // ✅ Add mode
       const memberToAdd: Member = {
         ...this.newMember,
         id: 0,
         subscriptionType,
         validUntil,
-        gymId,      // include gymId
-        gymName     // include gymName
+        gymId,
+        gymName
       };
   
       this.memberService.addMember(memberToAdd).subscribe((createdMember: Member) => {
-        this.members = [...this.members, createdMember]; // Append to list
+        this.members = [...this.members, createdMember];
         this.closeDialog();
-
+  
         Swal.fire({
           icon: 'success',
           title: 'Member Added!',
-          text: `${this.newMember.name} has been added successfully.`,   
+          text: `${this.newMember.name} has been added successfully.`,
           background: '#1e1e1e',
           color: '#f5f5f5',
           confirmButtonColor: '#00b894',

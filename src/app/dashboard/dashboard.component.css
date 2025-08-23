@@ -6,6 +6,70 @@
   margin-bottom: 1.5rem;
 }
 
+/* ---------------- Graph + QR Layout ---------------- */
+.grid-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Graph | QR */
+  gap: 1.5rem;
+}
+
+.full-height {
+  height: 100%;
+}
+
+/* ---------------- QR Container ---------------- */
+.qr-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.qr-image {
+  width: 180px;
+  height: 180px;
+  border: 6px solid #2a2a2a;
+  border-radius: 12px;
+  padding: 10px;
+  background: #fff;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+}
+
+/* Payment Text */
+.qr-container p {
+  color: #00c853; /* green success text */
+  font-weight: 600;
+  margin-top: 0.75rem;
+  font-size: 1rem;
+  text-align: center;
+}
+
+/* ---------------- UPI Logos ---------------- */
+.upi-logos {
+  display: flex;
+  justify-content: center; /* center align */
+  align-items: center;
+  margin-top: 1.5rem;
+  gap: 3rem; /* equal spacing between logos */
+  flex-wrap: wrap; /* responsive */
+}
+
+.upi-logos img {
+  height: 45px; /* uniform height for logos */
+  object-fit: contain;
+  filter: grayscale(100%); /* uniform grayscale for clean look */
+  opacity: 0.85;
+  transition: all 0.3s ease-in-out;
+}
+
+.upi-logos img:hover {
+  filter: grayscale(0%);
+  opacity: 1;
+  transform: scale(1.05);
+}
+
+
 /* ---------------- PrimeNG Card ---------------- */
 ::ng-deep p-card {
   background-color: #1e1e1e !important;
@@ -55,7 +119,7 @@
   color: #e0e0e0;
   font-size: 0.9rem;
   line-height: 1.3;
-  table-layout: fixed;       /* keeps columns aligned */
+  table-layout: fixed;
   margin: 0;
 }
 
@@ -78,10 +142,10 @@
   border: 1px solid #333;
   padding: 0.35rem 0.5rem;
   text-align: left;
-  white-space: nowrap;       /* prevent overflow */
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 150px;          /* adjust as needed */
+  max-width: 150px;
 }
 
 /* Optional wrap for certain columns */
@@ -147,10 +211,14 @@
   margin: 0.25rem 0;
 }
 
-/* Responsive adjustments for smaller screens */
+/* ---------------- Responsive ---------------- */
 @media screen and (max-width: 768px) {
   .dashboard-grid {
     grid-template-columns: 1fr;
+  }
+
+  .grid-layout {
+    grid-template-columns: 1fr; /* stack graph & QR vertically */
   }
 
   ::ng-deep table.table td,
@@ -162,5 +230,82 @@
 
   ::ng-deep p-card .p-card-body {
     font-size: 1rem;
+  }
+
+  .upi-logos {
+    gap: 0.6rem;
+  }
+
+  .upi-logos img {
+    height: 24px;
+  }
+}
+/* ---------------- Responsive ---------------- */
+
+/* Tablet and below */
+@media screen and (max-width: 1024px) {
+  .grid-layout {
+    grid-template-columns: 1fr; /* Stack graph & QR vertically */
+  }
+
+  .qr-image {
+    width: 150px;
+    height: 150px;
+  }
+
+  .upi-logos img {
+    height: 32px;
+  }
+}
+
+/* Mobile (up to 768px) */
+@media screen and (max-width: 768px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .grid-layout {
+    grid-template-columns: 1fr; /* full width graph then QR */
+  }
+
+  ::ng-deep table.table td,
+  ::ng-deep table.table th {
+    max-width: 120px;
+    font-size: 0.85rem;
+    padding: 0.25rem 0.4rem;
+  }
+
+  ::ng-deep p-card .p-card-body {
+    font-size: 1rem;
+  }
+
+  .qr-image {
+    width: 120px;
+    height: 120px;
+  }
+
+  .upi-logos {
+    gap: 0.8rem;
+  }
+
+  .upi-logos img {
+    height: 26px;
+  }
+}
+
+/* Small mobile (up to 480px) */
+@media screen and (max-width: 480px) {
+  .qr-image {
+    width: 100px;
+    height: 100px;
+    border-width: 4px;
+  }
+
+  .upi-logos img {
+    height: 22px;
+  }
+
+  ::ng-deep p-card .p-card-body {
+    font-size: 0.9rem;
   }
 }

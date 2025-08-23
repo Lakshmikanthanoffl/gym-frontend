@@ -36,6 +36,7 @@ import { CardModule } from 'primeng/card';
 import { ChartModule } from 'primeng/chart';
 import { CalendarModule } from 'primeng/calendar';
 import { RecaptchaModule } from 'ng-recaptcha';
+import { TabViewModule } from 'primeng/tabview';
 // Auth components
 import { LoginComponent } from './auth/login/login.component';
 import { SignupComponent } from './auth/signup/signup.component';
@@ -72,6 +73,7 @@ import { ContactUsComponent } from './contact-us/contact-us.component';
     HttpClientModule,
 
     TableModule,
+    TabViewModule,
     ButtonModule,
     DropdownModule,
     SplitButtonModule,

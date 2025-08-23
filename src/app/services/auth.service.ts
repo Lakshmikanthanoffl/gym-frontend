@@ -23,7 +23,8 @@ export class AuthService {
   // Add username BehaviorSubject and Observable
   private usernameSubject = new BehaviorSubject<string | null>(localStorage.getItem('username'));
   username$ = this.usernameSubject.asObservable();
-
+  private gymNameSubject = new BehaviorSubject<string | null>(localStorage.getItem('GymName'));
+  gymName$ = this.gymNameSubject.asObservable();
   private apiUrl = 'https://gymmanagementapi.onrender.com/api/Role/login'; // adjust if needed
 
   constructor(private http: HttpClient) {}
@@ -39,6 +40,7 @@ export class AuthService {
 
         this.roleSubject.next(role.RoleName);
         this.usernameSubject.next(role.UserName);
+        this.gymNameSubject.next(role.GymName);
       })
     );
   }
