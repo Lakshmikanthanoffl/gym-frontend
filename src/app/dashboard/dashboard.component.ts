@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { MemberService } from '../services/member.service';
-
+import { AuthService } from '../services/auth.service';
+import { Router } from '@angular/router';
+import Swal from 'sweetalert2';
 @Component({
   selector: 'app-dashboard',
   standalone: false,
@@ -64,7 +66,7 @@ recentPayments = [
   memberChartOptions: any;
   adminMembersMap: { [gymId: number]: any[] } = {};
 
-  constructor(private memberService: MemberService) {}
+  constructor(private authService: AuthService, private router: Router,private memberService: MemberService) {}
 
   ngOnInit() {
     this.defaultGymName = localStorage.getItem('GymName') ?? '';
@@ -75,6 +77,7 @@ recentPayments = [
     this.isAdminOrSuperAdmin = this.isAdmin || this.isSuperAdmin;
 
     this.fetchMembersFromAPI();
+    this.checkSubscription();
   }
 
   fetchMembersFromAPI() {
@@ -184,7 +187,25 @@ recentPayments = [
   }
 
 
+  checkSubscription() {
+    const isActive = this.authService.isActiveUser(); // implement this to return boolean
+    const role = this.authService.getRole();
 
+    // Only logout non-superadmin users if inactive
+    if (!isActive && role !== 'superadmin') {
+      this.authService.clearAuth();
+      Swal.fire({
+        icon: 'warning',
+        title: 'Subscription Ended',
+        text: 'Your subscription has ended. Please renew to continue.',
+        background: '#1a1a1a',
+        color: '#eaeaea',
+        confirmButtonColor: '#ff9900'
+      }).then(() => {
+        this.router.navigate(['/login']); // redirect to login page
+      });
+    }
+  }
 // Generates real UPI QR code for admin (UPI ID only)
 getUpiQrUrl(gymId: number, gymName: string): string {
   const gymInfo = this.gymUpiMap[gymId] || { 
