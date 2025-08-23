@@ -1,5 +1,9 @@
 <div *ngIf="isLoggedIn()" class="sidebar px-3 py-3" style="background-color: #1f1f1f; color: white;">
-  <h4 class="mb-4">Gym Management</h4>
+  <h4 class="mb-4 text-center">
+    {{ userrole === 'superadmin' ? 'Gym Management' : defaultGymName }}
+  </h4>
+  
+  
 
   <a routerLink="/dashboard" routerLinkActive="active">
     <i class="pi pi-home"></i>

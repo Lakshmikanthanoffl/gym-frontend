@@ -8,6 +8,8 @@ import { AuthService } from '../../services/auth.service'; // Adjust path
 })
 export class SidebarComponent implements OnInit{
   userrole: string | null = null;
+  defaultGymName!: string | null;
+
 
   constructor(private authService: AuthService) {}
 
@@ -16,6 +18,7 @@ export class SidebarComponent implements OnInit{
     this.authService.role$.subscribe(role => {
       this.userrole = role;
     });
+    this.authService.gymName$.subscribe(name => this.defaultGymName = name);
   }
 
   isLoggedIn(): boolean {
