@@ -142,7 +142,7 @@ export class AdminOnboardComponent implements OnInit {
     };
   
     // Make sure the subscription dropdown shows correct period
-    this.setDefaultDates();
+    
     
     this.showDialog = true;
   }
