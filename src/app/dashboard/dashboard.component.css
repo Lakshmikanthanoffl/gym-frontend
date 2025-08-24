@@ -6,6 +6,11 @@
   margin-bottom: 1.5rem;
 }
 
+/* Subtle divider between cards */
+.dashboard-grid p-card:not(:last-child) {
+  border-right: 1px solid #333;
+}
+
 /* ---------------- Graph + QR Layout ---------------- */
 .grid-layout {
   display: grid;
@@ -24,6 +29,15 @@
   align-items: center;
   justify-content: center;
   height: 100%;
+  background-color: #2a2a2a;
+  padding: 1rem;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.qr-container:hover {
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.8);
+  transform: translateY(-2px);
 }
 
 .qr-image {
@@ -38,27 +52,30 @@
 
 /* Payment Text */
 .qr-container p {
-  color: #00c853; /* green success text */
   font-weight: 600;
   margin-top: 0.75rem;
   font-size: 1rem;
   text-align: center;
 }
 
+.text-green-600 { color: #00c853; }  /* Active */
+.text-red-600 { color: #f44336; }    /* Expired */
+.text-yellow-500 { color: #ffb300; } /* Expiring soon */
+
 /* ---------------- UPI Logos ---------------- */
 .upi-logos {
   display: flex;
-  justify-content: center; /* center align */
+  justify-content: center;
   align-items: center;
   margin-top: 1.5rem;
-  gap: 3rem; /* equal spacing between logos */
-  flex-wrap: wrap; /* responsive */
+  gap: 3rem;
+  flex-wrap: wrap;
 }
 
 .upi-logos img {
-  height: 45px; /* uniform height for logos */
+  height: 45px;
   object-fit: contain;
-  filter: grayscale(100%); /* uniform grayscale for clean look */
+  filter: grayscale(100%);
   opacity: 0.85;
   transition: all 0.3s ease-in-out;
 }
@@ -69,14 +86,13 @@
   transform: scale(1.05);
 }
 
-
 /* ---------------- PrimeNG Card ---------------- */
 ::ng-deep p-card {
   background-color: #1e1e1e !important;
   color: #e0e0e0 !important;
   border: 1px solid #333;
   border-radius: 10px;
-  box-shadow: 0 1px 6px rgba(0,0,0,0.6);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.7);
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
@@ -90,6 +106,7 @@
   padding: 0.5rem 0.75rem;
   border-top-left-radius: 10px;
   border-top-right-radius: 10px;
+  letter-spacing: 0.5px;
 }
 
 /* Card Body */
@@ -109,6 +126,10 @@
   padding: 0.75rem;
   border-radius: 10px;
   color: #e0e0e0 !important;
+}
+
+::ng-deep .p-chart text {
+  fill: #e0e0e0 !important;
 }
 
 /* ---------------- Tables inside cards ---------------- */
@@ -168,6 +189,7 @@
   display: block;
   max-height: 250px;
   overflow-y: auto;
+  box-shadow: inset 0 -5px 5px -5px #000;
 }
 
 ::ng-deep table.table thead {
@@ -197,6 +219,10 @@
   border: 1px solid #1e1e1e;
 }
 
+::-webkit-scrollbar-thumb:hover {
+  background-color: #777;
+}
+
 /* ---------------- Utility classes ---------------- */
 .mt-4 {
   margin-top: 1.5rem;
@@ -212,37 +238,6 @@
 }
 
 /* ---------------- Responsive ---------------- */
-@media screen and (max-width: 768px) {
-  .dashboard-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .grid-layout {
-    grid-template-columns: 1fr; /* stack graph & QR vertically */
-  }
-
-  ::ng-deep table.table td,
-  ::ng-deep table.table th {
-    max-width: 120px;
-    font-size: 0.85rem;
-    padding: 0.25rem 0.4rem;
-  }
-
-  ::ng-deep p-card .p-card-body {
-    font-size: 1rem;
-  }
-
-  .upi-logos {
-    gap: 0.6rem;
-  }
-
-  .upi-logos img {
-    height: 24px;
-  }
-}
-/* ---------------- Responsive ---------------- */
-
-/* Tablet and below */
 @media screen and (max-width: 1024px) {
   .grid-layout {
     grid-template-columns: 1fr; /* Stack graph & QR vertically */
@@ -258,7 +253,6 @@
   }
 }
 
-/* Mobile (up to 768px) */
 @media screen and (max-width: 768px) {
   .dashboard-grid {
     grid-template-columns: 1fr;
@@ -293,7 +287,6 @@
   }
 }
 
-/* Small mobile (up to 480px) */
 @media screen and (max-width: 480px) {
   .qr-image {
     width: 100px;
@@ -308,4 +301,42 @@
   ::ng-deep p-card .p-card-body {
     font-size: 0.9rem;
   }
+}
+/* Ensure the table takes full width and columns are evenly spaced */
+.admin-expiry-table {
+  width: 100%;
+  table-layout: fixed; /* key for equal column widths */
+  border-collapse: collapse;
+}
+
+.admin-expiry-table th,
+.admin-expiry-table td {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 12px 8px;
+  text-align: center; /* center content */
+}
+
+/* Optional: alternate row colors */
+.admin-expiry-table tbody tr:nth-child(even) {
+  background-color: #2d2d2d; /* dark gray */
+}
+
+.admin-expiry-table tbody tr:nth-child(odd) {
+  background-color: #1f1f1f; /* slightly darker gray */
+}
+
+/* Smooth hover effect */
+.admin-expiry-table tbody tr:hover {
+  background-color: #444444;
+  transition: background-color 0.3s;
+}
+
+/* Header style */
+.admin-expiry-table thead th {
+  background-color: #111111;
+  color: #ffffff;
+  font-weight: bold;
+  border-bottom: 2px solid #333333;
 }

@@ -3,36 +3,25 @@ import { MemberService } from '../services/member.service';
 import { AuthService } from '../services/auth.service';
 import { Router } from '@angular/router';
 import Swal from 'sweetalert2';
+import { interval, Subscription } from 'rxjs';
+
 @Component({
   selector: 'app-dashboard',
   standalone: false,
   templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.css'] // fixed typo: styleUrl → styleUrls
+  styleUrls: ['./dashboard.component.css']
 })
 export class DashboardComponent implements OnInit {
   userrole: any;
   isAdmin: boolean = false;
   isSuperAdmin!: boolean;
   isAdminOrSuperAdmin!: boolean;
-// Hardcoded UPI IDs and display names for each gym
-// Hardcode UPI IDs for each gym
-// Gym UPI / Phone Map
-// Gym UPI / Phone Map
-// Gym UPI mapping
-gymUpiMap: { [gymId: number]: { upi?: string; phone?: string; name: string } } = {
-  1234: { 
-    upi: 'vetrikanthan.b.2006@okhdfcbank', 
-    phone: '9361701413',   // ignored
-    name: 'vetrigym' 
-  },
-  679: { 
-    upi: 'lakshmikanthan.b.2001-1@okhdfcbank', 
-    phone: '9025275948',   // ignored
-    // No UPI ID, phone is ignored
-    name: 'fitgyms' 
-  }
-};
 
+  // Hardcoded UPI IDs and display names for each gym
+  gymUpiMap: { [gymId: number]: { upi?: string; phone?: string; name: string } } = {
+    1234: { upi: 'vetrikanthan.b.2006@okhdfcbank', phone: '9361701413', name: 'vetrigym' },
+    679: { upi: 'lakshmikanthan.b.2001-1@okhdfcbank', phone: '9025275948', name: 'fitgyms' }
+  };
 
   defaultGymId: number | null = null;
   defaultGymName: string | null = null;
@@ -40,33 +29,34 @@ gymUpiMap: { [gymId: number]: { upi?: string; phone?: string; name: string } } =
   members: any[] = [];
   rolesList: any[] = [];
 
+  totalRevenue: number = 125000;
+  topGyms = [
+    { name: 'Gold Gym', revenue: 50000 },
+    { name: 'Fitness First', revenue: 35000 },
+    { name: 'Anytime Fitness', revenue: 25000 }
+  ];
 
-// Dummy data for Revenue tab
-totalRevenue: number = 125000;
+  recentPayments = [
+    { user: 'John Doe', amount: 2000, date: '2025-08-20' },
+    { user: 'Jane Smith', amount: 1500, date: '2025-08-21' },
+    { user: 'Alex Johnson', amount: 1800, date: '2025-08-22' }
+  ];
 
-// Dummy data for Top Gyms tab
-topGyms = [
-  { name: 'Gold Gym', revenue: 50000 },
-  { name: 'Fitness First', revenue: 35000 },
-  { name: 'Anytime Fitness', revenue: 25000 }
-];
-
-// Dummy data for Payments tab
-recentPayments = [
-  { user: 'John Doe', amount: 2000, date: '2025-08-20' },
-  { user: 'Jane Smith', amount: 1500, date: '2025-08-21' },
-  { user: 'Alex Johnson', amount: 1800, date: '2025-08-22' }
-];
   totalMembers = 0;
   activeMembers = 0;
   expiredMembers = 0;
   newMembersThisMonth = 0;
-
+  statusCheckSub!: Subscription;
+  timerSubscription!: Subscription;
   memberChartData: any;
   memberChartOptions: any;
   adminMembersMap: { [gymId: number]: any[] } = {};
 
-  constructor(private authService: AuthService, private router: Router,private memberService: MemberService) {}
+  constructor(
+    private authService: AuthService,
+    private router: Router,
+    private memberService: MemberService
+  ) {}
 
   ngOnInit() {
     this.defaultGymName = localStorage.getItem('GymName') ?? '';
@@ -75,8 +65,52 @@ recentPayments = [
     this.isAdmin = this.userrole === 'admin';
     this.isSuperAdmin = this.userrole === 'superadmin';
     this.isAdminOrSuperAdmin = this.isAdmin || this.isSuperAdmin;
-
+  
     this.fetchMembersFromAPI();
+  
+    // Automatically update subscription status every 1 minute
+    this.statusCheckSub = interval(1000).subscribe(() => {
+      // Just trigger Angular change detection by reassigning members
+      this.rolesList = [...this.rolesList];
+    });
+    this.timerSubscription = interval(1000).subscribe(() => {
+      this.updateCountdowns();
+    });
+  }
+  updateCountdowns() {
+    const now = new Date();
+  
+    this.rolesList.forEach(role => {
+      const validUntil = new Date(role.validUntil);
+      const diff = validUntil.getTime() - now.getTime(); // difference in ms
+  
+      if (diff <= 0) {
+        role.countdown = 'Expired';
+        role.statusColor = 'red';
+        role.status = 'Expired';
+      } else {
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+        const minutes = Math.floor((diff / (1000 * 60)) % 60);
+        const seconds = Math.floor((diff / 1000) % 60);
+  
+        role.countdown = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+  
+        if (days === 0) {
+          role.status = 'Expiring Today';
+          role.statusColor = 'orange';
+        } else {
+          role.status = 'Active';
+          role.statusColor = 'green';
+        }
+      }
+    });
+  }
+  
+  ngOnDestroy() {
+    if (this.statusCheckSub) {
+      this.statusCheckSub.unsubscribe();
+    }
   }
 
   fetchMembersFromAPI() {
@@ -89,8 +123,9 @@ recentPayments = [
             userName: r.UserName,
             gymId: r.GymId,
             gymName: r.GymName,
-            upiVpa: r.UpiVpa || 'demo@upi'
+            validUntil: r.ValidUntil ? new Date(r.ValidUntil) : null
           }));
+
           this.memberService.getAllMembers().subscribe({
             next: (data: any[]) => this.processMembersSuperAdmin(data),
             error: (err) => console.error('Failed to fetch members:', err),
@@ -127,11 +162,7 @@ recentPayments = [
     this.memberChartData = {
       labels: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
       datasets: [
-        {
-          label: 'Members Joined',
-          data: monthCounts,
-          backgroundColor: '#42A5F5'
-        }
+        { label: 'Members Joined', data: monthCounts, backgroundColor: '#42A5F5' }
       ]
     };
 
@@ -161,13 +192,7 @@ recentPayments = [
 
     this.memberChartData = {
       labels,
-      datasets: [
-        {
-          label: 'Members per Admin',
-          data: counts,
-          backgroundColor: '#42A5F5'
-        }
-      ]
+      datasets: [{ label: 'Members per Admin', data: counts, backgroundColor: '#42A5F5' }]
     };
 
     this.memberChartOptions = {
@@ -185,26 +210,68 @@ recentPayments = [
     });
   }
 
-
-// Generates real UPI QR code for admin (UPI ID only)
-getUpiQrUrl(gymId: number, gymName: string): string {
-  const gymInfo = this.gymUpiMap[gymId] || { 
-    upi: '', 
-    name: gymName 
-  };
-
-  const payeeAddress = gymInfo.upi?.trim();
-
-  // If no UPI ID, use a default dummy UPI
-  const finalPayeeAddress = payeeAddress || 'lakshmikanthan.b.2001-1@okhdfcbank';
-  const payeeName = gymInfo.name || gymName;
-
-  const upiString = `upi://pay?pa=${encodeURIComponent(finalPayeeAddress)}&pn=${encodeURIComponent(payeeName)}&tn=${encodeURIComponent('Gym Payment for ' + gymName)}&cu=INR`;
-
-  return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(upiString)}`;
+  
+// Check subscription status
+isValid(date: string | Date): boolean {
+  const today = new Date();
+  return new Date(date) >= today;
+}
+// Check if subscription is expired
+isExpired(date: string | Date): boolean {
+  const today = new Date();
+  return new Date(date) < today;
 }
 
+// Check if expiring today
+isExpiringToday(date: string | Date): boolean {
+  const today = new Date();
+  const expiry = new Date(date);
+  return !this.isExpired(date) &&
+         expiry.getFullYear() === today.getFullYear() &&
+         expiry.getMonth() === today.getMonth() &&
+         expiry.getDate() === today.getDate();
+}
 
+// Check if expiring soon (next 7 days, excluding today)
+isExpiringSoon(date: string | Date): boolean {
+  const today = new Date();
+  const expiry = new Date(date);
+  const diffDays = Math.ceil((expiry.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+  return diffDays > 0 && diffDays <= 7;
+}
 
+// Get status text
+getStatusText(date: string | Date): string {
+  if (this.isExpired(date)) return 'Expired';
+  if (this.isExpiringToday(date)) return 'Expiring Today';
+  if (this.isExpiringSoon(date)) return 'Expiring Soon';
+  return 'Active';
+}
 
+// Get status color
+getStatusColor(date: string | Date): string {
+  if (this.isExpired(date)) return '#FF4C4C';       // Red
+  if (this.isExpiringToday(date)) return '#FFA500'; // Orange
+  if (this.isExpiringSoon(date)) return '#FFD700';  // Gold
+  return '#32CD32';                                  // Green
+}
+
+// Get row class for highlighting
+getRowClass(date: string | Date): string {
+  if (this.isExpired(date)) return 'expired';
+  if (this.isExpiringToday(date)) return 'expiring-today';
+  if (this.isExpiringSoon(date)) return 'expiring-soon';
+  return '';
+}
+
+  // Generate UPI QR code for admin or gym
+  getUpiQrUrl(gymId: number, gymName: string): string {
+    const gymInfo = this.gymUpiMap[gymId] || { upi: '', name: gymName };
+    const finalPayeeAddress = gymInfo.upi?.trim() || 'lakshmikanthan.b.2001-1@okhdfcbank';
+    const payeeName = gymInfo.name || gymName;
+
+    const upiString = `upi://pay?pa=${encodeURIComponent(finalPayeeAddress)}&pn=${encodeURIComponent(payeeName)}&tn=${encodeURIComponent('Gym Payment for ' + gymName)}&cu=INR`;
+
+    return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(upiString)}`;
+  }
 }
