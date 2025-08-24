@@ -38,19 +38,28 @@ export class LoginComponent implements OnInit {
           this.router.navigate(['/dashboard']);
           Swal.fire({
             icon: 'success',
-            title: 'Welcome Back, Super Admin!',
-            text: 'Login successful.',
-            background: '#1a1a1a',
-            color: '#eaeaea',
+            title: `<span style="color:#ffd700; font-size:28px; font-weight:700; text-shadow:0 0 10px #ffcc00;">👑 Welcome Back, Super Admin ${role.UserName}!</span>`,
+            html: `<p style="font-size:18px; color:#eaeaea; margin-top:10px;">
+                     You have full access to the system.
+                   </p>`,
+            background: '#0d0d0d',
+            color: '#ffffff',
+            width: 600,   // ✅ Bigger popup
             showConfirmButton: false,
-            timer: 2000,
-            timerProgressBar: true
+            timer: 2800,
+            timerProgressBar: true,
+            backdrop: `
+              rgba(0,0,0,0.8)
+              url("https://media.giphy.com/media/3o7aD2saalBwwftBIY/giphy.gif")
+              center top
+              no-repeat
+            `, // ✅ Animated glowing backdrop
           });
         } else {
           this.router.navigate(['/dashboard']);
           Swal.fire({
             icon: 'success',
-            title: 'Welcome Back!',
+            title: `Welcome Back, ${role.UserName}!`,
             text: 'Login successful.',
             background: '#1a1a1a',
             color: '#eaeaea',
@@ -59,6 +68,7 @@ export class LoginComponent implements OnInit {
             timerProgressBar: true
           });
         }
+        
       },
       error: (err) => {
         if (err.status === 401) {

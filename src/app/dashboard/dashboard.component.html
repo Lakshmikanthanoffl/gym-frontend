@@ -6,14 +6,46 @@
   <p-card header="New This Month"><p>{{ newMembersThisMonth }}</p></p-card>
 </div>
 
-<!-- Graph + QR -->
+<!-- Graph + Admin/QR -->
 <div class="mt-4" *ngIf="isAdminOrSuperAdmin">
   <div class="grid-layout">
+    <!-- Member Trend Graph -->
     <p-card [header]="isSuperAdmin ? 'Members per Admin' : 'New Members Trend'" class="full-height">
       <p-chart type="bar" [data]="memberChartData" [options]="memberChartOptions"></p-chart>
     </p-card>
 
-    <!-- Admin QR Only -->
+    <!-- SuperAdmin: Admin Subscription Expiry -->
+   <!-- SuperAdmin: Admin Subscription Expiry (Modern Dark Theme) -->
+   <p-card header="Admin Subscription Expiry" class="full-height shadow-lg rounded-lg p-4" *ngIf="isSuperAdmin">
+    <table class="admin-expiry-table">
+      <thead>
+        <tr>
+          <th>Admin</th>
+          <th>Gym</th>
+          <th>Valid Until</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let role of rolesList">
+          <td>{{ role.userName }}</td>
+          <td>{{ role.gymName }}</td>
+          <td>{{ role.countdown }}</td>
+          <td [style.color]="role.statusColor" class="font-semibold">
+            {{ role.status }}
+          </td>
+
+        </tr>
+        <tr *ngIf="!rolesList?.length">
+          <td colspan="4" class="text-center text-gray-400 py-4">No admins found</td>
+        </tr>
+      </tbody>
+    </table>
+  </p-card>
+  
+
+
+    <!-- Admin: QR Payment Card instead of Expiry -->
     <p-card header="Payments" class="full-height qr-box" *ngIf="!isSuperAdmin && isAdmin">
       <div class="qr-container">
         <img 
@@ -21,25 +53,20 @@
           alt="QR Code" 
           class="qr-image"
         />
-
         <p class="mt-2 text-center font-semibold text-green-600">
           ✅ Pay to: {{ defaultGymName }}
         </p>
-
         <div class="upi-logos" *ngIf="userrole === 'admin'">
           <img src="assets/logos/paytm.png" alt="Paytm">
           <img src="assets/logos/phonepe.png" alt="PhonePe">
           <img src="assets/logos/gpay.png" alt="Google Pay">
         </div>
-        
-        
-        
       </div>
     </p-card>
   </div>
 </div>
 
-<!-- SuperAdmin: Admin-wise Members with QR -->
+<!-- SuperAdmin: Admin-wise Members with QR (unchanged) -->
 <div class="mt-4" *ngIf="isSuperAdmin && rolesList.length">
   <p-card *ngFor="let role of rolesList" [header]="role.userName + ' (' + role.gymName + ')'">
     
@@ -48,11 +75,6 @@
       <p class="mt-2 text-center font-semibold text-green-600">
         ✅ Pay to: {{ role.gymName }}
       </p>
-      <!-- <div class="upi-logos">
-        <img src="assets/logos/paytm.png" alt="Paytm">
-        <img src="assets/logos/gpay.png" alt="Google Pay">
-        <img src="assets/logos/phonepe.png" alt="PhonePe">
-      </div> -->
     </div>
 
     <table class="table">

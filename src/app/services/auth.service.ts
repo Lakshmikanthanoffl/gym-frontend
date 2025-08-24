@@ -49,10 +49,14 @@ export class AuthService {
   }
 
   private checkValidity() {
+    const token = localStorage.getItem('authToken');
     const isActive = localStorage.getItem('isActive') === 'true';
     const validUntil = localStorage.getItem('validUntil');
   
-    // Skip if already on login page
+    // ✅ Skip if not logged in
+    if (!token) return;
+  
+    // ✅ Skip if already on login page
     if (this.router.url === '/login') return;
   
     if (!isActive) {
@@ -64,7 +68,14 @@ export class AuthService {
       this.forceLogout('Your subscription has expired.');
       return;
     }
+  
+    // ✅ Update state normally if logged in and valid
+    if (validUntil) {
+      this.validUntilSubject.next(validUntil);
+    }
+    this.isActiveSubject.next(isActive);
   }
+  
   
 
   forceLogout(message: string) {
