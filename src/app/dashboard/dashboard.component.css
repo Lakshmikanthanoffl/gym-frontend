@@ -340,3 +340,76 @@
   font-weight: bold;
   border-bottom: 2px solid #333333;
 }
+/* ---------------- Mobile Friendly Tables ---------------- */
+@media screen and (max-width: 768px) {
+  /* Make tables scrollable horizontally instead of squeezing */
+  .admin-expiry-table,
+  ::ng-deep table.table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+    border-radius: 8px;
+  }
+
+  /* Prevent squished columns */
+  .admin-expiry-table th,
+  .admin-expiry-table td,
+  ::ng-deep table.table th,
+  ::ng-deep table.table td {
+    min-width: 120px; /* ensures tap-friendly cells */
+    font-size: 0.85rem;
+    padding: 8px 6px;
+  }
+
+  /* Make QR + Graph stack full width */
+  .grid-layout {
+    grid-template-columns: 1fr !important;
+    gap: 1rem;
+  }
+
+  /* Dashboard summary cards full width */
+  .dashboard-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Shrink QR image for small screens */
+  .qr-image {
+    width: 100px;
+    height: 100px;
+  }
+
+  .upi-logos img {
+    height: 24px;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  /* Smaller text for very small screens */
+  .admin-expiry-table th,
+  .admin-expiry-table td,
+  ::ng-deep table.table th,
+  ::ng-deep table.table td {
+    font-size: 0.8rem;
+    min-width: 100px;
+    padding: 6px 4px;
+  }
+
+  /* Card body text */
+  ::ng-deep p-card .p-card-body {
+    font-size: 0.85rem;
+  }
+
+  /* QR code even smaller */
+  .qr-image {
+    width: 80px;
+    height: 80px;
+  }
+
+  .upi-logos {
+    gap: 0.5rem;
+  }
+
+  .upi-logos img {
+    height: 20px;
+  }
+}
