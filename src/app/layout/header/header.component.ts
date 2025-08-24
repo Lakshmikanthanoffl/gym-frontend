@@ -84,6 +84,14 @@ export class HeaderComponent implements OnInit {
     this.authService.username$.subscribe(username => {
       this.username = username;
     });
+
+     // Listen for subscription updates
+  this.authService.validUntil$.subscribe(validUntil => {
+    if (validUntil) {
+      localStorage.setItem('validUntil', validUntil);
+      this.checkSubscriptionExpiry();
+    }
+  });
     this.checkSubscriptionExpiry();
   }
   
@@ -244,17 +252,19 @@ export class HeaderComponent implements OnInit {
   }
   
   
-  
-  // QR generation helper
-  async generateUpiQr(amount: number) {
-    const upiString = `upi://pay?pa=${this.upiId}&pn=techzy&am=${amount}&cu=INR`;
-    try {
-      return await QRCode.toDataURL(upiString, { width: 300 });
-    } catch (err) {
-      console.error(err);
-      return '';
-    }
-  }  
+ // QR generation helper
+async generateUpiQr(amount: number) {
+  const note = "Payment for Techzy"; // ✅ your note/message
+  const upiString = `upi://pay?pa=${this.upiId}&pn=techzy&am=${amount}&cu=INR&tn=${encodeURIComponent(note)}`;
+
+  try {
+    return await QRCode.toDataURL(upiString, { width: 300 });
+  } catch (err) {
+    console.error(err);
+    return '';
+  }
+}
+
   
   logout() {
     Swal.fire({
