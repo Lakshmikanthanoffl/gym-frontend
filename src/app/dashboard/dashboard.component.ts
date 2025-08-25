@@ -77,6 +77,10 @@ export class DashboardComponent implements OnInit {
       this.updateCountdowns();
     });
   }
+  get expiredAdminsCount(): number {
+    return this.rolesList?.filter(r => r.status?.toLowerCase() === 'expired').length || 0;
+  }
+  
   updateCountdowns() {
     const now = new Date();
   
@@ -114,10 +118,12 @@ export class DashboardComponent implements OnInit {
   }
 
   fetchMembersFromAPI() {
+    const now = new Date();
     if (this.userrole === 'superadmin') {
       this.memberService.getRoles().subscribe({
         next: (rolesData: any[]) => {
           this.rolesList = rolesData.map(r => ({
+            PaidDate:r.PaidDate,
             roleId: r.RoleId,
             roleName: r.RoleName,
             userName: r.UserName,
@@ -125,7 +131,11 @@ export class DashboardComponent implements OnInit {
             gymName: r.GymName,
             validUntil: r.ValidUntil ? new Date(r.ValidUntil) : null
           }));
-
+          this.newMembersThisMonth = this.rolesList.filter(m => {
+            const joined = new Date(m.PaidDate);
+            return joined.getMonth() === now.getMonth() && joined.getFullYear() === now.getFullYear();
+          }).length;
+      
           this.memberService.getAllMembers().subscribe({
             next: (data: any[]) => this.processMembersSuperAdmin(data),
             error: (err) => console.error('Failed to fetch members:', err),
@@ -182,11 +192,7 @@ export class DashboardComponent implements OnInit {
     this.totalMembers = this.members.length;
     this.activeMembers = this.members.filter(m => new Date(m.ValidUntil) >= now).length;
     this.expiredMembers = this.members.filter(m => new Date(m.ValidUntil) < now).length;
-    this.newMembersThisMonth = this.members.filter(m => {
-      const joined = new Date(m.PaidDate);
-      return joined.getMonth() === now.getMonth() && joined.getFullYear() === now.getFullYear();
-    }).length;
-
+    
     const labels = this.rolesList.map(r => r.userName);
     const counts = this.rolesList.map(r => this.members.filter(m => m.GymId === r.gymId).length);
 

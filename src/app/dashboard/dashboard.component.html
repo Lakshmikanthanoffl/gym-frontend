@@ -3,6 +3,10 @@
   <p-card header="Total Members"><p>{{ totalMembers }}</p></p-card>
   <p-card header="Active Members"><p>{{ activeMembers }}</p></p-card>
   <p-card header="Expired Members"><p>{{ expiredMembers }}</p></p-card>
+  <p-card *ngIf="userrole === 'superadmin'" header="Expired Admins">
+    <p>{{ expiredAdminsCount }}</p>
+  </p-card>
+  
   <p-card header="New This Month"><p>{{ newMembersThisMonth }}</p></p-card>
 </div>
 

@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service'; // Adjust path if needed
 import Swal from 'sweetalert2';
+import confetti from 'canvas-confetti';
 
 @Component({
   selector: 'app-login',
@@ -36,24 +37,190 @@ export class LoginComponent implements OnInit {
 
         if (role.RoleName === 'superadmin') {
           this.router.navigate(['/dashboard']);
+        
+          // Front confetti container
+          const confettiContainer = document.createElement('div');
+          confettiContainer.style.position = 'fixed';
+          confettiContainer.style.top = '0';
+          confettiContainer.style.left = '0';
+          confettiContainer.style.width = '100%';
+          confettiContainer.style.height = '100%';
+          confettiContainer.style.pointerEvents = 'none';
+          confettiContainer.style.zIndex = '9999';
+          document.body.appendChild(confettiContainer);
+        
+          // Background glow container
+          const glowContainer = document.createElement('div');
+          glowContainer.style.position = 'fixed';
+          glowContainer.style.top = '0';
+          glowContainer.style.left = '0';
+          glowContainer.style.width = '100%';
+          glowContainer.style.height = '100%';
+          glowContainer.style.pointerEvents = 'none';
+          glowContainer.style.zIndex = '9998';
+          document.body.appendChild(glowContainer);
+        
+          // Background glow circles
+          for (let i = 0; i < 10; i++) {
+            const circle = document.createElement('div');
+            circle.style.position = 'absolute';
+            circle.style.width = `${20 + Math.random() * 40}px`;
+            circle.style.height = `${20 + Math.random() * 40}px`;
+            circle.style.borderRadius = '50%';
+            circle.style.background = 'radial-gradient(circle, #ffd70055, transparent)';
+            circle.style.top = `${Math.random() * 100}%`;
+            circle.style.left = `${Math.random() * 100}%`;
+            circle.style.filter = 'blur(15px)';
+            circle.style.opacity = '0.3';
+            circle.style.animation = `floatGlow ${3 + Math.random() * 2}s ease-in-out infinite alternate`;
+            glowContainer.appendChild(circle);
+          }
+        
           Swal.fire({
-            icon: 'success',
-            title: `<span style="color:#ffd700; font-size:28px; font-weight:700; text-shadow:0 0 10px #ffcc00;">👑 Welcome Back, Super Admin ${role.UserName}!</span>`,
-            html: `<p style="font-size:18px; color:#eaeaea; margin-top:10px;">
-                     You have full access to the system.
-                   </p>`,
+            html: `
+              <div style="text-align:center; position:relative;">
+                <!-- Rotating sparkling crown -->
+                <div id="crown" style="
+                  font-size:40px; 
+                  margin-bottom:8px; 
+                  animation: rotateCrown 1.5s linear infinite;
+                  position: relative;
+                ">
+                  👑
+                </div>
+        
+                <!-- Glowing gradient title -->
+                <h2 style="
+                  font-size:28px;
+                  font-weight:900;
+                  background: linear-gradient(90deg, #ffd700, #ffae00, #ff4500);
+                  -webkit-background-clip: text;
+                  -webkit-text-fill-color: transparent;
+                  text-shadow: 0 0 15px #ffd700, 0 0 30px #ffae00;
+                  animation: glow 1s ease-in-out infinite alternate;
+                ">
+                  Welcome Back, Super Admin ${role.UserName}!
+                </h2>
+        
+                <p style="font-size:16px; color:#eaeaea; margin-top:6px;">
+                  You have <strong>full access</strong> to the system.<br/>
+                  Enjoy your <span style="color:#ffd700;">premium privileges</span>!
+                </p>
+              </div>
+        
+              <style>
+                @keyframes glow {
+                  0% { text-shadow: 0 0 8px #ffd700, 0 0 16px #ffae00; }
+                  50% { text-shadow: 0 0 16px #ffd700, 0 0 32px #ffae00; }
+                  100% { text-shadow: 0 0 24px #ffd700, 0 0 48px #ffae00; }
+                }
+        
+                @keyframes rotateCrown {
+                  0% { transform: rotate(0deg); }
+                  50% { transform: rotate(12deg); }
+                  100% { transform: rotate(-12deg); }
+                }
+        
+                @keyframes floatGlow {
+                  0% { transform: translateY(0px) translateX(0px); opacity:0.3; }
+                  50% { transform: translateY(-15px) translateX(8px); opacity:0.5; }
+                  100% { transform: translateY(0px) translateX(-8px); opacity:0.3; }
+                }
+              </style>
+            `,
             background: '#0d0d0d',
-            color: '#ffffff',
-            width: 600,   // ✅ Bigger popup
+            width: 600,
             showConfirmButton: false,
-            timer: 2800,
+            timer: 2800, // faster
             timerProgressBar: true,
-            backdrop: `
-              rgba(0,0,0,0.8)
-              url("https://media.giphy.com/media/3o7aD2saalBwwftBIY/giphy.gif")
-              center top
-              no-repeat
-            `, // ✅ Animated glowing backdrop
+            didOpen: () => {
+              const crown = document.getElementById('crown');
+        
+              // Crown sparkles with gold dust trail
+              const sparkleInterval = setInterval(() => {
+                if (!crown) return;
+        
+                // Main sparkle
+                const sparkle = document.createElement('div');
+                sparkle.style.position = 'absolute';
+                sparkle.style.width = '5px';
+                sparkle.style.height = '5px';
+                sparkle.style.backgroundColor = '#ffd700';
+                sparkle.style.borderRadius = '50%';
+                sparkle.style.top = `${Math.random() * 50}%`;
+                sparkle.style.left = `${Math.random() * 50}%`;
+                sparkle.style.boxShadow = '0 0 8px #ffd700, 0 0 12px #ffae00';
+                sparkle.style.opacity = '1';
+                sparkle.style.pointerEvents = 'none';
+                sparkle.style.animation = 'fadeOutTrail 0.8s forwards';
+                crown.appendChild(sparkle);
+        
+                // Gold dust trail
+                for (let i = 0; i < 3; i++) {
+                  const trail = document.createElement('div');
+                  trail.style.position = 'absolute';
+                  trail.style.width = `${2 + Math.random() * 2}px`;
+                  trail.style.height = `${2 + Math.random() * 2}px`;
+                  trail.style.backgroundColor = '#ffd700';
+                  trail.style.borderRadius = '50%';
+                  trail.style.top = `${Math.random() * 50}%`;
+                  trail.style.left = `${Math.random() * 50}%`;
+                  trail.style.opacity = '0.8';
+                  trail.style.filter = 'blur(1px)';
+                  trail.style.pointerEvents = 'none';
+                  trail.style.animation = `fadeOutTrail ${0.8 + Math.random() * 0.4}s forwards`;
+                  crown.appendChild(trail);
+                  setTimeout(() => crown.removeChild(trail), 1200);
+                }
+        
+                setTimeout(() => crown.removeChild(sparkle), 800);
+              }, 120);
+        
+              const style = document.createElement('style');
+              style.innerHTML = `
+                @keyframes fadeOutTrail {
+                  0% { opacity: 1; transform: scale(1); }
+                  100% { opacity: 0; transform: scale(0.3) translateY(-4px); }
+                }
+              `;
+              document.head.appendChild(style);
+        
+              // Confetti
+              const duration = 2800;
+              const animationEnd = Date.now() + duration;
+        
+              const interval = setInterval(() => {
+                const timeLeft = animationEnd - Date.now();
+                if (timeLeft <= 0) {
+                  clearInterval(interval);
+                  clearInterval(sparkleInterval);
+                  document.body.removeChild(confettiContainer);
+                  document.body.removeChild(glowContainer);
+                  return;
+                }
+        
+                confetti({
+                  particleCount: 4 + Math.random() * 4,
+                  spread: 360,
+                  origin: { x: Math.random(), y: Math.random() * 0.5 },
+                  colors: ['#ffd700', '#ffae00', '#ff4500', '#fff8dc'],
+                  gravity: 0.1,
+                  scalar: 0.5 + Math.random() * 0.4,
+                  zIndex: 9999,
+                });
+        
+                if (Math.random() > 0.7) {
+                  confetti({
+                    particleCount: 6 + Math.random() * 4,
+                    origin: { x: Math.random(), y: 0 },
+                    colors: ['#ffd700', '#ffae00', '#ff4500'],
+                    gravity: 0.2,
+                    scalar: 0.8 + Math.random() * 0.4,
+                    zIndex: 9999,
+                  });
+                }
+              }, 150);
+            }
           });
         } else {
           this.router.navigate(['/dashboard']);
