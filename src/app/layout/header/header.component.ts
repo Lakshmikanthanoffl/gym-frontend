@@ -93,6 +93,8 @@ export class HeaderComponent implements OnInit {
     }
   });
     this.checkSubscriptionExpiry();
+
+    this.scheduleSubscriptionPopup();
   }
   
   togglePopup() {
@@ -104,6 +106,65 @@ export class HeaderComponent implements OnInit {
       }, 0);
     }
   }
+  scheduleSubscriptionPopup() {
+    const validUntilStr = localStorage.getItem('validUntil');
+    if (!validUntilStr) return;
+  
+    const expiryDate = new Date(validUntilStr);
+    const now = new Date();
+  
+    const diffMs = expiryDate.getTime() - now.getTime();
+    if (diffMs <= 0) return; // already expired
+  
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  
+    // ✅ Show only once per day (store today's date in localStorage)
+    const todayKey = `subscriptionShown_${now.toDateString()}`;
+    if (!localStorage.getItem(todayKey) && diffDays <= 7) {
+      this.showSubscriptionPopup();
+      localStorage.setItem(todayKey, "true");
+    }
+  
+    // Daily reminders scheduling (future days)
+    for (let i = diffDays; i >= 1; i--) {
+      const reminderDate = new Date(expiryDate);
+      reminderDate.setDate(expiryDate.getDate() - i);
+      const delay = reminderDate.getTime() - now.getTime();
+  
+      if (delay > 0) {
+        setTimeout(() => {
+          const reminderKey = `subscriptionShown_${new Date().toDateString()}`;
+          if (!localStorage.getItem(reminderKey)) {
+            this.showSubscriptionPopup();
+            localStorage.setItem(reminderKey, "true");
+          }
+        }, delay);
+      }
+    }
+  
+    // Precise triggers on last day (10 min, 5 min, 10 sec)
+      // Precise triggers on last day (10 min, 5 min, 1 min, 10 sec)
+  if (diffDays <= 1) {
+    const triggers = [
+      10 * 60 * 1000, // 10 minutes
+      5 * 60 * 1000,  // 5 minutes
+      1 * 60 * 1000,  // 1 minute ✅
+      10 * 1000       // 10 seconds
+    ];
+
+    triggers.forEach(msBefore => {
+      const triggerTime = expiryDate.getTime() - msBefore;
+      const delay = triggerTime - now.getTime();
+
+      if (delay > 0) {
+        setTimeout(() => this.showSubscriptionPopup(), delay);
+      }
+    });
+  }
+
+  }
+  
+  
   checkSubscriptionExpiry() {
     const validUntilStr = localStorage.getItem('validUntil');
     if (validUntilStr) {
@@ -117,19 +178,23 @@ export class HeaderComponent implements OnInit {
   }
   async showSubscriptionPopup() {
     const validUntilStr = localStorage.getItem('validUntil');
-    const expiryDate = validUntilStr ? new Date(validUntilStr) : null;
+    if (!validUntilStr) return;
   
-    // Format date and time as "DD/MM/YYYY, hh:mm AM/PM"
-    const formattedDateTime = expiryDate
-      ? expiryDate.toLocaleString('en-GB', { 
-          day: '2-digit', 
-          month: '2-digit', 
-          year: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit',
-          hour12: true
-        })
-      : 'N/A';
+    const expiryDate = new Date(validUntilStr);
+    const now = new Date();
+    const diffMs = expiryDate.getTime() - now.getTime();
+    if (diffMs <= 0) return; // already expired
+  
+    const formattedDateTime = expiryDate.toLocaleString('en-GB', { 
+      day: '2-digit', 
+      month: '2-digit', 
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    });
+  
+    let countdownInterval: any;
   
     const { isConfirmed } = await Swal.fire({
       title: '<strong style="color:#ffcc00;">⚠ Subscription Expiry</strong>',
@@ -137,6 +202,7 @@ export class HeaderComponent implements OnInit {
         <div style="font-size:16px; color:#f0f0f0; font-family:'Segoe UI', Tahoma, sans-serif; text-align:left;">
           <p>Your subscription is going to expire soon.</p>
           <p><strong>Expiry Date & Time:</strong> ${formattedDateTime}</p>
+          <p><strong>Time Remaining:</strong> <span id="countdown-timer">calculating...</span></p>
         </div>
       `,
       background: '#1f1f1f',
@@ -150,6 +216,31 @@ export class HeaderComponent implements OnInit {
         popup: 'dark-popup',
         title: 'dark-title',
         confirmButton: 'dark-confirm'
+      },
+      didOpen: () => {
+        const countdownEl = document.getElementById('countdown-timer');
+  
+        countdownInterval = setInterval(() => {
+          const now = new Date().getTime();
+          const distance = expiryDate.getTime() - now;
+  
+          if (distance <= 0) {
+            countdownEl!.innerText = "Expired";
+            clearInterval(countdownInterval);
+            return;
+          }
+  
+          const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+          const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+          const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+          const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+  
+          countdownEl!.innerText = 
+            `${days > 0 ? days + 'd ' : ''}${hours}h ${minutes}m ${seconds}s`;
+        }, 1000);
+      },
+      willClose: () => {
+        if (countdownInterval) clearInterval(countdownInterval);
       }
     });
   
