@@ -19,6 +19,9 @@
   </div>
 
   <!-- Add Member Button (right) -->
+ <!-- Buttons -->
+ <div class="d-flex gap-2">
+  <!-- Add Member -->
   <button
     pButton
     label="Add Member"
@@ -27,6 +30,22 @@
     style="border-radius: 30px; font-weight: 500;"
     (click)="showAddDialog()"
   ></button>
+
+  <!-- Export Button with Dropdown -->
+  <button
+    pButton
+    label="Export"
+    icon="pi pi-download"
+    class="p-button-rounded p-button-info px-4 py-2 shadow-sm"
+    style="border-radius: 30px; font-weight: 500;"
+    (click)="menu.toggle($event)"
+  ></button>
+
+  <!-- Dark Themed Export Menu -->
+  <p-menu #menu [popup]="true" [model]="exportItems" styleClass="dark-menu"></p-menu>
+</div>
+
+
 </div>
       
     

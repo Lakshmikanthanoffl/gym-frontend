@@ -10,6 +10,7 @@ export interface Member {
     validUntil: Date;
     gymId?: number;      // ✅ add gymId
     gymName?: string;    // ✅ add gymName
+    [field: string]: any; // ✅ allows dynamic indexing
   }
   
   

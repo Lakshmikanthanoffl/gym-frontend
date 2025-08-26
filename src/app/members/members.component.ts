@@ -3,6 +3,15 @@ import Swal from 'sweetalert2';
 
 import { MemberService } from '../services/member.service';
 import { Member } from '../models/member.model';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+// For normal read/write operations
+import * as XLSX from 'xlsx';
+
+// For styling support
+import * as XLSXStyle from 'xlsx-js-style';
+
+
 interface SubscriptionOption {
   label: string;
   value: string;
@@ -22,8 +31,28 @@ export class MembersComponent implements OnInit{
   availableGyms: { id: number; name: string }[] = [];
   gymId!: number;
   gymname!: string | null;
-  constructor(private memberService: MemberService) {}
+  constructor(private memberService: MemberService) {
+    
+
+  }
   otpSent: boolean = false;
+  exportItems = [
+    {
+      label: 'Export as Excel',
+      icon: 'assets/icons/excel.png', // custom PNG icon
+      command: () => {
+        this.exportExcel();
+      }
+    },
+    {
+      label: 'Export as PDF',
+      icon: 'assets/icons/pdf.png', // custom PNG icon
+      command: () => {
+        this.exportPdf();
+      }
+    }
+  ];
+  
   defaultGymId!: number;      // ✅ add this
   defaultGymName!: string;    // ✅ add this
 enteredOtp: string = '';
@@ -95,6 +124,149 @@ searchTerm: string = '';
     this.getgymname();
     
   }
+  exportExcel() {
+    // Define columns
+    const columns = [
+      { header: 'ID', field: 'id' },
+      { header: 'Name', field: 'name' },
+      { header: 'Email', field: 'email' },
+      { header: 'Mobile No', field: 'phone' },
+      ...(this.userrole === 'superadmin'
+        ? [
+            { header: 'Gym ID', field: 'gymId' },
+            { header: 'Gym Name', field: 'gymName' }
+          ]
+        : []),
+      { header: 'Subscription Type', field: 'subscriptionType' },
+      { header: 'Period', field: 'period' },
+      { header: 'Amount Paid', field: 'amountPaid' },
+      { header: 'Paid Date', field: 'paidDate' },
+      { header: 'Valid Until', field: 'validUntil' },
+      { header: 'Status', field: 'status' }
+    ];
+  
+    // Format data
+    const data = this.filteredMembers.map(m => {
+      const row: any = {};
+      columns.forEach(col => {
+        let value = m[col.field];
+  
+        if (col.field === 'amountPaid') {
+          value = `₹${m.amountPaid}`;
+        }
+        if (col.field === 'paidDate' || col.field === 'validUntil') {
+          value = m[col.field] ? new Date(m[col.field]).toLocaleDateString() : '';
+        }
+        if (col.field === 'status') {
+          value = this.getStatus(m.validUntil);
+        }
+        if (col.field === 'subscriptionType') {
+          value = m.subscriptionType?.label || '';
+        }
+  
+        row[col.header] = value;
+      });
+      return row;
+    });
+  
+    // Create worksheet
+    const ws: XLSXStyle.WorkSheet = XLSXStyle.utils.json_to_sheet(data, {
+      header: columns.map(c => c.header),
+      skipHeader: false
+    });
+  
+    // Set equal column widths
+    const colWidth = 20;
+    ws['!cols'] = columns.map(() => ({ wch: colWidth }));
+  
+    // Apply header styles with wrap
+    columns.forEach((col, index) => {
+      const cellRef = XLSX.utils.encode_cell({ r: 0, c: index });
+      if (ws[cellRef]) {
+        ws[cellRef].s = {
+          fill: { fgColor: { rgb: "282828" } }, // dark header
+          font: { color: { rgb: "FFFFFF" }, bold: true, sz: 12 },
+          alignment: { horizontal: "center", vertical: "center", wrapText: true }
+        };
+      }
+    });
+  
+    // Apply row styles with wrap
+    data.forEach((row, rowIndex) => {
+      columns.forEach((col, colIndex) => {
+        const cellRef = XLSX.utils.encode_cell({ r: rowIndex + 1, c: colIndex });
+        if (ws[cellRef]) {
+          ws[cellRef].s = {
+            alignment: { horizontal: "center", vertical: "center", wrapText: true },
+            font: { color: { rgb: "000000" }, sz: 10 }
+          };
+        }
+      });
+    });
+  
+    // Create workbook
+    const wb: XLSXStyle.WorkBook = XLSXStyle.utils.book_new();
+    XLSXStyle.utils.book_append_sheet(wb, ws, "Members");
+  
+    // Save file
+    XLSXStyle.writeFile(wb, "members.xlsx");
+  }
+  
+  
+  
+  exportPdf() {
+    const doc = new jsPDF();
+
+    // Table headers
+    const headers = [[
+      'ID',
+      'Name',
+      'Email',
+      'Phone',
+      'Period',
+      'Amount Paid',
+      'Paid Date',
+      'Valid Until',
+      'Subscription Type'
+    ]];
+
+    // Table rows
+    const data = this.filteredMembers.map(m => [
+      m.id, // 👈 Make sure your member object has an "id"
+      m.name,
+      m.email,
+      m.phone,
+      m.period,
+      m.amountPaid,
+      new Date(m.paidDate).toLocaleDateString(),
+      new Date(m.validUntil).toLocaleDateString(),
+      m.subscriptionType?.label || '' // 👈 only label shown
+    ]);
+
+    autoTable(doc, {
+      head: headers,
+      body: data,
+      theme: 'grid',
+      startY: 20,
+      tableWidth: 'auto',        // 👈 auto scale columns to fit
+      styles: {
+        fontSize: 8,
+        overflow: 'linebreak',
+        valign: 'middle'
+      },
+      headStyles: {
+        fillColor: [40, 40, 40],
+        textColor: [255, 255, 255],
+        fontSize: 9
+      }
+    });
+    
+
+    doc.save('Members.pdf');
+  }
+  
+  
+  
   
   viewMember(member: any) {
     this.selectedMember = member;

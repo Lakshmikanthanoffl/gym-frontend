@@ -112,57 +112,120 @@ export class HeaderComponent implements OnInit {
   
     const expiryDate = new Date(validUntilStr);
     const now = new Date();
-  
     const diffMs = expiryDate.getTime() - now.getTime();
     if (diffMs <= 0) return; // already expired
   
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
   
-    // ✅ Show only once per day (store today's date in localStorage)
+    // ✅ Daily reminders (once per day if within 7 days)
     const todayKey = `subscriptionShown_${now.toDateString()}`;
     if (!localStorage.getItem(todayKey) && diffDays <= 7) {
       this.showSubscriptionPopup();
       localStorage.setItem(todayKey, "true");
     }
   
-    // Daily reminders scheduling (future days)
-    for (let i = diffDays; i >= 1; i--) {
-      const reminderDate = new Date(expiryDate);
-      reminderDate.setDate(expiryDate.getDate() - i);
-      const delay = reminderDate.getTime() - now.getTime();
+    // ✅ Timed triggers (10 min, 5 min, 1 min, 10 sec)
+    if (diffDays <= 1) {
+      const triggers = [
+        { ms: 10 * 60 * 1000, type: "toast10" }, // 10 min
+        { ms: 5 * 60 * 1000, type: "toast5" },   // 5 min
+        { ms: 1 * 60 * 1000, type: "popup1" },   // 1 min
+        { ms: 10 * 1000, type: "popup10" }       // 10 sec
+      ];
   
-      if (delay > 0) {
-        setTimeout(() => {
-          const reminderKey = `subscriptionShown_${new Date().toDateString()}`;
-          if (!localStorage.getItem(reminderKey)) {
-            this.showSubscriptionPopup();
-            localStorage.setItem(reminderKey, "true");
-          }
-        }, delay);
-      }
+      triggers.forEach(trigger => {
+        const triggerTime = expiryDate.getTime() - trigger.ms;
+        const delay = triggerTime - now.getTime();
+  
+        if (delay > 0) {
+          setTimeout(() => {
+            if (trigger.type === "toast10") {
+              this.showToast("⏳ Subscription expiring in 10 minutes!", "info");
+            } 
+            else if (trigger.type === "toast5") {
+              this.showToast("⚠️ Last 5 minutes! Please save your work.", "warning");
+            } 
+            else if (trigger.type === "popup1") {
+              this.showSubscriptionPopup(); // normal popup with OK
+            } 
+            else if (trigger.type === "popup10") {
+              this.showForcePopup(); // last 10 sec unclosable
+            }
+          }, delay);
+        }
+      });
     }
+  }
   
-    // Precise triggers on last day (10 min, 5 min, 10 sec)
-      // Precise triggers on last day (10 min, 5 min, 1 min, 10 sec)
-  if (diffDays <= 1) {
-    const triggers = [
-      10 * 60 * 1000, // 10 minutes
-      5 * 60 * 1000,  // 5 minutes
-      1 * 60 * 1000,  // 1 minute ✅
-      10 * 1000       // 10 seconds
-    ];
-
-    triggers.forEach(msBefore => {
-      const triggerTime = expiryDate.getTime() - msBefore;
-      const delay = triggerTime - now.getTime();
-
-      if (delay > 0) {
-        setTimeout(() => this.showSubscriptionPopup(), delay);
+  showToast(message: string, icon: "info" | "warning") {
+    Swal.fire({
+      toast: true,
+      position: 'top-end',   // 👉 right-top corner
+      icon: icon,
+      title: message,
+      showConfirmButton: false,
+      timer: 5000,
+      background: "#1f1f1f",
+      color: "#f0f0f0"
+    });
+  }
+  
+  
+  showForcePopup() {
+    const validUntilStr = localStorage.getItem('validUntil');
+    if (!validUntilStr) return;
+  
+    const expiryDate = new Date(validUntilStr);
+    let countdownInterval: any;
+  
+    Swal.fire({
+      title: '<strong style="color:#ff0000;">⏳ Subscription Expiring!</strong>',
+      html: `
+        <h2 style="color:#fff;font-size:32px;" id="final-countdown">10s</h2>
+        <p id="renew-text" 
+           style="color:#0d6efd; font-size:18px; margin-top:10px;
+                  opacity:0; transform:translateY(10px);
+                  transition: all 1s ease;">
+           Renew the Subscription
+        </p>
+      `,
+      background: '#1f1f1f',
+      color: '#fff',
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      showConfirmButton: false, // no default confirm
+      didOpen: () => {
+        const el = document.getElementById("final-countdown");
+        const renewText = document.getElementById("renew-text");
+  
+        // Gentle fade-in for text
+        if (renewText) {
+          setTimeout(() => {
+            renewText.style.opacity = "1";
+            renewText.style.transform = "translateY(0)";
+          }, 500);
+        }
+  
+        countdownInterval = setInterval(() => {
+          const now = new Date().getTime();
+          let timeLeft = Math.ceil((expiryDate.getTime() - now) / 1000);
+  
+          if (timeLeft < 0) timeLeft = 0;
+          if (el) el.innerText = timeLeft + "s";
+  
+          if (timeLeft <= 0) {
+            clearInterval(countdownInterval);
+            Swal.close(); // just close popup
+          }
+        }, 1000);
+      },
+      willClose: () => {
+        if (countdownInterval) clearInterval(countdownInterval);
       }
     });
   }
+  
 
-  }
   
   
   checkSubscriptionExpiry() {
@@ -202,7 +265,12 @@ export class HeaderComponent implements OnInit {
         <div style="font-size:16px; color:#f0f0f0; font-family:'Segoe UI', Tahoma, sans-serif; text-align:left;">
           <p>Your subscription is going to expire soon.</p>
           <p><strong>Expiry Date & Time:</strong> ${formattedDateTime}</p>
-          <p><strong>Time Remaining:</strong> <span id="countdown-timer">calculating...</span></p>
+          <p><strong>⏳ Time Remaining:</strong> 
+            <span id="countdown-timer" 
+                  style="font-size:22px; font-weight:bold; color:#00ff99;">
+              calculating...
+            </span>
+          </p>
         </div>
       `,
       background: '#1f1f1f',
@@ -225,7 +293,7 @@ export class HeaderComponent implements OnInit {
           const distance = expiryDate.getTime() - now;
   
           if (distance <= 0) {
-            countdownEl!.innerText = "Expired";
+            countdownEl!.innerHTML = "<span style='color:#ff4444'>Expired</span>";
             clearInterval(countdownInterval);
             return;
           }
@@ -235,8 +303,13 @@ export class HeaderComponent implements OnInit {
           const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
           const seconds = Math.floor((distance % (1000 * 60)) / 1000);
   
-          countdownEl!.innerText = 
-            `${days > 0 ? days + 'd ' : ''}${hours}h ${minutes}m ${seconds}s`;
+          // Highlight urgency colors
+          let color = "#00ff99"; // green
+          if (distance <= 5 * 60 * 1000) color = "#ff4444"; // red if < 5 min
+          else if (distance <= 60 * 60 * 1000) color = "#ffcc00"; // yellow if < 1 hr
+  
+          countdownEl!.innerHTML = 
+            `<span style="color:${color}">${days > 0 ? days + 'd ' : ''}${hours}h ${minutes}m ${seconds}s</span>`;
         }, 1000);
       },
       willClose: () => {
@@ -248,6 +321,7 @@ export class HeaderComponent implements OnInit {
       this.showPaymentPopup();
     }
   }
+  
   
   async showPaymentPopup() {
     let selectedPlan = this.subscriptionPlans[0]; // default Monthly
@@ -268,11 +342,11 @@ export class HeaderComponent implements OnInit {
           <select id="planSelect" style="margin-top:5px; padding:5px; width:100%; border-radius:6px;">
             ${this.subscriptionPlans.map(p => `<option value="${p.amount}" data-name="${p.name}">${p.name} - ₹${p.amount}</option>`).join('')}
           </select>
-  
+    
           <div style="margin-top:15px; text-align:center;">
             <img id="upiQrImg" src="${qrDataUrl}" style="width:180px; height:180px;" />
           </div>
-  
+    
           <div id="emailNote" style="margin-top:10px; text-align:center; cursor:pointer;" title="Click here to send payment email">
             <p style="color:#f0f0f0; text-decoration:underline; font-weight:500; margin:0;">
               lakshmikanthan.b.2001@gmail.com
@@ -298,48 +372,53 @@ export class HeaderComponent implements OnInit {
         const qrImgEl: HTMLImageElement = document.getElementById('upiQrImg') as HTMLImageElement;
         const countdownEl: HTMLElement = document.getElementById('countdown') as HTMLElement;
         const emailNote: HTMLElement = document.getElementById('emailNote') as HTMLElement;
-  
-        // Gmail link generator
+    
+        // Mailto link generator (works on mobile + desktop)
         const getEmailLink = (planName: string, amount: number) =>
-          `https://mail.google.com/mail/?view=cm&fs=1&to=lakshmikanthan.b.2001@gmail.com&su=${encodeURIComponent('Subscription Renew - ' + gymName)}&body=${encodeURIComponent(`Gym: ${gymName}\nPlan: ${planName}\nAmount: ₹${amount}\nPlease pay using GPay, PhonePe, or Paytm and attach the paid screenshot.`)}`;
-  
-        // Open Gmail when user clicks anywhere in the emailNote div
+          `mailto:lakshmikanthan.b.2001@gmail.com?subject=${encodeURIComponent('Subscription Renew - ' + gymName)}&body=${encodeURIComponent(
+            `Gym: ${gymName}
+    Plan: ${planName}
+    Amount: ₹${amount}
+    Please pay using GPay, PhonePe, or Paytm and attach the paid screenshot.`
+          )}`;
+    
+        // Open mail app when user clicks email note
         emailNote.addEventListener('click', () => {
           const amount = Number(selectEl.value);
           const planName = selectEl.selectedOptions[0].getAttribute('data-name') || 'Plan';
           const link = getEmailLink(planName, amount);
-          window.open(link, '_blank');
+          window.location.href = link; // ✅ Triggers mail app on mobile/desktop
         });
-  
+    
         // Update QR dynamically when plan changes
         selectEl.addEventListener('change', async (event: any) => {
           const amount = Number(event.target.value);
-          const planName = selectEl.selectedOptions[0].getAttribute('data-name') || 'Plan';
           qrImgEl.src = await this.generateUpiQr(amount);
         });
-  
+    
         // Start live countdown
         if (expiryDate) {
           const interval = setInterval(() => {
             const now = new Date().getTime();
             const distance = expiryDate.getTime() - now;
-  
+    
             if (distance <= 0) {
               countdownEl.innerHTML = '<strong>Subscription expired!</strong>';
               clearInterval(interval);
               return;
             }
-  
+    
             const days = Math.floor(distance / (1000 * 60 * 60 * 24));
             const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
             const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
             const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-  
+    
             countdownEl.innerHTML = `<strong>Time left:</strong> ${days}d ${hours}h ${minutes}m ${seconds}s`;
           }, 1000);
         }
       }
     });
+    
   }
   
   
