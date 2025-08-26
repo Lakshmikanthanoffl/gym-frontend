@@ -110,7 +110,9 @@ export class DashboardComponent implements OnInit {
       }
     });
   }
-  
+  goToAdminOnboard() {
+    this.router.navigate(['/admin-onboard']);
+  }
   ngOnDestroy() {
     if (this.statusCheckSub) {
       this.statusCheckSub.unsubscribe();
