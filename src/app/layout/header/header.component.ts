@@ -342,11 +342,11 @@ export class HeaderComponent implements OnInit {
           <select id="planSelect" style="margin-top:5px; padding:5px; width:100%; border-radius:6px;">
             ${this.subscriptionPlans.map(p => `<option value="${p.amount}" data-name="${p.name}">${p.name} - ₹${p.amount}</option>`).join('')}
           </select>
-    
+  
           <div style="margin-top:15px; text-align:center;">
             <img id="upiQrImg" src="${qrDataUrl}" style="width:180px; height:180px;" />
           </div>
-    
+  
           <div id="emailNote" style="margin-top:10px; text-align:center; cursor:pointer;" title="Click here to send payment email">
             <p style="color:#f0f0f0; text-decoration:underline; font-weight:500; margin:0;">
               lakshmikanthan.b.2001@gmail.com
@@ -372,53 +372,48 @@ export class HeaderComponent implements OnInit {
         const qrImgEl: HTMLImageElement = document.getElementById('upiQrImg') as HTMLImageElement;
         const countdownEl: HTMLElement = document.getElementById('countdown') as HTMLElement;
         const emailNote: HTMLElement = document.getElementById('emailNote') as HTMLElement;
-    
-        // Mailto link generator (works on mobile + desktop)
+  
+        // Gmail link generator
         const getEmailLink = (planName: string, amount: number) =>
-          `mailto:lakshmikanthan.b.2001@gmail.com?subject=${encodeURIComponent('Subscription Renew - ' + gymName)}&body=${encodeURIComponent(
-            `Gym: ${gymName}
-    Plan: ${planName}
-    Amount: ₹${amount}
-    Please pay using GPay, PhonePe, or Paytm and attach the paid screenshot.`
-          )}`;
-    
-        // Open mail app when user clicks email note
+          `https://mail.google.com/mail/?view=cm&fs=1&to=lakshmikanthan.b.2001@gmail.com&su=${encodeURIComponent('Subscription Renew - ' + gymName)}&body=${encodeURIComponent(`Gym: ${gymName}\nPlan: ${planName}\nAmount: ₹${amount}\nPlease pay using GPay, PhonePe, or Paytm and attach the paid screenshot.`)}`;
+  
+        // Open Gmail when user clicks anywhere in the emailNote div
         emailNote.addEventListener('click', () => {
           const amount = Number(selectEl.value);
           const planName = selectEl.selectedOptions[0].getAttribute('data-name') || 'Plan';
           const link = getEmailLink(planName, amount);
-          window.location.href = link; // ✅ Triggers mail app on mobile/desktop
+          window.open(link, '_blank');
         });
-    
+  
         // Update QR dynamically when plan changes
         selectEl.addEventListener('change', async (event: any) => {
           const amount = Number(event.target.value);
+          const planName = selectEl.selectedOptions[0].getAttribute('data-name') || 'Plan';
           qrImgEl.src = await this.generateUpiQr(amount);
         });
-    
+  
         // Start live countdown
         if (expiryDate) {
           const interval = setInterval(() => {
             const now = new Date().getTime();
             const distance = expiryDate.getTime() - now;
-    
+  
             if (distance <= 0) {
               countdownEl.innerHTML = '<strong>Subscription expired!</strong>';
               clearInterval(interval);
               return;
             }
-    
+  
             const days = Math.floor(distance / (1000 * 60 * 60 * 24));
             const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
             const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
             const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-    
+  
             countdownEl.innerHTML = `<strong>Time left:</strong> ${days}d ${hours}h ${minutes}m ${seconds}s`;
           }, 1000);
         }
       }
     });
-    
   }
   
   
