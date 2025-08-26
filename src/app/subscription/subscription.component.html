@@ -1,0 +1,29 @@
+<div class="subscription-card">
+    <div class="header">
+      <h3>⚠ Subscription Status</h3>
+      <span class="status" [ngClass]="statusClass">
+        {{ subscriptionStatus }}
+      </span>
+    </div>
+  
+    <div class="subscription-info">
+      <p><strong>Expiry Date & Time:</strong> {{ formattedExpiry }}</p>
+      
+      <p>
+        <strong>⏳ Time Remaining:</strong> 
+        <span [ngStyle]="{ color: countdownColor }" [ngClass]="{ 'blink-red': isBlinking }">
+          {{ countdown }}
+        </span>
+      </p>
+  
+      <div class="progress-bar">
+        <div class="progress-fill" 
+        [ngStyle]="{'width': progressPercent + '%', 'background-color': countdownColor}">
+        </div>
+   
+      </div>
+  
+      <button class="renew-btn" (click)="renewSubscription()">Renew Now</button>
+    </div>
+  </div>
+  

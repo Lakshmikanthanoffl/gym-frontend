@@ -59,6 +59,7 @@ export class HeaderComponent implements OnInit {
   userrole: any;
   username: any;
   subscriptionExpiring: boolean = false;
+  validUntil: Date | null = null; // ✅ live expiry from service
   constructor(private router: Router, private activatedRoute: ActivatedRoute,private authService: AuthService) {
     this.router.events
       .pipe(
@@ -88,7 +89,7 @@ export class HeaderComponent implements OnInit {
      // Listen for subscription updates
   this.authService.validUntil$.subscribe(validUntil => {
     if (validUntil) {
-      localStorage.setItem('validUntil', validUntil);
+      this.validUntil = new Date(validUntil);
       this.checkSubscriptionExpiry();
     }
   });
@@ -107,7 +108,7 @@ export class HeaderComponent implements OnInit {
     }
   }
   scheduleSubscriptionPopup() {
-    const validUntilStr = localStorage.getItem('validUntil');
+    const validUntilStr = this.validUntil;
     if (!validUntilStr) return;
   
     const expiryDate = new Date(validUntilStr);
@@ -172,7 +173,7 @@ export class HeaderComponent implements OnInit {
   
   
   showForcePopup() {
-    const validUntilStr = localStorage.getItem('validUntil');
+    const validUntilStr = this.validUntil;
     if (!validUntilStr) return;
   
     const expiryDate = new Date(validUntilStr);
@@ -229,7 +230,7 @@ export class HeaderComponent implements OnInit {
   
   
   checkSubscriptionExpiry() {
-    const validUntilStr = localStorage.getItem('validUntil');
+    const validUntilStr = this.validUntil;
     if (validUntilStr) {
       const today = new Date();
       const expiryDate = new Date(validUntilStr);
@@ -240,7 +241,7 @@ export class HeaderComponent implements OnInit {
     }
   }
   async showSubscriptionPopup() {
-    const validUntilStr = localStorage.getItem('validUntil');
+    const validUntilStr = this.validUntil;
     if (!validUntilStr) return;
   
     const expiryDate = new Date(validUntilStr);

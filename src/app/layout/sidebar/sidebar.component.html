@@ -24,6 +24,21 @@
     <i class="pi pi-credit-card"></i>
     <span> Payments</span>
   </a>
+  <a *ngIf="userrole === 'admin' || userrole === 'superadmin'" 
+   routerLink="/subscription" 
+   routerLinkActive="active"
+   class="subscription-link">
+  <i class="pi pi-id-card"></i>
+  <span class="subscription-text">
+    Subscription
+    <!-- Yellow dot if 1–7 days left -->
+    <span *ngIf="showBellIcon && !bellIsRed" class="sub-dot sub-dot-yellow"></span>
+    <!-- Red dot if expires today -->
+    <span *ngIf="bellIsRed" class="sub-dot sub-dot-red"></span>
+  </span>
+</a>
+
+
 
   <!-- Superadmin only section -->
   <div *ngIf="userrole === 'superadmin'" class="mt-4">
