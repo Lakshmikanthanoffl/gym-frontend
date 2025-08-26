@@ -10,6 +10,7 @@ import { SignupComponent } from './auth/signup/signup.component';
 import { AuthGuard } from './guards/auth.guard';
 import { AdminOnboardComponent } from './admin-onboard/admin-onboard.component'; // Import later
 import { ContactUsComponent } from './contact-us/contact-us.component';  // 👈 Import here
+import { SubscriptionComponent } from './subscription/subscription.component';
 const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
 
@@ -41,6 +42,12 @@ const routes: Routes = [
     component: PaymentsComponent,
     canActivate: [AuthGuard],
     data: { title: 'Payments', roles: ['admin', 'superadmin'] } // ❗️Only admin
+  },
+  {
+    path: 'subscription',                     // 👈 New Route
+    component: SubscriptionComponent,
+    canActivate: [AuthGuard],                 // ✅ Only logged-in users
+    data: { title: 'Subscription', roles: ['admin', 'superadmin'] } // Only admin/superadmin
   },
   {
     path: 'admin-onboard',

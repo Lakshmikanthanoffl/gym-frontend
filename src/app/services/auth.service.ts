@@ -13,6 +13,7 @@ export interface Role {
   GymName: string;
   IsActive: boolean;
   ValidUntil: string;  // ✅ from API
+  PaidDate:string;
 }
 
 @Injectable({
@@ -31,6 +32,9 @@ export class AuthService {
   // ✅ new: subscription expiry subject
   private validUntilSubject = new BehaviorSubject<string | null>(localStorage.getItem('validUntil'));
   validUntil$ = this.validUntilSubject.asObservable();
+
+  private PaidDateSubject = new BehaviorSubject<string | null>(localStorage.getItem('startDate'));
+  startDate$ = this.PaidDateSubject.asObservable();
 
   // ✅ new subject for IsActive
   private isActiveSubject = new BehaviorSubject<boolean>(localStorage.getItem('isActive') === 'true');
@@ -106,7 +110,10 @@ export class AuthService {
           localStorage.setItem('validUntil', role.ValidUntil);
           this.validUntilSubject.next(role.ValidUntil);
         }
-
+        if (role.PaidDate) {
+          localStorage.setItem('startDate', role.PaidDate);
+          this.PaidDateSubject.next(role.PaidDate);
+        }
         localStorage.setItem('isActive', role.IsActive ? 'true' : 'false');
         this.isActiveSubject.next(role.IsActive);
 

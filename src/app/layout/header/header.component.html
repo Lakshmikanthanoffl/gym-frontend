@@ -5,22 +5,24 @@
   <h5 class="m-0">{{ headerTitle }}</h5>
 
   <div class="d-flex align-items-center position-relative" style="cursor: pointer;">
-    <span class="me-2">{{ username }}</span>
 
-    <!-- 🔔 Notification if subscription is expiring -->
+    <!-- 🔔 Notification bell before username -->
     <ng-container *ngIf="subscriptionExpiring">
-      <div class="notification-wrapper me-2" (click)="showSubscriptionPopup()">
+      <div class="notification-wrapper me-3" (click)="showSubscriptionPopup()">
         <i class="pi pi-bell notification-bell" 
            title="Your subscription is about to expire"></i>
         <span class="pulse-dot"></span>
       </div>
     </ng-container>
-    
 
+    <!-- 👤 Username -->
+    <span class="me-3">{{ username }}</span>
+
+    <!-- 👤 User Icon -->
     <i class="pi pi-user" style="font-size: 1.2rem;" 
        (click)="togglePopup()" tabindex="0"></i>
 
-    <!-- Custom Popup -->
+    <!-- ⚙️ Custom Popup -->
     <div class="custom-popup-menu" [@popupAnimation]="popupVisible ? 'visible' : 'hidden'">
       <ul>
         <li (click)="logout()" tabindex="0" #logoutItem>
