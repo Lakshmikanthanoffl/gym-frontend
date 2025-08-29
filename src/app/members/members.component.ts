@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import Swal from 'sweetalert2';
 
 import { MemberService } from '../services/member.service';
@@ -7,7 +7,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 // For normal read/write operations
 import * as XLSX from 'xlsx';
-
+import { BarcodeFormat } from '@zxing/library';
 // For styling support
 import * as XLSXStyle from 'xlsx-js-style';
 
@@ -28,9 +28,14 @@ interface SubscriptionOption {
 })
 
 export class MembersComponent implements OnInit{
+  qrDialogVisible = false;
+
+  @ViewChild('qrcodeCanvas', { static: false }) qrcodeCanvas: ElementRef | undefined;
   availableGyms: { id: number; name: string }[] = [];
   gymId!: number;
   gymname!: string | null;
+  selectedMonth: number = new Date().getMonth(); // default current month
+  currentYear: number = new Date().getFullYear();
   constructor(private memberService: MemberService) {
     
 
@@ -52,7 +57,9 @@ export class MembersComponent implements OnInit{
       }
     }
   ];
-  
+  scannedResult: string | null = null;
+  isCameraOpen = false;
+  allowedFormats = [ BarcodeFormat.QR_CODE ];
   defaultGymId!: number;      // ✅ add this
   defaultGymName!: string;    // ✅ add this
 enteredOtp: string = '';
@@ -60,7 +67,8 @@ generatedOtp: string = '';
 isPhoneVerified: boolean = false;
 otpDialogVisible: boolean = false;
 isEditMode: boolean = false;
-selectedMemberId: number | null = null;
+selectedMemberId: number | null = null; // must be number, not string
+
 deleteDialogVisible: boolean = false;
 memberToDelete: any = null;
 deleteConfirmationText: string = '';
@@ -124,6 +132,31 @@ searchTerm: string = '';
     this.getgymname();
     
   }
+  openMemberQR(member: any) {
+    this.selectedMemberId = Number(member.id); // convert to number
+    this.qrDialogVisible = true;
+  }
+  
+ // Generate QR URL for a member
+ getMemberQrUrl(memberId: number | null): string {
+  if (!memberId) return '';
+  const qrData = `MemberID:${memberId}`;
+  return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrData)}`;
+}
+
+
+// Download QR
+downloadMemberQr() {
+  if (this.selectedMemberId === null) return;
+
+  const url = this.getMemberQrUrl(this.selectedMemberId);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `member-${this.selectedMemberId}-qrcode.png`;
+  link.click();
+}
+
+  
   exportExcel() {
     // Define columns
     const columns = [
@@ -142,7 +175,8 @@ searchTerm: string = '';
       { header: 'Amount Paid', field: 'amountPaid' },
       { header: 'Paid Date', field: 'paidDate' },
       { header: 'Valid Until', field: 'validUntil' },
-      { header: 'Status', field: 'status' }
+      { header: 'Status', field: 'status' },
+      { header: 'Attendance', field: 'attendance' } // 👈 new column
     ];
   
     // Format data
@@ -163,6 +197,11 @@ searchTerm: string = '';
         if (col.field === 'subscriptionType') {
           value = m.subscriptionType?.label || '';
         }
+        if (col.field === 'attendance') {
+          value = m.attendance && m.attendance.length > 0
+            ? m.attendance.map((d: string) => new Date(d).toLocaleDateString()).join(', ')
+            : 'No records';
+        }
   
         row[col.header] = value;
       });
@@ -175,16 +214,17 @@ searchTerm: string = '';
       skipHeader: false
     });
   
-    // Set equal column widths
-    const colWidth = 20;
-    ws['!cols'] = columns.map(() => ({ wch: colWidth }));
+    // Set column widths (Attendance column wider)
+    ws['!cols'] = columns.map(col => ({
+      wch: col.header === 'Attendance' ? 40 : 20
+    }));
   
     // Apply header styles with wrap
     columns.forEach((col, index) => {
       const cellRef = XLSX.utils.encode_cell({ r: 0, c: index });
       if (ws[cellRef]) {
         ws[cellRef].s = {
-          fill: { fgColor: { rgb: "282828" } }, // dark header
+          fill: { fgColor: { rgb: "282828" } },
           font: { color: { rgb: "FFFFFF" }, bold: true, sz: 12 },
           alignment: { horizontal: "center", vertical: "center", wrapText: true }
         };
@@ -212,11 +252,102 @@ searchTerm: string = '';
     XLSXStyle.writeFile(wb, "members.xlsx");
   }
   
+ 
+
+  onCodeResult(resultString: string) {
+    if (!resultString) return;
+  
+    this.scannedResult = resultString;
+    const today = new Date();
+    const todayStr = today.toLocaleDateString('en-CA'); // "YYYY-MM-DD"
+    const memberId = parseInt(resultString.replace(/\D/g, ''), 10); // assuming QR has just the Member ID
+  
+    if (!isNaN(memberId)) {
+      this.memberService.markAttendance(memberId, todayStr).subscribe({
+        next: () => {
+          // Show toast on success
+          Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: 'success',
+            title: `Attendance marked for member ${memberId}`,
+            background: '#2b2b2b',   // Dark toast background
+            color: '#f0f0f0',        // Light text
+            iconColor: '#0d6efd',    // Blue success icon
+            showConfirmButton: false,
+            timer: 1500,
+            timerProgressBar: true,
+          });
+  
+          this.fetchMembersFromAPI(); // refresh members if needed
+        },
+        error: (err) => {
+          // Show toast on error
+          Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: 'error',
+            title: 'Error marking attendance!',
+            background: '#2b2b2b',
+            color: '#f0f0f0',
+            iconColor: '#dc3545',   // Red error icon
+            showConfirmButton: false,
+            timer: 2000,
+            timerProgressBar: true,
+          });
+          console.error('Error marking attendance:', err);
+        }
+      });
+    }
+  }
+  
+
+  closeCamera() {
+    this.isCameraOpen = false;
+  }
+  markAttendance(member: Member): void {
+    const today = new Date();
+    const todayStr = today.toLocaleDateString('en-CA'); // "YYYY-MM-DD"
+    this.memberService.markAttendance(member.id, todayStr).subscribe(() => {
+      if (!member.attendance) member.attendance = [];
+      if (!member.attendance.includes(todayStr)) {
+        member.attendance.push(todayStr);
+      }
+    });
+  }
+  
+  getMonthlyAttendance(member: Member): number {
+    if (!member.attendance) return 0;
+    return member.attendance.filter(dateStr => {
+      const date = new Date(dateStr);
+      return date.getMonth() === this.selectedMonth && date.getFullYear() === this.currentYear;
+    }).length;
+  }
+  
+  getTotalDaysInMonth(month: number, year: number): number {
+    return new Date(year, month + 1, 0).getDate();
+  }
+  isInSelectedMonth(dateStr: string): boolean {
+    const date = new Date(dateStr);
+    return date.getMonth() === this.selectedMonth && date.getFullYear() === this.currentYear;
+  }
+  isAttendanceMarkedToday(member: Member): boolean {
+    const today = new Date();
+    const todayStr = today.toLocaleDateString('en-CA'); // "YYYY-MM-DD"
+    return member.attendance?.some(date => date.split("T")[0] === todayStr) ?? false;
+  }
+  
+  
+  
   
   
   exportPdf() {
-    const doc = new jsPDF();
-
+    const doc = new jsPDF({
+      orientation: 'landscape', // 👈 more width
+      unit: 'pt',
+      format: 'A4'
+    });
+  
     // Table headers
     const headers = [[
       'ID',
@@ -227,12 +358,13 @@ searchTerm: string = '';
       'Amount Paid',
       'Paid Date',
       'Valid Until',
-      'Subscription Type'
+      'Subscription Type',
+      'Attendance'
     ]];
-
+  
     // Table rows
     const data = this.filteredMembers.map(m => [
-      m.id, // 👈 Make sure your member object has an "id"
+      m.id,
       m.name,
       m.email,
       m.phone,
@@ -240,15 +372,18 @@ searchTerm: string = '';
       m.amountPaid,
       new Date(m.paidDate).toLocaleDateString(),
       new Date(m.validUntil).toLocaleDateString(),
-      m.subscriptionType?.label || '' // 👈 only label shown
+      m.subscriptionType?.label || '',
+      (m.attendance && m.attendance.length > 0) 
+        ? m.attendance.join(', ') 
+        : 'No records'
     ]);
-
+  
     autoTable(doc, {
       head: headers,
       body: data,
       theme: 'grid',
-      startY: 20,
-      tableWidth: 'auto',        // 👈 auto scale columns to fit
+      startY: 30,
+      tableWidth: 'wrap',   // 👈 ensures wrapping
       styles: {
         fontSize: 8,
         overflow: 'linebreak',
@@ -258,12 +393,24 @@ searchTerm: string = '';
         fillColor: [40, 40, 40],
         textColor: [255, 255, 255],
         fontSize: 9
+      },
+      columnStyles: {
+        0: { cellWidth: 40 },  // ID
+        1: { cellWidth: 80 },  // Name
+        2: { cellWidth: 120 }, // Email
+        3: { cellWidth: 80 },  // Phone
+        4: { cellWidth: 50 },  // Period
+        5: { cellWidth: 70 },  // Amount Paid
+        6: { cellWidth: 70 },  // Paid Date
+        7: { cellWidth: 70 },  // Valid Until
+        8: { cellWidth: 90 },  // Subscription Type
+        9: { cellWidth: 120 }  // Attendance
       }
     });
-    
-
+  
     doc.save('Members.pdf');
   }
+  
   
   
   
@@ -384,7 +531,10 @@ private processMembers(data: any[]) {
     validUntil: new Date(m.ValidUntil),
     gymId: m.GymId,
     gymName: m.GymName || '',
+    attendance: m.Attendance || []   // ✅ Keep attendance from backend
   }));
+
+
 
   this.filteredMembers = [...this.members];
 
@@ -834,7 +984,7 @@ isUnassignedGym(member: any): boolean {
     if (this.isEditMode && this.selectedMemberId != null) {
       const updatedMember: Member = {
         ...this.newMember,
-        id: this.selectedMemberId,
+        id: Number(this.selectedMemberId),
         subscriptionType,
         validUntil,
         gymId,

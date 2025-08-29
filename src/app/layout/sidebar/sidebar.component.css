@@ -96,5 +96,10 @@
     box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
   }
 }
+.big-title {
+  font-size: 2rem; /* adjust as needed */
+  font-weight: 600; /* optional: makes it a bit bolder */
+}
+
 
 

@@ -126,4 +126,14 @@ export class MemberService {
   getMembersByGym(gymId: number, gymName: string): Observable<Member[]> {
     return this.http.get<Member[]>(`${this.apiUrl}/by-gym?gymId=${gymId}&gymName=${gymName}`);
   }
+ 
+  markAttendance(id: number, date: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/${id}/attendance`, { date });
+  }
+  
+  
+
+  getAttendance(memberId: number): Observable<string[]> {
+    return this.http.get<string[]>(`${this.apiUrl}/${memberId}/attendance`);
+  }
 }

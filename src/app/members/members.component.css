@@ -179,3 +179,40 @@
   color: #ffc107;
   font-weight: 600;
 }
+.attendance-grid {
+  display: grid;
+  grid-template-columns: repeat(3, auto); /* 3 per row, adjust as needed */
+  gap: 6px;
+  justify-content: center;
+}
+
+.attendance-grid {
+  display: grid;
+  grid-template-columns: repeat(3, auto); /* 3 per row, adjust as needed */
+  gap: 6px;
+  justify-content: center;
+}
+
+.attendance-grid .p-tag {
+  font-size: 0.75rem;
+  padding: 2px 6px;
+  border-radius: 8px;
+}
+.mt-2{
+  color: white;
+}
+
+
+.scanner-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 500px;
+  margin: auto;
+}
+
+.scanner {
+  width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
