@@ -22,6 +22,8 @@ import { PaymentsComponent } from './payments/payments.component';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { MonthFilterPipe } from '../month-filter.pipe'; // correct path
+import { ZXingScannerModule } from '@zxing/ngx-scanner';  // ✅ import this
 
 // PrimeNG modules
 import { TableModule } from 'primeng/table';
@@ -72,9 +74,11 @@ import { SubscriptionComponent } from './subscription/subscription.component';
     BrowserModule,
     AppRoutingModule,
     BrowserAnimationsModule,
+    MonthFilterPipe,  // <-- add pipe here
     FormsModule,
     ReactiveFormsModule,
     HttpClientModule,
+    ZXingScannerModule,  // ✅ add here'
 
     TableModule,
     TabViewModule,

@@ -6,7 +6,9 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "postinstall": "ngcc"
+
   },
   "private": true,
   "dependencies": {
@@ -19,6 +21,9 @@
     "@angular/platform-browser": "^19.2.0",
     "@angular/platform-browser-dynamic": "^19.2.0",
     "@angular/router": "^19.2.0",
+    "@techiediaries/ngx-qrcode": "^9.1.0",
+    "@zxing/ngx-scanner": "^20.0.0",
+    "angularx-qrcode": "^20.0.0",
     "bootstrap": "^5.3.7",
     "canvas-confetti": "^1.9.3",
     "chart.js": "^4.5.0",
@@ -28,6 +33,7 @@
     "jspdf": "^3.0.1",
     "jspdf-autotable": "^5.0.2",
     "ng-recaptcha": "^13.2.1",
+    "ngx-qrcode": "^0.1.0-rc.1",
     "primeflex": "^4.0.0",
     "primeicons": "^7.0.0",
     "primeng": "^17.6.0",
