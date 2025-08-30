@@ -128,6 +128,10 @@ searchTerm: string = '';
   editDialogVisible = false;
   selectedMember: any = null;
   addDialogVisible = false;
+  qrScannerDialogVisible = false;
+closePasswordDialogVisible = false;
+enteredPassword: string = '';
+correctPassword = 'admin123'; // change to your actual password
   ngOnInit() {
     this.isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
     this.userrole = localStorage.getItem("role")
@@ -137,8 +141,28 @@ searchTerm: string = '';
     this.defaultGymId = Number(localStorage.getItem('GymId')) || 0;
     this.fetchMembersFromAPI(); // 👈
     this.getgymname();
+
     
   }
+  openQrScanner() {
+    this.qrScannerDialogVisible = true;
+  }
+  confirmCloseScanner() {
+    // Hide the camera scanner temporarily (optional)
+    this.closePasswordDialogVisible = true;
+  }
+  verifyClosePassword() {
+    if (this.enteredPassword === this.correctPassword) {
+      this.qrScannerDialogVisible = false; // Close QR scanner
+      this.closePasswordDialogVisible = false; // Hide password popup
+      this.enteredPassword = '';
+      this.closeCamera(); // Your existing method to stop the camera
+    } else {
+      alert('Incorrect password!');
+      this.enteredPassword = '';
+    }
+  }
+    
   openMemberQR(member: any) {
     this.selectedMemberId = Number(member.id); // convert to number
     this.qrDialogVisible = true;
