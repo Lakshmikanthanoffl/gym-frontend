@@ -57,14 +57,13 @@
 <!-- Camera selection -->
 <div class="camera-select mt-2 text-center">
   <p-dropdown
-  [options]="availableCameras"
-  [(ngModel)]="selectedDevice"
-  [optionLabel]="getCameraLabel"
-  placeholder="Select Camera"
-  styleClass="w-full">
-</p-dropdown>
-
+    [options]="availableCameras"
+    [(ngModel)]="selectedDevice"
+    placeholder="Select Camera"
+    styleClass="w-full">
+  </p-dropdown>
 </div>
+
 
 
   <div class="scanner-controls mt-2 d-flex justify-content-center">
