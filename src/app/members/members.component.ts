@@ -70,7 +70,7 @@ isEditMode: boolean = false;
 selectedMemberId: number | null = null; // must be number, not string
 availableCameras: { label: string; value: MediaDeviceInfo }[] = [];
 selectedDevice: MediaDeviceInfo | undefined;
-
+videoConstraints: any = {};
 deleteDialogVisible: boolean = false;
 memberToDelete: any = null;
 deleteConfirmationText: string = '';
@@ -156,11 +156,37 @@ onCamerasFound(cameras: MediaDeviceInfo[]) {
     value: cam
   }));
 
-  // Default: back camera if available
+  // Default: back camera
   const backCam = this.availableCameras.find(c => 
     c.label.toLowerCase().includes('back')
   );
   this.selectedDevice = backCam?.value || this.availableCameras[0]?.value;
+
+  this.updateVideoConstraints();
+}
+
+onCameraChange() {
+  this.updateVideoConstraints();
+}
+
+private updateVideoConstraints() {
+  if (!this.selectedDevice) return;
+
+  if (this.selectedDevice.label.toLowerCase().includes('front')) {
+    // Force higher res + facingMode user (front)
+    this.videoConstraints = {
+      width: { ideal: 1280 },
+      height: { ideal: 720 },
+      facingMode: 'user'
+    };
+  } else {
+    // Default back cam (environment)
+    this.videoConstraints = {
+      width: { ideal: 1280 },
+      height: { ideal: 720 },
+      facingMode: 'environment'
+    };
+  }
 }
 
 // Download QR

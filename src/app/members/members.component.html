@@ -50,6 +50,7 @@
   [formats]="allowedFormats"
   (scanSuccess)="onCodeResult($event)"
   [device]="selectedDevice"
+  [videoConstraints]="videoConstraints"
   (camerasFound)="onCamerasFound($event)"
   class="scanner">
 </zxing-scanner>
@@ -59,10 +60,12 @@
   <p-dropdown
     [options]="availableCameras"
     [(ngModel)]="selectedDevice"
+    (onChange)="onCameraChange()"
     placeholder="Select Camera"
     styleClass="w-full">
   </p-dropdown>
 </div>
+
 
 
 
