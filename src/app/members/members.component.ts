@@ -68,7 +68,8 @@ isPhoneVerified: boolean = false;
 otpDialogVisible: boolean = false;
 isEditMode: boolean = false;
 selectedMemberId: number | null = null; // must be number, not string
-
+availableCameras: any[] = [];
+selectedDevice: any = null;
 deleteDialogVisible: boolean = false;
 memberToDelete: any = null;
 deleteConfirmationText: string = '';
@@ -145,6 +146,16 @@ searchTerm: string = '';
 }
 
 
+onCamerasFound(cameras: MediaDeviceInfo[]) {
+  this.availableCameras = cameras.map(cam => ({
+    label: cam.label || `Camera ${cam.deviceId}`,
+    deviceId: cam.deviceId
+  }));
+
+  // Default: back camera if available, else first
+  const backCam = this.availableCameras.find(c => c.label.toLowerCase().includes('back'));
+  this.selectedDevice = backCam ? backCam.deviceId : this.availableCameras[0]?.deviceId;
+}
 // Download QR
 downloadMemberQr() {
   if (this.selectedMemberId === null) return;
