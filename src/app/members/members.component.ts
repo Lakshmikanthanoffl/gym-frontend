@@ -68,8 +68,9 @@ isPhoneVerified: boolean = false;
 otpDialogVisible: boolean = false;
 isEditMode: boolean = false;
 selectedMemberId: number | null = null; // must be number, not string
-availableCameras: any[] = [];
-selectedDevice: any = null;
+availableCameras: MediaDeviceInfo[] = [];
+selectedDevice: MediaDeviceInfo | undefined;
+
 deleteDialogVisible: boolean = false;
 memberToDelete: any = null;
 deleteConfirmationText: string = '';
@@ -144,17 +145,17 @@ searchTerm: string = '';
   const qrData = `MemberID:${memberId}`;
   return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrData)}`;
 }
+getCameraLabel = (device: MediaDeviceInfo) => {
+  return device.label || `Camera (${device.deviceId})`;
+};
 
 
 onCamerasFound(cameras: MediaDeviceInfo[]) {
-  this.availableCameras = cameras.map(cam => ({
-    label: cam.label || `Camera ${cam.deviceId}`,
-    deviceId: cam.deviceId
-  }));
+  this.availableCameras = cameras;
 
-  // Default: back camera if available, else first
-  const backCam = this.availableCameras.find(c => c.label.toLowerCase().includes('back'));
-  this.selectedDevice = backCam ? backCam.deviceId : this.availableCameras[0]?.deviceId;
+  // Pick the "back" camera if available, else first
+  const backCam = cameras.find(c => c.label.toLowerCase().includes('back'));
+  this.selectedDevice = backCam || cameras[0];
 }
 // Download QR
 downloadMemberQr() {
