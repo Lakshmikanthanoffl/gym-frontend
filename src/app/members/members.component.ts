@@ -68,7 +68,7 @@ isPhoneVerified: boolean = false;
 otpDialogVisible: boolean = false;
 isEditMode: boolean = false;
 selectedMemberId: number | null = null; // must be number, not string
-availableCameras: MediaDeviceInfo[] = [];
+availableCameras: { label: string; value: MediaDeviceInfo }[] = [];
 selectedDevice: MediaDeviceInfo | undefined;
 
 deleteDialogVisible: boolean = false;
@@ -151,12 +151,18 @@ getCameraLabel = (device: MediaDeviceInfo) => {
 
 
 onCamerasFound(cameras: MediaDeviceInfo[]) {
-  this.availableCameras = cameras;
+  this.availableCameras = cameras.map(cam => ({
+    label: cam.label || `Camera (${cam.deviceId})`,
+    value: cam
+  }));
 
-  // Pick the "back" camera if available, else first
-  const backCam = cameras.find(c => c.label.toLowerCase().includes('back'));
-  this.selectedDevice = backCam || cameras[0];
+  // Default: back camera if available
+  const backCam = this.availableCameras.find(c => 
+    c.label.toLowerCase().includes('back')
+  );
+  this.selectedDevice = backCam?.value || this.availableCameras[0]?.value;
 }
+
 // Download QR
 downloadMemberQr() {
   if (this.selectedMemberId === null) return;
