@@ -68,9 +68,10 @@ isPhoneVerified: boolean = false;
 otpDialogVisible: boolean = false;
 isEditMode: boolean = false;
 selectedMemberId: number | null = null; // must be number, not string
-availableCameras: { label: string; value: MediaDeviceInfo }[] = [];
+availableCameras: MediaDeviceInfo[] = [];
 selectedDevice: MediaDeviceInfo | undefined;
 videoConstraints: any = {};
+isFrontCamera = false; // track current mode
 deleteDialogVisible: boolean = false;
 memberToDelete: any = null;
 deleteConfirmationText: string = '';
@@ -149,44 +150,43 @@ getCameraLabel = (device: MediaDeviceInfo) => {
   return device.label || `Camera (${device.deviceId})`;
 };
 
-
 onCamerasFound(cameras: MediaDeviceInfo[]) {
-  this.availableCameras = cameras.map(cam => ({
-    label: cam.label || `Camera (${cam.deviceId})`,
-    value: cam
-  }));
+  this.availableCameras = cameras;
 
-  // Default: back camera
-  const backCam = this.availableCameras.find(c => 
-    c.label.toLowerCase().includes('back')
-  );
-  this.selectedDevice = backCam?.value || this.availableCameras[0]?.value;
+  // default back camera
+  const backCam = cameras.find(c => c.label.toLowerCase().includes('back'));
+  this.selectedDevice = backCam || cameras[0];
 
+  this.isFrontCamera = false;
   this.updateVideoConstraints();
 }
 
-onCameraChange() {
+toggleCamera() {
+  if (this.availableCameras.length < 2) return; // no switching if only 1 camera
+
+  this.isFrontCamera = !this.isFrontCamera;
+
+  if (this.isFrontCamera) {
+    // pick a front cam if available
+    const frontCam = this.availableCameras.find(c =>
+      c.label.toLowerCase().includes('front')
+    );
+    this.selectedDevice = frontCam || this.availableCameras[0];
+  } else {
+    // pick a back cam if available
+    const backCam = this.availableCameras.find(c =>
+      c.label.toLowerCase().includes('back')
+    );
+    this.selectedDevice = backCam || this.availableCameras[0];
+  }
+
   this.updateVideoConstraints();
 }
 
 private updateVideoConstraints() {
-  if (!this.selectedDevice) return;
-
-  if (this.selectedDevice.label.toLowerCase().includes('front')) {
-    // Force higher res + facingMode user (front)
-    this.videoConstraints = {
-      width: { ideal: 1280 },
-      height: { ideal: 720 },
-      facingMode: 'user'
-    };
-  } else {
-    // Default back cam (environment)
-    this.videoConstraints = {
-      width: { ideal: 1280 },
-      height: { ideal: 720 },
-      facingMode: 'environment'
-    };
-  }
+  this.videoConstraints = this.isFrontCamera
+    ? { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } }
+    : { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } };
 }
 
 // Download QR

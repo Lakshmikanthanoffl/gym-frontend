@@ -55,16 +55,18 @@
   class="scanner">
 </zxing-scanner>
 
-<!-- Camera selection -->
-<div class="camera-select mt-2 text-center">
-  <p-dropdown
-    [options]="availableCameras"
-    [(ngModel)]="selectedDevice"
-    (onChange)="onCameraChange()"
-    placeholder="Select Camera"
-    styleClass="w-full">
-  </p-dropdown>
+<!-- Toggle Camera Button -->
+<div class="text-center mt-2">
+  <button 
+    pButton 
+    type="button" 
+    (click)="toggleCamera()" 
+    [label]="isFrontCamera ? 'Switch to Back Camera' : 'Switch to Front Camera'"
+    icon="pi pi-refresh"
+    class="p-button-rounded p-button-info">
+  </button>
 </div>
+
 
 
 
