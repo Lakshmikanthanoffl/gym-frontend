@@ -44,23 +44,39 @@
   </div>
 
   <!-- QR Scanner Section -->
-  <div *ngIf="isCameraOpen" class="scanner-wrapper mb-3">
-    <zxing-scanner
-      [formats]="allowedFormats"
-      (scanSuccess)="onCodeResult($event)"
-      [enable]="true"
-      class="scanner">
-    </zxing-scanner>
-    <div class="scanner-controls mt-2 d-flex justify-content-center">
-      <button 
-        pButton 
-        type="button" 
-        label="Close Camera" 
-        class="p-button-danger" 
-        (click)="closeCamera()">
-      </button>
-    </div>
+<!-- QR Scanner Section -->
+<div *ngIf="isCameraOpen" class="scanner-wrapper mb-3">
+  <zxing-scanner
+    [formats]="allowedFormats"
+    (scanSuccess)="onCodeResult($event)"
+    [device]="selectedDevice"
+    (camerasFound)="onCamerasFound($event)"
+    class="scanner">
+  </zxing-scanner>
+
+  <!-- Camera selection -->
+  <div class="camera-select mt-2 text-center">
+    <p-dropdown
+      [options]="availableCameras"
+      [(ngModel)]="selectedDevice"
+      optionLabel="label"
+      optionValue="deviceId"
+      placeholder="Select Camera"
+      styleClass="w-full"
+    ></p-dropdown>
   </div>
+
+  <div class="scanner-controls mt-2 d-flex justify-content-center">
+    <button 
+      pButton 
+      type="button" 
+      label="Close Camera" 
+      class="p-button-danger" 
+      (click)="closeCamera()">
+    </button>
+  </div>
+</div>
+
 
   <div *ngIf="scannedResult" class="mt-2 text-center">
     <p><strong>Last Scanned Member ID:</strong> {{ scannedResult }}</p>
