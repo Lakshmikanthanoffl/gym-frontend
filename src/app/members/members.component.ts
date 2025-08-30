@@ -10,6 +10,7 @@ import * as XLSX from 'xlsx';
 import { BarcodeFormat } from '@zxing/library';
 // For styling support
 import * as XLSXStyle from 'xlsx-js-style';
+import { ZXingScannerComponent } from '@zxing/ngx-scanner';
 
 
 interface SubscriptionOption {
@@ -29,7 +30,7 @@ interface SubscriptionOption {
 
 export class MembersComponent implements OnInit{
   qrDialogVisible = false;
-
+  @ViewChild('scanner')   scanner: ZXingScannerComponent | undefined; 
   @ViewChild('qrcodeCanvas', { static: false }) qrcodeCanvas: ElementRef | undefined;
   availableGyms: { id: number; name: string }[] = [];
   gymId!: number;
@@ -71,7 +72,9 @@ selectedMemberId: number | null = null; // must be number, not string
 availableCameras: MediaDeviceInfo[] = [];
 selectedDevice: MediaDeviceInfo | undefined;
 videoConstraints: any = {};
-isFrontCamera = false; // track current mode
+isFrontCamera = false;
+isMobile = false;
+
 deleteDialogVisible: boolean = false;
 memberToDelete: any = null;
 deleteConfirmationText: string = '';
@@ -126,6 +129,7 @@ searchTerm: string = '';
   selectedMember: any = null;
   addDialogVisible = false;
   ngOnInit() {
+    this.isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
     this.userrole = localStorage.getItem("role")
     this.isAdmin = this.userrole === 'admin';
     
@@ -150,30 +154,39 @@ getCameraLabel = (device: MediaDeviceInfo) => {
   return device.label || `Camera (${device.deviceId})`;
 };
 
+cameraOptions: any[] = [];
+
 onCamerasFound(cameras: MediaDeviceInfo[]) {
   this.availableCameras = cameras;
 
-  // default back camera
-  const backCam = cameras.find(c => c.label.toLowerCase().includes('back'));
-  this.selectedDevice = backCam || cameras[0];
+  // Convert MediaDeviceInfo[] → Dropdown options
+  this.cameraOptions = cameras.map(cam => ({
+    label: cam.label || `Camera ${cameras.indexOf(cam) + 1}`,
+    value: cam
+  }));
 
-  this.isFrontCamera = false;
-  this.updateVideoConstraints();
+  if (this.isMobile) {
+    const backCam = cameras.find(c => c.label.toLowerCase().includes('back'));
+    this.selectedDevice = backCam || cameras[0];
+    this.isFrontCamera = false;
+    this.updateVideoConstraints();
+  } else {
+    this.selectedDevice = cameras[0];
+  }
 }
 
+
 toggleCamera() {
-  if (this.availableCameras.length < 2) return; // no switching if only 1 camera
+  if (this.availableCameras.length < 2) return;
 
   this.isFrontCamera = !this.isFrontCamera;
 
   if (this.isFrontCamera) {
-    // pick a front cam if available
     const frontCam = this.availableCameras.find(c =>
       c.label.toLowerCase().includes('front')
     );
     this.selectedDevice = frontCam || this.availableCameras[0];
   } else {
-    // pick a back cam if available
     const backCam = this.availableCameras.find(c =>
       c.label.toLowerCase().includes('back')
     );
@@ -188,7 +201,6 @@ private updateVideoConstraints() {
     ? { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } }
     : { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } };
 }
-
 // Download QR
 downloadMemberQr() {
   if (this.selectedMemberId === null) return;

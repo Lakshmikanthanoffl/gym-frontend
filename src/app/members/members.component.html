@@ -55,8 +55,8 @@
   class="scanner">
 </zxing-scanner>
 
-<!-- Toggle Camera Button -->
-<div class="text-center mt-2">
+<!-- Mobile: Toggle Button -->
+<div *ngIf="isMobile" class="text-center mt-2">
   <button 
     pButton 
     type="button" 
@@ -66,6 +66,21 @@
     class="p-button-rounded p-button-info">
   </button>
 </div>
+
+<!-- Desktop/Laptop: Dropdown -->
+<div *ngIf="!isMobile" class="mt-2">
+  <p-dropdown
+  [options]="cameraOptions"
+  [(ngModel)]="selectedDevice"
+  placeholder="Select Camera"
+  optionLabel="label"
+  optionValue="value"
+  [style.width.%]="100">
+</p-dropdown>
+
+</div>
+
+
 
 
 
