@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
 import Swal from 'sweetalert2';
 
 import { MemberService } from '../services/member.service';
@@ -30,8 +30,22 @@ interface SubscriptionOption {
 
 export class MembersComponent implements OnInit{
   qrDialogVisible = false;
+  scannerOpen = false;
+  passwordRequired = false;
   @ViewChild('scanner')   scanner: ZXingScannerComponent | undefined; 
   @ViewChild('qrcodeCanvas', { static: false }) qrcodeCanvas: ElementRef | undefined;
+  @HostListener('window:beforeunload', ['$event'])
+  handleBeforeUnload(event: BeforeUnloadEvent): string | undefined {
+    if (!this.pageLocked) {
+      this.promptPassword(); // show password modal
+      event.preventDefault();
+      event.returnValue = ''; // required for Chrome
+      return '';              // return empty string to satisfy TypeScript
+    }
+    return undefined;         // for the case when pageLocked is true
+  }
+  
+
   availableGyms: { id: number; name: string }[] = [];
   gymId!: number;
   gymname!: string | null;
@@ -64,6 +78,7 @@ export class MembersComponent implements OnInit{
   defaultGymId!: number;      // ✅ add this
   defaultGymName!: string;    // ✅ add this
 enteredOtp: string = '';
+pageLocked = false;  // NEW: to lock the page when refresh detected
 generatedOtp: string = '';
 isPhoneVerified: boolean = false;
 otpDialogVisible: boolean = false;
@@ -132,7 +147,12 @@ isScannerOpen: boolean = false;
 closePasswordDialogVisible = false;
 enteredPassword: string = '';
 correctPassword = 'admin123'; // change to your actual password
+private keydownHandler!: (event: KeyboardEvent) => void;
+private contextMenuHandler!: (event: MouseEvent) => void;
+private popStateHandler!: (event: PopStateEvent) => void;
+scannerActive: boolean = false;
   ngOnInit() {
+    
     this.isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
     this.userrole = localStorage.getItem("role")
     this.isAdmin = this.userrole === 'admin';
@@ -145,12 +165,177 @@ correctPassword = 'admin123'; // change to your actual password
     
   }
   ngOnDestroy(): void {
+    this.enableRefresh();
     this.closeCamera();
   }
+  promptPassword() {
+    this.pageLocked = true;
+  
+    Swal.fire({
+      title: 'Password Required',
+      text: 'Enter your password to continue using the page',
+      icon: 'warning',
+      input: 'password',
+      inputPlaceholder: 'Enter password',
+      inputAttributes: {
+        autocapitalize: 'off',
+        autocomplete: 'new-password'
+      },
+      background: '#1e1e1e',
+      color: '#fff',
+      showCancelButton: false,
+      confirmButtonText: 'Confirm',
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      inputValidator: (value) => {
+        if (!value) {
+          return 'Password is required!';
+        }
+        return null;
+      }
+    }).then((result) => {
+      if (result.isConfirmed) {
+        if (result.value === this.correctPassword) {
+          this.pageLocked = false;
+          Swal.fire({
+            icon: 'success',
+            title: 'Access Granted',
+            timer: 1500,
+            showConfirmButton: false,
+            background: '#1e1e1e',
+            color: '#fff'
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Invalid Password',
+            text: 'The password you entered is incorrect.',
+            background: '#1e1e1e',
+            color: '#fff'
+          }).then(() => {
+            this.promptPassword(); // loop until correct password
+          });
+        }
+      }
+    });
+  }
+  
+  disableRefresh() {
+    // Block F5, Ctrl+R, Ctrl+Shift+R
+    document.addEventListener('keydown', this.preventKeys, true);
+
+    // Block refresh/reload button and tab close
+    window.addEventListener('beforeunload', this.preventUnload, true);
+  }
+
+  enableRefresh() {
+    // Re-enable when scanner closes
+    document.removeEventListener('keydown', this.preventKeys, true);
+    window.removeEventListener('beforeunload', this.preventUnload, true);
+  }
+
+  preventKeys = (event: KeyboardEvent) => {
+    if (
+      event.key === 'F5' ||
+      (event.ctrlKey && event.key.toLowerCase() === 'r') ||
+      (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === 'r')
+    ) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  };
+
+  preventUnload = (event: BeforeUnloadEvent) => {
+    // Just cancel without dialog (Chrome/Edge will silently block reload)
+    event.preventDefault();
+    event.returnValue = '';
+  };
+  preventRefresh() {
+    // Prevent F5, Ctrl+R, Ctrl+Shift+R
+    this.keydownHandler = (event: KeyboardEvent) => {
+      if (this.scannerActive) {
+        if (
+          event.key === "F5" ||
+          (event.ctrlKey && event.key.toLowerCase() === "r")
+        ) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+      }
+    };
+  
+    // Prevent right-click menu (Reload option)
+    this.contextMenuHandler = (event: MouseEvent) => {
+      if (this.scannerActive) {
+        event.preventDefault();
+      }
+    };
+  
+    // Prevent browser back/forward navigation
+    history.pushState(null, "", window.location.href);
+    this.popStateHandler = () => {
+      if (this.scannerActive) {
+        history.pushState(null, "", window.location.href);
+      }
+    };
+  
+    window.addEventListener("keydown", this.keydownHandler, true);
+    window.addEventListener("contextmenu", this.contextMenuHandler, true);
+    window.addEventListener("popstate", this.popStateHandler, true);
+  }
+  
+  allowRefresh() {
+    window.removeEventListener("keydown", this.keydownHandler, true);
+    window.removeEventListener("contextmenu", this.contextMenuHandler, true);
+    window.removeEventListener("popstate", this.popStateHandler, true);
+  }
   openQrScanner(): void {
+    this.scannerOpen = true;
+  
+    const elem = document.documentElement as any;
+    if (elem.requestFullscreen) {
+      elem.requestFullscreen();
+    } else if (elem.webkitRequestFullscreen) { // Safari
+      elem.webkitRequestFullscreen();
+    } else if (elem.msRequestFullscreen) { // IE11
+      elem.msRequestFullscreen();
+    }
+  
+    // Disable mobile gestures like pull-to-refresh
+    window.addEventListener('touchstart', this.disablePull, { passive: false });
+    window.addEventListener('touchmove', this.disablePull, { passive: false });
+  
+    this.scannerActive = true;
+    document.body.style.overscrollBehavior = 'none'; // disables pull-to-refresh
+    this.disableRefresh();
+    this.preventRefresh();
+  
     this.qrScannerDialogVisible = true;
     this.startCamera();
   }
+  
+  @HostListener('window:keydown', ['$event'])
+  handleKeyDown(event: KeyboardEvent) {
+    if (this.scannerOpen) {
+      // Prevent refresh
+      if (event.key === 'F5' || (event.ctrlKey && event.key.toLowerCase() === 'r')) {
+        event.preventDefault();
+        this.confirmCloseScanner();
+      }
+  
+      // Detect Esc and immediately re-enter fullscreen
+      if (event.key === 'Escape' || event.key === 'Esc') {
+        event.preventDefault();
+        setTimeout(() => {
+          const elem = document.documentElement as any;
+          if (!document.fullscreenElement) {
+            if (elem.requestFullscreen) elem.requestFullscreen();
+          }
+        }, 0);
+      }
+    }
+  }
+  
    // Start the camera only when needed
    startCamera(): void {
     this.videoConstraints = {
@@ -190,6 +375,21 @@ correctPassword = 'admin123'; // change to your actual password
   
         if (enteredPassword === correctPassword) {
           this.qrScannerDialogVisible = false;
+          this.scannerActive = false;
+          this.scannerOpen = false;
+
+  if (document.exitFullscreen) {
+    document.exitFullscreen();
+  } else if ((document as any).webkitExitFullscreen) {
+    (document as any).webkitExitFullscreen();
+  } else if ((document as any).msExitFullscreen) {
+    (document as any).msExitFullscreen();
+  }
+  window.removeEventListener('touchstart', this.disablePull);
+  window.removeEventListener('touchmove', this.disablePull);
+  this.allowRefresh();
+  document.body.style.overscrollBehavior = 'auto'; // restore
+          this.enableRefresh();
           this.closeCamera();
           Swal.fire({
             icon: 'success',
@@ -213,7 +413,11 @@ correctPassword = 'admin123'; // change to your actual password
     });
   }
   
-
+  disablePull(event: TouchEvent) {
+    if (this.scannerOpen && event.touches.length === 1 && event.touches[0].clientY < 50) {
+      event.preventDefault(); // Prevent pull-to-refresh
+    }
+  }
     
   openMemberQR(member: any) {
     this.selectedMemberId = Number(member.id); // convert to number
@@ -1192,63 +1396,70 @@ isUnassignedGym(member: any): boolean {
     }
   
     // ✅ Edit mode
-    if (this.isEditMode && this.selectedMemberId != null) {
-      const updatedMember: Member = {
-        ...this.newMember,
-        id: Number(this.selectedMemberId),
-        subscriptionType,
-        validUntil,
-        gymId,
-        gymName
-      };
   
-      this.memberService.updateMember(updatedMember).subscribe(() => {
-        const index = this.members.findIndex(m => m.id === this.selectedMemberId);
-        if (index !== -1) {
-          this.members[index] = { ...updatedMember };
-          this.members = [...this.members];
-        }
-        this.closeDialog();
-        Swal.fire({
-          icon: 'success',
-          title: 'Member Updated!',
-          text: `${updatedMember.name} has been updated successfully.`,
-          background: '#1e1e1e',
-          color: '#f5f5f5',
-          confirmButtonColor: '#00b894',
-          timer: 2000,
-          showConfirmButton: false,
-          timerProgressBar: true
-        });
-      });
-    } else {
-      // ✅ Add mode
-      const memberToAdd: Member = {
-        ...this.newMember,
-        id: 0,
-        subscriptionType,
-        validUntil,
-        gymId,
-        gymName
-      };
-  
-      this.memberService.addMember(memberToAdd).subscribe((createdMember: Member) => {
-        this.members = [...this.members, createdMember];
-        this.closeDialog();
-  
-        Swal.fire({
-          icon: 'success',
-          title: 'Member Added!',
-          text: `${this.newMember.name} has been added successfully.`,
-          background: '#1e1e1e',
-          color: '#f5f5f5',
-          confirmButtonColor: '#00b894',
-          timer: 2000,
-          showConfirmButton: false,
-          timerProgressBar: true
-        });
-      });
+if (this.isEditMode && this.selectedMemberId != null) {
+  // Keep existing attendance for this member
+  const existingAttendance = this.members.find(m => m.id === this.selectedMemberId)?.attendance || [];
+
+  const updatedMember: Member = {
+    ...this.newMember,
+    id: Number(this.selectedMemberId),
+    subscriptionType,
+    validUntil,
+    gymId,
+    gymName,
+    attendance: existingAttendance   // 👈 preserve attendance
+  };
+
+  this.memberService.updateMember(updatedMember).subscribe(() => {
+    const index = this.members.findIndex(m => m.id === this.selectedMemberId);
+    if (index !== -1) {
+      this.members[index] = { ...updatedMember };
+      this.members = [...this.members];
     }
+    this.closeDialog();
+    Swal.fire({
+      icon: 'success',
+      title: 'Member Updated!',
+      text: `${updatedMember.name} has been updated successfully.`,
+      background: '#1e1e1e',
+      color: '#f5f5f5',
+      confirmButtonColor: '#00b894',
+      timer: 2000,
+      showConfirmButton: false,
+      timerProgressBar: true
+    });
+  });
+} else {
+  // ✅ Add mode
+  const memberToAdd: Member = {
+    ...this.newMember,
+    id: 0,
+    subscriptionType,
+    validUntil,
+    gymId,
+    gymName,
+    attendance: []   // 👈 new members start with empty attendance
+  };
+
+  this.memberService.addMember(memberToAdd).subscribe((createdMember: Member) => {
+    this.members = [...this.members, createdMember];
+    this.closeDialog();
+
+    Swal.fire({
+      icon: 'success',
+      title: 'Member Added!',
+      text: `${this.newMember.name} has been added successfully.`,
+      background: '#1e1e1e',
+      color: '#f5f5f5',
+      confirmButtonColor: '#00b894',
+      timer: 2000,
+      showConfirmButton: false,
+      timerProgressBar: true
+    });
+  });
+}
+
   }
   
   

@@ -20,7 +20,7 @@ export class SignupComponent {
   showConfirmPassword = false;
   isPasswordStrong = false;
 
-  private apiUrl = 'https://gymmanagementapi.onrender.com/api/Role';
+  private apiUrl = 'https://localhost:44363/api/Role';
 
   constructor(private router: Router, private http: HttpClient) {}
 
