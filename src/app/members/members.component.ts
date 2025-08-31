@@ -30,21 +30,30 @@ interface SubscriptionOption {
 
 export class MembersComponent implements OnInit{
   qrDialogVisible = false;
+  scannerOpen = false;
+  passwordRequired = false;
   @ViewChild('scanner')   scanner: ZXingScannerComponent | undefined; 
   @ViewChild('qrcodeCanvas', { static: false }) qrcodeCanvas: ElementRef | undefined;
-   // 🔒 Block refresh / reload / close when scanner is active
-   @HostListener('window:beforeunload', ['$event'])
-   handleBeforeUnload(event: any) {
-     if (this.scannerActive) {
-       const entered = prompt("Scanner is active. Enter password to reload/exit:");
-       if (entered !== this.correctPassword) {
-         event.preventDefault();
-         event.returnValue = ''; // Prevent reload
-         return '';
-       }
-     }
-     return true;
-   }
+    // ✅ Block refresh / navigation when scanner is open
+    handleBeforeUnload(event: any): string | void {
+      if (this.isScannerOpen) {
+        // Instead of default browser message, we provide a string
+        // Note: Modern browsers ignore custom text and only show a generic prompt
+        const message = "Please enter password to reload!";
+        event.preventDefault();
+        event.returnValue = message; // required for Chrome/Edge
+        return message; // required for Firefox
+      }
+      return; // ensure all code paths return something
+    }
+    
+    // ✅ Catch keyboard shortcuts (F5 / Ctrl+R / Ctrl+Shift+R)
+
+   // ✅ Show password modal instead of browser dialog
+   askPassword() {
+    this.passwordRequired = true;
+  }
+
   availableGyms: { id: number; name: string }[] = [];
   gymId!: number;
   gymname!: string | null;
@@ -236,6 +245,19 @@ scannerActive: boolean = false;
     window.removeEventListener("popstate", this.popStateHandler, true);
   }
   openQrScanner(): void {
+    this.scannerOpen = true;
+
+  const elem = document.documentElement as any;
+  if (elem.requestFullscreen) {
+    elem.requestFullscreen();
+  } else if (elem.webkitRequestFullscreen) { // Safari
+    elem.webkitRequestFullscreen();
+  } else if (elem.msRequestFullscreen) { // IE11
+    elem.msRequestFullscreen();
+  }
+  window.addEventListener('touchstart', this.disablePull, { passive: false });
+  window.addEventListener('touchmove', this.disablePull, { passive: false });
+    this.scannerOpen = true;
     document.body.style.overscrollBehavior = 'none'; // disables pull-to-refresh
     this.disableRefresh();
     this.scannerActive = true;
@@ -283,6 +305,17 @@ scannerActive: boolean = false;
         if (enteredPassword === correctPassword) {
           this.qrScannerDialogVisible = false;
           this.scannerActive = false;
+          this.scannerOpen = false;
+
+  if (document.exitFullscreen) {
+    document.exitFullscreen();
+  } else if ((document as any).webkitExitFullscreen) {
+    (document as any).webkitExitFullscreen();
+  } else if ((document as any).msExitFullscreen) {
+    (document as any).msExitFullscreen();
+  }
+  window.removeEventListener('touchstart', this.disablePull);
+  window.removeEventListener('touchmove', this.disablePull);
   this.allowRefresh();
   document.body.style.overscrollBehavior = 'auto'; // restore
           this.enableRefresh();
@@ -309,7 +342,11 @@ scannerActive: boolean = false;
     });
   }
   
-
+  disablePull(event: TouchEvent) {
+    if (this.scannerOpen && event.touches.length === 1 && event.touches[0].clientY < 50) {
+      event.preventDefault(); // Prevent pull-to-refresh
+    }
+  }
     
   openMemberQR(member: any) {
     this.selectedMemberId = Number(member.id); // convert to number

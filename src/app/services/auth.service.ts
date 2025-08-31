@@ -40,7 +40,7 @@ export class AuthService {
   private isActiveSubject = new BehaviorSubject<boolean>(localStorage.getItem('isActive') === 'true');
   isActive$ = this.isActiveSubject.asObservable();
 
-  private apiUrl = 'https://localhost:44363/api/Role/login';
+  private apiUrl = 'https://gymmanagementapi.onrender.com/api/Role/login';
 
   constructor(private http: HttpClient, private router: Router) {
     // ✅ Immediately check validity on service load
