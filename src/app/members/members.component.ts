@@ -213,17 +213,7 @@ correctPassword = 'admin123'; // change to your actual password
     });
   }
   
-  verifyClosePassword() {
-    if (this.enteredPassword === this.correctPassword) {
-      this.qrScannerDialogVisible = false; // Close QR scanner
-      this.closePasswordDialogVisible = false; // Hide password popup
-      this.enteredPassword = '';
-      this.closeCamera(); // Your existing method to stop the camera
-    } else {
-      alert('Incorrect password!');
-      this.enteredPassword = '';
-    }
-  }
+
     
   openMemberQR(member: any) {
     this.selectedMemberId = Number(member.id); // convert to number
@@ -264,12 +254,22 @@ openScanner() {
 
   if (this.availableCameras.length > 0) {
     if (this.isMobile) {
-      // Mobile: default to back camera
-      const backCam = this.availableCameras.find(c =>
-        c.label.toLowerCase().includes('back')
+      // Mobile: default to front camera
+      const frontCam = this.availableCameras.find(c =>
+        c.label.toLowerCase().includes('front')
       );
-      this.selectedDevice = backCam || this.availableCameras[0];
-      this.isFrontCamera = false;
+
+      if (frontCam) {
+        this.selectedDevice = frontCam;
+        this.isFrontCamera = true;
+      } else {
+        // Fallback: use back camera if front not found
+        const backCam = this.availableCameras.find(c =>
+          c.label.toLowerCase().includes('back')
+        );
+        this.selectedDevice = backCam || this.availableCameras[0];
+        this.isFrontCamera = false;
+      }
     } else {
       // Desktop: select first available camera by default
       this.selectedDevice = this.availableCameras[0];
@@ -278,6 +278,7 @@ openScanner() {
 
   this.updateVideoConstraints();
 }
+
 
 
 // Called when user toggles between front/back (for mobile)
