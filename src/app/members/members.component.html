@@ -114,42 +114,7 @@
   <div *ngIf="scannedResult" class="mt-2 text-center">
     <p><strong>Last Scanned Member ID:</strong> {{ scannedResult }}</p>
   </div>
-  <p-dialog 
-  header="Enter Password to Close Scanner" 
-  [(visible)]="closePasswordDialogVisible"
-  [modal]="true"
-  [closable]="false"
-  [dismissableMask]="false"
-  [style]="{ width: '400px' }"
->
-  <div class="p-fluid">
-    <div class="field mb-3">
-      <label for="password">Password</label>
-      <input
-        type="password"
-        pInputText
-        id="password"
-        [(ngModel)]="enteredPassword"
-      />
-    </div>
-    <div class="d-flex justify-content-end gap-2">
-      <button 
-        pButton 
-        type="button" 
-        label="Cancel" 
-        class="p-button-secondary"
-        (click)="enteredPassword=''; closePasswordDialogVisible=false"
-      ></button>
-      <button 
-        pButton 
-        type="button" 
-        label="Confirm" 
-        class="p-button-primary"
-        (click)="verifyClosePassword()"
-      ></button>
-    </div>
-  </div>
-</p-dialog>
+  
 
   <!-- Members Table -->
   <p-table
