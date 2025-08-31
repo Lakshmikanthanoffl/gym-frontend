@@ -235,25 +235,44 @@ getCameraLabel = (device: MediaDeviceInfo) => {
 onCamerasFound(cameras: MediaDeviceInfo[]) {
   this.availableCameras = cameras;
 
+  const isMobile = /Mobi|Android|iPhone/i.test(navigator.userAgent);
+
   this.cameraOptions = cameras.map((cam, i) => {
     let label = cam.label || `Camera ${i + 1}`;
 
-    // For mobile devices → rename first camera as "Back Camera (Default)"
-    if (/Mobi|Android/i.test(navigator.userAgent) && i === 0) {
-      label = "Back Camera (Default)";
+    if (isMobile) {
+      // Force label corrections on mobile
+      if (cam.label.toLowerCase().includes("front")) {
+        label = "Front Camera";
+      } else if (
+        cam.label.toLowerCase().includes("back") ||
+        cam.label.toLowerCase().includes("rear") ||
+        cam.label.toLowerCase().includes("environment")
+      ) {
+        label = "Back Camera";
+      }
+
+      // ✅ If browser mislabeled but it's the first (default) camera we open, force it as Back
+      if (i === 0) {
+        label = "Back Camera";
+      }
     }
 
-    return {
-      label,
-      value: cam
-    };
+    return { label, value: cam };
   });
 
-  // Set default camera if not already selected
+  // Default to back camera on mobile
   if (!this.selectedDevice && cameras.length > 0) {
-    this.selectedDevice = cameras[0];  // still default to first camera
+    const backCam = cameras.find(c =>
+      c.label.toLowerCase().includes("back") ||
+      c.label.toLowerCase().includes("rear") ||
+      c.label.toLowerCase().includes("environment")
+    );
+
+    this.selectedDevice = backCam || cameras[0];
   }
 }
+
 
 
 
