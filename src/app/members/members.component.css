@@ -216,3 +216,27 @@
   border-radius: 6px;
 }
 
+/* Make header actions wrap on mobile */
+.page-header {
+  flex-wrap: wrap; /* allow buttons to move to next line */
+  gap: 0.5rem;
+}
+
+.page-header .d-flex {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+/* Make buttons full width on small screens */
+@media (max-width: 576px) {
+  .page-header .d-flex button {
+    flex: 1 1 100%;
+    min-width: 100%;
+    justify-content: center;
+  }
+  
+  .search-bar {
+    flex: 1 1 100% !important;
+    margin-bottom: 0.5rem;
+  }
+}

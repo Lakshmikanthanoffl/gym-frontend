@@ -254,22 +254,17 @@ openScanner() {
 
   if (this.availableCameras.length > 0) {
     if (this.isMobile) {
-      // Mobile: default to front camera
+      // Prefer front camera first
       const frontCam = this.availableCameras.find(c =>
         c.label.toLowerCase().includes('front')
       );
+      const backCam = this.availableCameras.find(c =>
+        c.label.toLowerCase().includes('back')
+      );
 
-      if (frontCam) {
-        this.selectedDevice = frontCam;
-        this.isFrontCamera = true;
-      } else {
-        // Fallback: use back camera if front not found
-        const backCam = this.availableCameras.find(c =>
-          c.label.toLowerCase().includes('back')
-        );
-        this.selectedDevice = backCam || this.availableCameras[0];
-        this.isFrontCamera = false;
-      }
+      // Default to front, fallback to back, then fallback to first
+      this.selectedDevice = frontCam || backCam || this.availableCameras[0];
+      this.isFrontCamera = !!frontCam;
     } else {
       // Desktop: select first available camera by default
       this.selectedDevice = this.availableCameras[0];
@@ -278,6 +273,7 @@ openScanner() {
 
   this.updateVideoConstraints();
 }
+
 
 
 
@@ -304,9 +300,19 @@ toggleCamera() {
 
 
 private updateVideoConstraints() {
-  this.videoConstraints = this.isFrontCamera
-    ? { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } }
-    : { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } };
+  if (this.selectedDevice && this.selectedDevice.deviceId) {
+    // 🎯 Use deviceId if a camera is selected
+    this.videoConstraints = {
+      deviceId: { exact: this.selectedDevice.deviceId },
+      width: { ideal: 1280 },
+      height: { ideal: 720 }
+    };
+  } else {
+    // 🎯 Fallback to facingMode if deviceId not available
+    this.videoConstraints = this.isFrontCamera
+      ? { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } }
+      : { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } };
+  }
 }
 // Download QR
 downloadMemberQr() {
