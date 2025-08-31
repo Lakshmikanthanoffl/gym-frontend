@@ -34,17 +34,34 @@ export class MembersComponent implements OnInit{
   passwordRequired = false;
   @ViewChild('scanner')   scanner: ZXingScannerComponent | undefined; 
   @ViewChild('qrcodeCanvas', { static: false }) qrcodeCanvas: ElementRef | undefined;
-  @HostListener('window:beforeunload', ['$event'])
-  handleBeforeUnload(event: BeforeUnloadEvent): string | undefined {
-    if (!this.pageLocked) {
-      this.promptPassword(); // show password modal
-      event.preventDefault();
-      event.returnValue = ''; // required for Chrome
-      return '';              // return empty string to satisfy TypeScript
+    // ✅ Block refresh / navigation when scanner is open
+    handleBeforeUnload(event: any): string | void {
+      if (this.isScannerOpen) {
+        // Instead of default browser message, we provide a string
+        // Note: Modern browsers ignore custom text and only show a generic prompt
+        const message = "Please enter password to reload!";
+        event.preventDefault();
+        event.returnValue = message; // required for Chrome/Edge
+        return message; // required for Firefox
+      }
+      return; // ensure all code paths return something
     }
-    return undefined;         // for the case when pageLocked is true
+    
+    // ✅ Catch keyboard shortcuts (F5 / Ctrl+R / Ctrl+Shift+R)
+    @HostListener('window:keydown', ['$event'])
+    handleKeyDown(event: KeyboardEvent) {
+      if (this.scannerOpen) {
+        if ((event.key === 'F5') || 
+            (event.ctrlKey && event.key.toLowerCase() === 'r')) {
+          event.preventDefault();
+          this.askPassword();
+        }
+      }
+    }
+   // ✅ Show password modal instead of browser dialog
+   askPassword() {
+    this.passwordRequired = true;
   }
-  
 
   availableGyms: { id: number; name: string }[] = [];
   gymId!: number;
@@ -78,7 +95,6 @@ export class MembersComponent implements OnInit{
   defaultGymId!: number;      // ✅ add this
   defaultGymName!: string;    // ✅ add this
 enteredOtp: string = '';
-pageLocked = false;  // NEW: to lock the page when refresh detected
 generatedOtp: string = '';
 isPhoneVerified: boolean = false;
 otpDialogVisible: boolean = false;
@@ -168,58 +184,6 @@ scannerActive: boolean = false;
     this.enableRefresh();
     this.closeCamera();
   }
-  promptPassword() {
-    this.pageLocked = true;
-  
-    Swal.fire({
-      title: 'Password Required',
-      text: 'Enter your password to continue using the page',
-      icon: 'warning',
-      input: 'password',
-      inputPlaceholder: 'Enter password',
-      inputAttributes: {
-        autocapitalize: 'off',
-        autocomplete: 'new-password'
-      },
-      background: '#1e1e1e',
-      color: '#fff',
-      showCancelButton: false,
-      confirmButtonText: 'Confirm',
-      allowOutsideClick: false,
-      allowEscapeKey: false,
-      inputValidator: (value) => {
-        if (!value) {
-          return 'Password is required!';
-        }
-        return null;
-      }
-    }).then((result) => {
-      if (result.isConfirmed) {
-        if (result.value === this.correctPassword) {
-          this.pageLocked = false;
-          Swal.fire({
-            icon: 'success',
-            title: 'Access Granted',
-            timer: 1500,
-            showConfirmButton: false,
-            background: '#1e1e1e',
-            color: '#fff'
-          });
-        } else {
-          Swal.fire({
-            icon: 'error',
-            title: 'Invalid Password',
-            text: 'The password you entered is incorrect.',
-            background: '#1e1e1e',
-            color: '#fff'
-          }).then(() => {
-            this.promptPassword(); // loop until correct password
-          });
-        }
-      }
-    });
-  }
-  
   disableRefresh() {
     // Block F5, Ctrl+R, Ctrl+Shift+R
     document.addEventListener('keydown', this.preventKeys, true);
@@ -291,51 +255,23 @@ scannerActive: boolean = false;
   }
   openQrScanner(): void {
     this.scannerOpen = true;
-  
-    const elem = document.documentElement as any;
-    if (elem.requestFullscreen) {
-      elem.requestFullscreen();
-    } else if (elem.webkitRequestFullscreen) { // Safari
-      elem.webkitRequestFullscreen();
-    } else if (elem.msRequestFullscreen) { // IE11
-      elem.msRequestFullscreen();
-    }
-  
-    // Disable mobile gestures like pull-to-refresh
-    window.addEventListener('touchstart', this.disablePull, { passive: false });
-    window.addEventListener('touchmove', this.disablePull, { passive: false });
-  
-    this.scannerActive = true;
+
+  const elem = document.documentElement as any;
+  if (elem.requestFullscreen) {
+    elem.requestFullscreen();
+  } else if (elem.webkitRequestFullscreen) { // Safari
+    elem.webkitRequestFullscreen();
+  } else if (elem.msRequestFullscreen) { // IE11
+    elem.msRequestFullscreen();
+  }
+    this.scannerOpen = true;
     document.body.style.overscrollBehavior = 'none'; // disables pull-to-refresh
     this.disableRefresh();
-    this.preventRefresh();
-  
+    this.scannerActive = true;
+  this.preventRefresh();
     this.qrScannerDialogVisible = true;
     this.startCamera();
   }
-  
-  @HostListener('window:keydown', ['$event'])
-  handleKeyDown(event: KeyboardEvent) {
-    if (this.scannerOpen) {
-      // Prevent refresh
-      if (event.key === 'F5' || (event.ctrlKey && event.key.toLowerCase() === 'r')) {
-        event.preventDefault();
-        this.confirmCloseScanner();
-      }
-  
-      // Detect Esc and immediately re-enter fullscreen
-      if (event.key === 'Escape' || event.key === 'Esc') {
-        event.preventDefault();
-        setTimeout(() => {
-          const elem = document.documentElement as any;
-          if (!document.fullscreenElement) {
-            if (elem.requestFullscreen) elem.requestFullscreen();
-          }
-        }, 0);
-      }
-    }
-  }
-  
    // Start the camera only when needed
    startCamera(): void {
     this.videoConstraints = {
@@ -385,8 +321,6 @@ scannerActive: boolean = false;
   } else if ((document as any).msExitFullscreen) {
     (document as any).msExitFullscreen();
   }
-  window.removeEventListener('touchstart', this.disablePull);
-  window.removeEventListener('touchmove', this.disablePull);
   this.allowRefresh();
   document.body.style.overscrollBehavior = 'auto'; // restore
           this.enableRefresh();
@@ -413,11 +347,7 @@ scannerActive: boolean = false;
     });
   }
   
-  disablePull(event: TouchEvent) {
-    if (this.scannerOpen && event.touches.length === 1 && event.touches[0].clientY < 50) {
-      event.preventDefault(); // Prevent pull-to-refresh
-    }
-  }
+
     
   openMemberQR(member: any) {
     this.selectedMemberId = Number(member.id); // convert to number
