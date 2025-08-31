@@ -1,3 +1,8 @@
+html, body {
+  overscroll-behavior-y: contain;
+  overscroll-behavior-x: none;
+  touch-action: none; /* Prevent double-tap zoom / gestures */
+}
 
 
 /* ============================= */
@@ -10,6 +15,11 @@
   box-shadow: 0 0 12px rgba(0, 0, 0, 0.4);
   border: 1px solid #444;
   margin: 1rem 0;
+}
+.page-locked {
+  pointer-events: none; /* blocks clicks */
+  user-select: none;    /* blocks text selection */
+  opacity: 0.6;         /* visual feedback */
 }
 
 /* ============================= */

@@ -20,10 +20,10 @@ export interface Payment {
   providedIn: 'root'
 })
 export class MemberService {
-  private apiUrl = 'https://localhost:44363/api/members';
-  private roleApiUrl = 'https://localhost:44363/api/Role';
-  private gymApiUrl = 'https://localhost:44363/api/role/bygym';
-  private apiUrlpayments = 'https://localhost:44363/api/Payment';
+  private apiUrl = 'https://gymmanagementapi.onrender.com/api/members';
+  private roleApiUrl = 'https://gymmanagementapi.onrender.com/api/Role';
+  private gymApiUrl = 'https://gymmanagementapi.onrender.com/api/role/bygym';
+  private apiUrlpayments = 'https://gymmanagementapi.onrender.com/api/Payment';
 
   constructor(private http: HttpClient) {}
 
