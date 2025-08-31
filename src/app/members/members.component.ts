@@ -71,7 +71,7 @@ isEditMode: boolean = false;
 selectedMemberId: number | null = null; // must be number, not string
 availableCameras: MediaDeviceInfo[] = [];
 selectedDevice: MediaDeviceInfo | undefined;
-videoConstraints: any = {};
+videoConstraints: MediaTrackConstraints = {};
 isFrontCamera = false;
 isMobile = false;
 
@@ -122,9 +122,9 @@ isAdmin: boolean=false;
   
   members: Member[] = [];
   filteredMembers: Member[] = [];
-
+  cameraOptions: any[] = [];
 searchTerm: string = '';
-
+isScannerOpen: boolean = false;
   editDialogVisible = false;
   selectedMember: any = null;
   addDialogVisible = false;
@@ -144,13 +144,75 @@ correctPassword = 'admin123'; // change to your actual password
 
     
   }
-  openQrScanner() {
+  ngOnDestroy(): void {
+    this.closeCamera();
+  }
+  openQrScanner(): void {
     this.qrScannerDialogVisible = true;
+    this.startCamera();
   }
-  confirmCloseScanner() {
-    // Hide the camera scanner temporarily (optional)
-    this.closePasswordDialogVisible = true;
+   // Start the camera only when needed
+   startCamera(): void {
+    this.videoConstraints = {
+      facingMode: this.isMobile
+        ? (this.isFrontCamera ? 'user' : 'environment')
+        : undefined
+    };
   }
+  confirmCloseScanner(): void {
+    Swal.fire({
+      title: 'Close Scanner?',
+      text: 'Enter password to close the QR scanner',
+      icon: 'warning',
+      input: 'password',
+      inputPlaceholder: 'Enter your password',
+      inputAttributes: {
+        autocapitalize: 'off',
+        autocomplete: 'new-password'
+      },
+      background: '#1e1e1e', // dark background
+      color: '#fff',         // white text
+      showCancelButton: true,
+      confirmButtonText: 'Confirm',
+      cancelButtonText: 'Cancel',
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      inputValidator: (value) => {
+        if (!value) {
+          return 'Password is required!';
+        }
+        return null;
+      }
+    }).then((result) => {
+      if (result.isConfirmed) {
+        const enteredPassword = result.value;
+        const correctPassword = '12345'; // 🔒 set your own password here or fetch dynamically
+  
+        if (enteredPassword === correctPassword) {
+          this.qrScannerDialogVisible = false;
+          this.closeCamera();
+          Swal.fire({
+            icon: 'success',
+            title: 'Scanner Closed',
+            text: 'QR scanner closed successfully.',
+            background: '#1e1e1e',
+            color: '#fff',
+            timer: 2000,
+            showConfirmButton: false
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Invalid Password',
+            text: 'The password you entered is incorrect.',
+            background: '#1e1e1e',
+            color: '#fff'
+          });
+        }
+      }
+    });
+  }
+  
   verifyClosePassword() {
     if (this.enteredPassword === this.correctPassword) {
       this.qrScannerDialogVisible = false; // Close QR scanner
@@ -178,28 +240,47 @@ getCameraLabel = (device: MediaDeviceInfo) => {
   return device.label || `Camera (${device.deviceId})`;
 };
 
-cameraOptions: any[] = [];
+
+// Called when cameras are detected
 
 onCamerasFound(cameras: MediaDeviceInfo[]) {
   this.availableCameras = cameras;
 
-  // Convert MediaDeviceInfo[] → Dropdown options
-  this.cameraOptions = cameras.map(cam => ({
-    label: cam.label || `Camera ${cameras.indexOf(cam) + 1}`,
+  this.cameraOptions = cameras.map((cam, i) => ({
+    label: cam.label || `Camera ${i + 1}`,
     value: cam
   }));
 
-  if (this.isMobile) {
-    const backCam = cameras.find(c => c.label.toLowerCase().includes('back'));
-    this.selectedDevice = backCam || cameras[0];
-    this.isFrontCamera = false;
-    this.updateVideoConstraints();
-  } else {
-    this.selectedDevice = cameras[0];
+  // Set default camera if not already selected
+  if (!this.selectedDevice && cameras.length > 0) {
+    this.selectedDevice = cameras[0];  // default to first camera
   }
 }
 
 
+// Called when user opens the QR Scanner popup
+openScanner() {
+  this.qrScannerDialogVisible = true;
+
+  if (this.availableCameras.length > 0) {
+    if (this.isMobile) {
+      // Mobile: default to back camera
+      const backCam = this.availableCameras.find(c =>
+        c.label.toLowerCase().includes('back')
+      );
+      this.selectedDevice = backCam || this.availableCameras[0];
+      this.isFrontCamera = false;
+    } else {
+      // Desktop: select first available camera by default
+      this.selectedDevice = this.availableCameras[0];
+    }
+  }
+
+  this.updateVideoConstraints();
+}
+
+
+// Called when user toggles between front/back (for mobile)
 toggleCamera() {
   if (this.availableCameras.length < 2) return;
 
@@ -219,6 +300,7 @@ toggleCamera() {
 
   this.updateVideoConstraints();
 }
+
 
 private updateVideoConstraints() {
   this.videoConstraints = this.isFrontCamera
@@ -332,59 +414,82 @@ downloadMemberQr() {
     XLSXStyle.writeFile(wb, "members.xlsx");
   }
   
- 
+  showToastInsideScanner(message: string, type: 'success' | 'error' | 'info') {
+    Swal.fire({
+      toast: true,
+      position: 'top',  // or 'top-end'
+      target: '#scannerModal', // 👈 attaches toast to the camera popup
+      icon: type,
+      title: message,
+      showConfirmButton: false,
+      timer: 2000,
+      timerProgressBar: true
+    });
+  }
+  
 
   onCodeResult(resultString: string) {
     if (!resultString) return;
   
     this.scannedResult = resultString;
     const today = new Date();
-    const todayStr = today.toLocaleDateString('en-CA'); // "YYYY-MM-DD"
-    const memberId = parseInt(resultString.replace(/\D/g, ''), 10); // assuming QR has just the Member ID
+    const todayStr = today.toLocaleDateString('en-CA');
+    const memberId = parseInt(resultString.replace(/\D/g, ''), 10);
   
     if (!isNaN(memberId)) {
       this.memberService.markAttendance(memberId, todayStr).subscribe({
         next: () => {
-          // Show toast on success
+          // ✅ SweetAlert toast INSIDE QR scanner popup
           Swal.fire({
             toast: true,
-            position: 'top-end',
+            position: 'top', // show at top of dialog
+            target: '.qr-scanner-dialog', // 👈 attach to dialog
             icon: 'success',
-            title: `Attendance marked for member ${memberId}`,
-            background: '#2b2b2b',   // Dark toast background
-            color: '#f0f0f0',        // Light text
-            iconColor: '#0d6efd',    // Blue success icon
-            showConfirmButton: false,
-            timer: 1500,
-            timerProgressBar: true,
-          });
-  
-          this.fetchMembersFromAPI(); // refresh members if needed
-        },
-        error: (err) => {
-          // Show toast on error
-          Swal.fire({
-            toast: true,
-            position: 'top-end',
-            icon: 'error',
-            title: 'Error marking attendance!',
-            background: '#2b2b2b',
-            color: '#f0f0f0',
-            iconColor: '#dc3545',   // Red error icon
+            title: 'Attendance marked successfully!',
             showConfirmButton: false,
             timer: 2000,
             timerProgressBar: true,
+            background: '#1e1e1e',
+            color: '#f5f5f5'
           });
-          console.error('Error marking attendance:', err);
+  
+          // ✅ Update attendance in list
+          const member = this.members.find(m => m.id === memberId);
+          if (member) {
+            if (!member.attendance) member.attendance = [];
+            if (!member.attendance.includes(todayStr)) {
+              member.attendance.push(todayStr);
+            }
+          }
+        },
+        error: () => {
+          Swal.fire({
+            toast: true,
+            position: 'top',
+            target: '.qr-scanner-dialog', // 👈 inside popup
+            icon: 'error',
+            title: 'Failed to mark attendance.',
+            showConfirmButton: false,
+            timer: 2000,
+            timerProgressBar: true,
+            background: '#1e1e1e',
+            color: '#f5f5f5'
+          });
         }
       });
     }
   }
   
 
-  closeCamera() {
-    this.isCameraOpen = false;
-  }
+
+
+
+ // Called when dialog closes
+closeCamera() {
+  this.selectedDevice = undefined;
+  this.videoConstraints = {}; // clears constraints
+  this.qrScannerDialogVisible = false;
+}
   markAttendance(member: Member): void {
     const today = new Date();
     const todayStr = today.toLocaleDateString('en-CA'); // "YYYY-MM-DD"
