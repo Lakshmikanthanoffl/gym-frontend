@@ -1,4 +1,4 @@
-<div class="table-wrapper">
+<div [ngClass]="{'page-locked': pageLocked}">
   <!-- Top Row: Search + Add Member + QR Scanner -->
   <div class="page-header d-flex align-items-center justify-content-between mb-3">
     <!-- Search box -->
@@ -21,6 +21,7 @@
         label="Add Member"
         icon="pi pi-plus"
         class="p-button-rounded p-button-success p-button-outlined px-4 py-2"
+        [disabled]="pageLocked || scannerOpen"
         (click)="showAddDialog()"
       ></button>
 
@@ -215,6 +216,7 @@
             type="button"
             icon="pi pi-eye"
             class="p-button-rounded p-button-text p-button-sm p-button-info me-2"
+            [disabled]="pageLocked || scannerOpen"
             (click)="viewMember(member)">
           </button>
           <button
@@ -222,6 +224,7 @@
             type="button"
             icon="pi pi-pencil"
             class="p-button-rounded p-button-text p-button-sm p-button-primary me-2"
+            [disabled]="pageLocked || scannerOpen"
             (click)="editMember(member)">
           </button>
           <button
@@ -229,6 +232,7 @@
             type="button"
             icon="pi pi-trash"
             class="p-button-rounded p-button-text p-button-sm p-button-danger"
+            [disabled]="pageLocked || scannerOpen"
             (click)="confirmDelete(member)">
           </button>
         </td>
