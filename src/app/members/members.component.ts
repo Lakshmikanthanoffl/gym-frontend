@@ -235,25 +235,23 @@ getCameraLabel = (device: MediaDeviceInfo) => {
 onCamerasFound(cameras: MediaDeviceInfo[]) {
   this.availableCameras = cameras;
 
-  const isMobile = /Mobi|Android/i.test(navigator.userAgent);
-
   this.cameraOptions = cameras.map((cam, i) => {
     let label = cam.label || `Camera ${i + 1}`;
 
-    // For mobile: force first/default camera label to "Back Camera"
-    if (isMobile && i === 0) {
-      label = "Back Camera";
+    // For mobile devices → rename first camera as "Back Camera (Default)"
+    if (/Mobi|Android/i.test(navigator.userAgent) && i === 0) {
+      label = "Back Camera (Default)";
     }
 
     return {
-      label: label,
+      label,
       value: cam
     };
   });
 
   // Set default camera if not already selected
   if (!this.selectedDevice && cameras.length > 0) {
-    this.selectedDevice = cameras[0];  // default to first camera (back)
+    this.selectedDevice = cameras[0];  // still default to first camera
   }
 }
 
