@@ -232,20 +232,31 @@ getCameraLabel = (device: MediaDeviceInfo) => {
 
 
 // Called when cameras are detected
-
 onCamerasFound(cameras: MediaDeviceInfo[]) {
   this.availableCameras = cameras;
 
-  this.cameraOptions = cameras.map((cam, i) => ({
-    label: cam.label || `Camera ${i + 1}`,
-    value: cam
-  }));
+  const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+
+  this.cameraOptions = cameras.map((cam, i) => {
+    let label = cam.label || `Camera ${i + 1}`;
+
+    // For mobile: force first/default camera label to "Back Camera"
+    if (isMobile && i === 0) {
+      label = "Back Camera";
+    }
+
+    return {
+      label: label,
+      value: cam
+    };
+  });
 
   // Set default camera if not already selected
   if (!this.selectedDevice && cameras.length > 0) {
-    this.selectedDevice = cameras[0];  // default to first camera
+    this.selectedDevice = cameras[0];  // default to first camera (back)
   }
 }
+
 
 
 // Called when user opens the QR Scanner popup
@@ -300,20 +311,11 @@ toggleCamera() {
 
 
 private updateVideoConstraints() {
-  if (this.selectedDevice && this.selectedDevice.deviceId) {
-    // 🎯 Use deviceId if a camera is selected
-    this.videoConstraints = {
-      deviceId: { exact: this.selectedDevice.deviceId },
-      width: { ideal: 1280 },
-      height: { ideal: 720 }
-    };
-  } else {
-    // 🎯 Fallback to facingMode if deviceId not available
-    this.videoConstraints = this.isFrontCamera
-      ? { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } }
-      : { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } };
-  }
+  this.videoConstraints = this.isFrontCamera
+    ? { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } }
+    : { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } };
 }
+
 // Download QR
 downloadMemberQr() {
   if (this.selectedMemberId === null) return;
