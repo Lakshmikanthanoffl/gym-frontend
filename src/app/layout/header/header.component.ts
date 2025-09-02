@@ -49,12 +49,11 @@ export class HeaderComponent implements OnInit {
   upiId = 'lakshmikanthan.b.2001-1@okhdfcbank';
 
   subscriptionPlans = [
-    { name: 'Monthly', amount: 3000 },
-    { name: '3 Months', amount: 9000 },
-    { name: '6 Months', amount: 18000 },
-    { name: 'Yearly', amount: 36000 }
+    { name: 'Monthly', amount: 3499 },
+    { name: '3 Months', amount: 9999 },
+    { name: 'Yearly', amount: 38000 }
   ];
-  aymentReceived: boolean = false; // Track if payment is done
+  paymentReceived: boolean = false; // Track if payment is done
   @ViewChild('logoutItem') logoutItem!: ElementRef;
   userrole: any;
   username: any;
@@ -420,8 +419,8 @@ export class HeaderComponent implements OnInit {
   
  // QR generation helper
 async generateUpiQr(amount: number) {
-  const note = "Payment for Techzy"; // ✅ your note/message
-  const upiString = `upi://pay?pa=${this.upiId}&pn=techzy&am=${amount}&cu=INR&tn=${encodeURIComponent(note)}`;
+  const note = "Payment for Zyct"; // ✅ your note/message
+  const upiString = `upi://pay?pa=${this.upiId}&pn=Zyct&am=${amount}&cu=INR&tn=${encodeURIComponent(note)}`;
 
   try {
     return await QRCode.toDataURL(upiString, { width: 300 });
