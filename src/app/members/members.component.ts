@@ -150,6 +150,7 @@ isScannerOpen: boolean = false;
   editDialogVisible = false;
   selectedMember: any = null;
   addDialogVisible = false;
+  successAudio = new Audio('assets/sounds/success.mp3');
   qrScannerDialogVisible = false;
 closePasswordDialogVisible = false;
 enteredPassword: string = '';
@@ -300,7 +301,7 @@ scannerActive: boolean = false;
     }).then((result) => {
       if (result.isConfirmed) {
         const enteredPassword = result.value;
-        const correctPassword = '12345'; // 🔒 set your own password here or fetch dynamically
+        const correctPassword = 'admin2@A'; // 🔒 set your own password here or fetch dynamically
   
         if (enteredPassword === correctPassword) {
           this.qrScannerDialogVisible = false;
@@ -596,24 +597,37 @@ downloadMemberQr() {
     const memberId = parseInt(resultString.replace(/\D/g, ''), 10);
   
     if (!isNaN(memberId)) {
+      const member = this.members.find(m => m.id === memberId);
+  
       this.memberService.markAttendance(memberId, todayStr).subscribe({
         next: () => {
-          // ✅ SweetAlert toast INSIDE QR scanner popup
+          // ✅ Play success sound
+          this.successAudio.play().catch(e => console.warn('Audio play failed', e));
+  
+          // ✅ Success toast
           Swal.fire({
             toast: true,
-            position: 'top', // show at top of dialog
-            target: '.qr-scanner-dialog', // 👈 attach to dialog
+            position: 'top',
+            target: '.qr-scanner-dialog',
             icon: 'success',
-            title: 'Attendance marked successfully!',
+            iconColor: '#fff',
+            html: member
+              ? `Attendance marked for <b>${member.name}</b> (ID: <b>${member.id}</b>)`
+              : `Attendance marked for ID: <b>${memberId}</b>`,
             showConfirmButton: false,
-            timer: 2000,
+            timer: 2500,
             timerProgressBar: true,
-            background: '#1e1e1e',
-            color: '#f5f5f5'
+            background: '#28a745',
+            color: '#fff',
+            showClass: {
+              popup: 'animate__animated animate__slideInDown'
+            },
+            hideClass: {
+              popup: 'animate__animated animate__fadeOut'
+            }
           });
   
           // ✅ Update attendance in list
-          const member = this.members.find(m => m.id === memberId);
           if (member) {
             if (!member.attendance) member.attendance = [];
             if (!member.attendance.includes(todayStr)) {
@@ -625,19 +639,27 @@ downloadMemberQr() {
           Swal.fire({
             toast: true,
             position: 'top',
-            target: '.qr-scanner-dialog', // 👈 inside popup
+            target: '.qr-scanner-dialog',
             icon: 'error',
+            iconColor: '#fff',
             title: 'Failed to mark attendance.',
             showConfirmButton: false,
-            timer: 2000,
+            timer: 2500,
             timerProgressBar: true,
-            background: '#1e1e1e',
-            color: '#f5f5f5'
+            background: '#dc3545',
+            color: '#fff',
+            showClass: {
+              popup: 'animate__animated animate__shakeX'
+            },
+            hideClass: {
+              popup: 'animate__animated animate__fadeOut'
+            }
           });
         }
       });
     }
   }
+  
   
 
 
