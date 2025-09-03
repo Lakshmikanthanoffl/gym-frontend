@@ -13,12 +13,14 @@ import * as XLSXStyle from 'xlsx-js-style';
 import { ZXingScannerComponent } from '@zxing/ngx-scanner';
 
 
-interface SubscriptionOption {
+export interface SubscriptionOption {
   label: string;
   value: string;
   period: string;
-  price: number; // ✅ Add this
+  price: number;
+  gymId?: number;
 }
+
 
 
 @Component({
@@ -96,7 +98,7 @@ selectedDevice: MediaDeviceInfo | undefined;
 videoConstraints: MediaTrackConstraints = {};
 isFrontCamera = false;
 isMobile = false;
-
+filteredSubscriptions: SubscriptionOption[] = [];
 deleteDialogVisible: boolean = false;
 memberToDelete: any = null;
 deleteConfirmationText: string = '';
@@ -135,11 +137,16 @@ isAdmin: boolean=false;
   
   
   subscriptionTypes: SubscriptionOption[] = [
-    { label: 'Monthly', value: 'Monthly', period: '1 Month', price: 600 },
-    { label: 'Quarterly', value: 'Quarterly', period: '3 Months', price: 1500 },
-    { label: 'Half-Yearly', value: 'Half-Yearly', period: '6 Months', price: 3200 },
-    { label: 'Yearly', value: 'Yearly', period: '12 Months', price: 6000 }
+    { label: 'Monthly', value: 'Monthly', period: '1 Month', price: 500, gymId: 679 },
+    { label: 'Quarterly', value: 'Quarterly', period: '3 Months', price: 1500, gymId: 679 },
+    { label: 'Half-Yearly', value: 'Half-Yearly', period: '6 Months', price: 3200, gymId: 679 },
+    { label: 'Yearly', value: 'Yearly', period: '12 Months', price: 6000, gymId: 679 },
+  
+    { label: 'Monthly', value: 'Monthly', period: '1 Month', price: 800, gymId: 1234 },
+    { label: 'Quarterly', value: 'Quarterly', period: '3 Months', price: 2000, gymId: 1234 },
+    { label: 'Yearly', value: 'Yearly', period: '12 Months', price: 7000, gymId: 1234 }
   ];
+  
   
   
   members: Member[] = [];
@@ -169,12 +176,17 @@ scannerActive: boolean = false;
     this.defaultGymId = Number(localStorage.getItem('GymId')) || 0;
     this.fetchMembersFromAPI(); // 👈
     this.getgymname();
-
+    this.loadSubscriptions();
     
   }
   ngOnDestroy(): void {
     this.enableRefresh();
     this.closeCamera();
+  }
+  loadSubscriptions() {
+    this.filteredSubscriptions = this.subscriptionTypes.filter(
+      sub => sub.gymId === this.defaultGymId
+    );
   }
   disableRefresh() {
     // Block F5, Ctrl+R, Ctrl+Shift+R

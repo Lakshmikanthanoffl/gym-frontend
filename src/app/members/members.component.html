@@ -378,7 +378,7 @@
       <label for="subscriptionType" class="form-label w-40">Subscription Type</label>
       <p-dropdown 
         id="subscriptionType"
-        [options]="subscriptionTypes"
+        [options]="filteredSubscriptions"
         [(ngModel)]="newMember.subscriptionType"
         optionLabel="label"
         placeholder="Select Subscription"

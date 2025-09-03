@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { GymService } from './gym.service';
 
 export interface Role {
   RoleId: number;
@@ -42,7 +43,7 @@ export class AuthService {
 
   private apiUrl = 'https://gymmanagementapi.onrender.com/api/Role/login';
 
-  constructor(private http: HttpClient, private router: Router) {
+  constructor(private http: HttpClient, private router: Router,private gymService: GymService) {
     // ✅ Immediately check validity on service load
     this.checkValidity();
 
@@ -120,7 +121,7 @@ export class AuthService {
         this.roleSubject.next(role.RoleName);
         this.usernameSubject.next(role.UserName);
         this.gymNameSubject.next(role.GymName);
-
+        this.gymService.setGymById(role.GymId); // example gymId
         // ✅ immediately check after login
         this.checkValidity();
       })
