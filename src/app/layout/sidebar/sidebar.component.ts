@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../../services/auth.service';
+import { GymService } from '../../services/gym.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -13,7 +14,7 @@ export class SidebarComponent implements OnInit {
   showBellIcon: boolean = false;
   bellIsRed: boolean = false;
 
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService, private gymService: GymService) {}
 
   ngOnInit() {
     // ✅ Role updates
@@ -29,6 +30,10 @@ export class SidebarComponent implements OnInit {
     // ✅ Expiry date updates (live, no refresh needed)
     this.authService.validUntil$.subscribe(validUntil => {
       this.updateExpiryStatus(validUntil);
+    });
+
+    this.gymService.currentGym$.subscribe(name => {
+      this.defaultGymName = name;
     });
   }
 

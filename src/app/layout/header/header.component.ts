@@ -12,6 +12,7 @@ import {
   animate,
 } from '@angular/animations';
 import { filter, map } from 'rxjs/operators';
+import { GymService } from '../../services/gym.service';
 
 @Component({
   selector: 'app-header',
@@ -59,7 +60,7 @@ export class HeaderComponent implements OnInit {
   username: any;
   subscriptionExpiring: boolean = false;
   validUntil: Date | null = null; // ✅ live expiry from service
-  constructor(private router: Router, private activatedRoute: ActivatedRoute,private authService: AuthService) {
+  constructor(private router: Router, private activatedRoute: ActivatedRoute,private authService: AuthService,private gymService: GymService) {
     this.router.events
       .pipe(
         filter(event => event instanceof NavigationEnd),
@@ -453,7 +454,7 @@ async generateUpiQr(amount: number) {
       if (result.isConfirmed) {
         localStorage.removeItem('authToken');
         localStorage.removeItem('role');
-      
+        this.gymService.logout();
         Swal.fire({
           title: 'Logged Out',
           text: 'You have successfully logged out.',
