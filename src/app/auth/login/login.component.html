@@ -1,56 +1,66 @@
-<div class="login-container d-flex justify-content-center align-items-center min-vh-100">
-  <div class="card login-card-dark shadow-lg border-0 p-5">
-    <h2 class="mb-4 text-center fw-bold">Member Login</h2>
-    
-    <form (ngSubmit)="login()" #loginForm="ngForm">
-      <!-- Email -->
-      <div class="mb-4">
-        <input
-          type="email"
-          placeholder="Email Address"
-          class="form-control form-control-lg dark-input rounded-3"
-          [(ngModel)]="UserEmail"
-          name="UserEmail"
-          required
-        />
-      </div>
+<div class="login-page">
+  <!-- Left: Welcome / Branding -->
+  <div class="login-left d-flex flex-column justify-content-center align-items-center text-center">
+    <div class="brand-logo mb-4">
+      <!-- Replace with your actual logo -->
+      <img src="assets/images/gym-bg.png" alt="Gym Logo" class="logo-img" />
+    </div>
+    <h1 class="welcome-title">Welcome to <span>Zyct</span></h1>
+    <p class="welcome-text">
+      Manage memberships, track progress, and power up your fitness journey 🚀
+    </p>
+  </div>
 
-      <!-- Password -->
-      <div class="mb-4 position-relative">
-        <input
-          [type]="showPassword ? 'text' : 'password'"
-          placeholder="Password"
-          class="form-control form-control-lg dark-input rounded-3"
-          [(ngModel)]="password"
-          name="password"
-          required
-        />
-        <button
-          type="button"
-          (click)="togglePasswordVisibility()"
-          class="btn btn-sm border-0 bg-transparent position-absolute toggle-eye"
-          tabindex="-1"
-        >
-          <i class="pi" [ngClass]="showPassword ? 'pi-eye' : 'pi-eye-slash'"></i>
+  <!-- Right: Login Form -->
+  <div class="login-right d-flex align-items-center justify-content-center">
+    <div class="login-box">
+      <h2 class="mb-4 fw-bold text-center login-title">Member Login</h2>
+
+      <form (ngSubmit)="login()" #loginForm="ngForm">
+        <!-- Email -->
+        <div class="mb-3">
+          <input
+            type="email"
+            placeholder="Email Address"
+            class="form-control dark-input"
+            [(ngModel)]="UserEmail"
+            name="UserEmail"
+            required
+          />
+        </div>
+
+        <!-- Password -->
+        <div class="mb-4 position-relative">
+          <input
+            [type]="showPassword ? 'text' : 'password'"
+            placeholder="Password"
+            class="form-control dark-input"
+            [(ngModel)]="password"
+            name="password"
+            required
+          />
+          <button
+            type="button"
+            (click)="togglePasswordVisibility()"
+            class="btn btn-sm border-0 bg-transparent position-absolute toggle-eye"
+            tabindex="-1"
+          >
+            <i class="pi" [ngClass]="showPassword ? 'pi-eye' : 'pi-eye-slash'"></i>
+          </button>
+        </div>
+
+        <!-- Login Button -->
+        <button type="submit" class="btn gym-btn w-100 rounded-3 shadow-sm">
+          Login
         </button>
-      </div>
 
-      <!-- Login Button -->
-      <button type="submit" class="btn gym-btn w-100 btn-lg rounded-3 shadow-sm">
-        Login
-      </button>
-<!-- Contact Us Link (only shows on subscription error) -->
-<div *ngIf="showContactUs" class="text-center mt-3">
-  <a (click)="openContactUsPopup()" class="fw-semibold text-accent text-decoration-none" style="cursor: pointer;">
-    Contact Us
-  </a>
-</div>
-
-      <!-- Signup Link -->
-      <!-- <p class="mt-4 text-center text-secondary">
-        New to our gym?
-        <a routerLink="/signup" class="fw-semibold text-accent text-decoration-none">Create Account</a>
-      </p> -->
-    </form>
+        <!-- Contact Us Link -->
+        <div *ngIf="showContactUs" class="text-center mt-3">
+          <a (click)="openContactUsPopup()" class="fw-semibold text-accent" style="cursor: pointer;">
+            Contact Us
+          </a>
+        </div>
+      </form>
+    </div>
   </div>
 </div>
