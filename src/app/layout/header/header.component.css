@@ -1,53 +1,53 @@
-/* SweetAlert2 Dark Popup Styles */
-.dark-popup {
-  border-radius: 12px;
-  box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+/* Header Base */
+.header {
+  background-color: #2e2e2e;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 60px;
+  padding: 0 15px;
 }
 
-.dark-title {
-  color: #ffcc00 !important; /* yellowish title */
+/* Left (Hamburger) */
+.header-left {
+  display: none; /* hidden on desktop */
+  align-items: center;
 }
 
-.dark-confirm {
-  background-color: #3085d6 !important;
-  color: #fff !important;
-  border-radius: 8px;
+/* Header Title */
+.header-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  flex: 1;
+  text-align: left; /* default left-aligned */
 }
 
-.dark-cancel {
-  background-color: #d33 !important;
-  color: #fff !important;
-  border-radius: 8px;
+/* Right Section */
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 15px;
 }
 
-/* Notification Dot Styles */
-.notification-dot {
-  width: 10px;
-  height: 10px;
-  background-color: red;
-  border-radius: 50%;
-  display: inline-block;
-  margin-right: 8px;
+/* Hamburger Button */
+.hamburger-btn {
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #ffcc00;
 }
 
-/* Notification Bell Styles */
+/* Notification Bell */
 .notification-wrapper {
   position: relative;
-  display: inline-block;
 }
 
 .notification-bell {
   font-size: 1.3rem;
-  color: #ffcc00; /* gold/yellow for warning */
+  color: #ffcc00;
   animation: bell-blink 1.2s infinite;
 }
 
-@keyframes bell-blink {
-  0%, 100% { color: #ffcc00; }
-  50% { color: #ff6600; } /* orange glow */
-}
-
-/* Small pulse dot on bell */
 .pulse-dot {
   position: absolute;
   top: -3px;
@@ -60,8 +60,102 @@
   animation: pulse 1.5s infinite;
 }
 
+@keyframes bell-blink {
+  0%, 100% { color: #ffcc00; }
+  50% { color: #ff6600; }
+}
+
 @keyframes pulse {
   0% { transform: scale(0.9); opacity: 0.8; }
   50% { transform: scale(1.3); opacity: 0.4; }
   100% { transform: scale(0.9); opacity: 0.8; }
+}
+
+/* Username & User Icon */
+.username-text {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #f1f1f1;
+  max-width: 150px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.user-icon {
+  font-size: 1.3rem;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.user-icon:hover {
+  color: #ffcc00;
+}
+
+/* Popup Menu */
+.custom-popup-menu {
+  position: absolute;
+  top: 120%;
+  right: 0;
+  background: #1f1f1f;
+  border: 1px solid #333;
+  border-radius: 8px;
+  min-width: 150px;
+  z-index: 1000;
+  padding: 8px 0;
+}
+
+.custom-popup-menu ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.custom-popup-menu li {
+  padding: 10px 15px;
+  cursor: pointer;
+  color: #eee;
+  display: flex;
+  align-items: center;
+}
+
+.custom-popup-menu li:hover {
+  background: #333;
+  border-radius: 6px;
+}
+
+/* Responsive */
+@media (max-width: 991px) {
+  .header-left {
+    display: flex; /* show hamburger on mobile */
+  }
+  .header-title {
+    text-align: center;
+  }
+  .header-right {
+    display: none; /* hide bell, username, logout on mobile */
+  }
+}
+
+/* Hamburger button */
+.hamburger-btn {
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #ffffff;
+}
+
+/* Hide right section on mobile when sidebar is closed */
+.hidden-mobile {
+  display: none;
+}
+
+/* Responsive */
+@media (min-width: 992px) {
+  .hamburger-btn {
+    display: none; /* hide hamburger on desktop */
+  }
+  
+  .hidden-mobile {
+    display: flex !important; /* always show right section on desktop */
+  }
 }

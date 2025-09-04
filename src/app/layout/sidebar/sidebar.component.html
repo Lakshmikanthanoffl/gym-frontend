@@ -1,61 +1,72 @@
-<div *ngIf="isLoggedIn()" class="sidebar px-3 py-3" style="background-color: #1f1f1f; color: white;">
-  <h4 class="mb-4 text-center big-title">
+<!-- Dark overlay (click to close) -->
+<div class="sidebar-overlay" *ngIf="sidebarOpen" (click)="toggleSidebar()"></div>
+
+<!-- Sidebar -->
+<div *ngIf="isLoggedIn()" 
+     class="sidebar px-3 py-3"
+     [class.sidebar-closed]="!sidebarOpen">
+
+  <!-- Close button (only visible on mobile) -->
+  <div class="sidebar-header d-flex justify-content-between align-items-center">
+    <h5 class="m-0 d-md-none"> {{ userrole === 'superadmin' ? 'Zyct' : defaultGymName }}</h5>
+    <i class="pi pi-times close-btn" (click)="toggleSidebar()"></i>
+  </div>
+
+  <!-- Mobile: Username & Logout -->
+  <div class="mobile-user-section d-md-none mt-3 mb-3">
+    <div class="d-flex justify-content-between align-items-center">
+      <span class="username-text">{{ username }}</span>
+      <i class="pi pi-sign-out user-icon" (click)="logout()"></i>
+    </div>
+  </div>
+
+  <!-- Sidebar Content -->
+  <h4 class="mb-4 text-center big-title d-none d-md-block">
     {{ userrole === 'superadmin' ? 'Zyct' : defaultGymName }}
-    
   </h4>
-  
-  
-  
 
-  <a routerLink="/dashboard" routerLinkActive="active">
-    <i class="pi pi-home"></i>
-    <span> Dashboard</span>
+  <a routerLink="/dashboard" routerLinkActive="active" (click)="closeSidebarOnMobile()">
+    <i class="pi pi-home"></i> <span> Dashboard</span>
   </a>
 
-  <a *ngIf="userrole === 'admin' || userrole === 'superadmin'" routerLink="/members" routerLinkActive="active">
-    <i class="pi pi-users"></i>
-    <span> Members</span>
-  </a> 
-
-  <a routerLink="/plans" routerLinkActive="active">
-    <i class="pi pi-book"></i>
-    <span> Plans</span>
-  </a>
-
-  <a *ngIf="userrole === 'admin' || userrole === 'superadmin'" routerLink="/payments" routerLinkActive="active">
-    <i class="pi pi-credit-card"></i>
-    <span> Payments</span>
-  </a>
   <a *ngIf="userrole === 'admin' || userrole === 'superadmin'" 
-   routerLink="/subscription" 
-   routerLinkActive="active"
-   class="subscription-link">
-  <i class="pi pi-id-card"></i>
-  <span class="subscription-text">
-    Subscription
-    <!-- Yellow dot if 1–7 days left -->
-    <span *ngIf="showBellIcon && !bellIsRed" class="sub-dot sub-dot-yellow"></span>
-    <!-- Red dot if expires today -->
-    <span *ngIf="bellIsRed" class="sub-dot sub-dot-red"></span>
-  </span>
-</a>
+     routerLink="/members" routerLinkActive="active" (click)="closeSidebarOnMobile()">
+    <i class="pi pi-users"></i> <span> Members</span>
+  </a>
 
+  <a routerLink="/plans" routerLinkActive="active" (click)="closeSidebarOnMobile()">
+    <i class="pi pi-book"></i> <span> Plans</span>
+  </a>
 
+  <a *ngIf="userrole === 'admin' || userrole === 'superadmin'" 
+     routerLink="/payments" routerLinkActive="active" (click)="closeSidebarOnMobile()">
+    <i class="pi pi-credit-card"></i> <span> Payments</span>
+  </a>
 
-  <!-- Superadmin only section -->
+  <a *ngIf="userrole === 'admin' || userrole === 'superadmin'" 
+     routerLink="/subscription" routerLinkActive="active" class="subscription-link"
+     (click)="closeSidebarOnMobile()">
+    <i class="pi pi-id-card"></i>
+    <span class="subscription-text">
+      Subscription
+      <span *ngIf="showBellIcon && !bellIsRed" class="sub-dot sub-dot-yellow"></span>
+      <span *ngIf="bellIsRed" class="sub-dot sub-dot-red"></span>
+    </span>
+  </a>
+
+  <!-- Admin Onboard -->
   <div *ngIf="userrole === 'superadmin'" class="mt-4">
     <h5 class="mb-2">Admin Onboard</h5>
-    <a routerLink="/admin-onboard" routerLinkActive="active">
-      <i class="pi pi-user-plus"></i>
-      <span> Onboard</span>
+    <a routerLink="/admin-onboard" routerLinkActive="active" (click)="closeSidebarOnMobile()">
+      <i class="pi pi-user-plus"></i> <span> Onboard</span>
     </a>
   </div>
-  <!-- Contact Us section (visible to all logged-in users) -->
+
+  <!-- Support -->
   <div class="mt-4">
     <h5 class="mb-2">Support</h5>
-    <a routerLink="/contact-us" routerLinkActive="active">
-      <i class="pi pi-envelope"></i>
-      <span> Contact Us</span>
+    <a routerLink="/contact-us" routerLinkActive="active" (click)="closeSidebarOnMobile()">
+      <i class="pi pi-envelope"></i> <span> Contact Us</span>
     </a>
   </div>
 </div>
