@@ -242,3 +242,86 @@
   transform: scale(1.2);
   color: #ffd700; /* optional hover color */
 }
+
+/* ============================= */
+/* Responsive Search & Button     */
+/* ============================= */
+@media (max-width: 768px) {
+  .search-filters {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .text-end.mb-3 {
+    text-align: center !important;
+  }
+
+  .text-end.mb-3 button {
+    width: 100%;
+  }
+}
+
+/* ============================= */
+/* Dashboard Grid Responsiveness  */
+/* ============================= */
+@media (max-width: 600px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr; /* stack cards vertically */
+    padding: 1rem;
+    gap: 1rem;
+  }
+
+  .card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+}
+
+/* ============================= */
+/* Dialog Responsiveness          */
+/* ============================= */
+@media (max-width: 768px) {
+  ::ng-deep .dark-dialog .p-dialog {
+    width: 95% !important;
+    max-width: 95% !important;
+  }
+
+  ::ng-deep .dark-dialog .p-fluid {
+    grid-template-columns: 1fr; /* stack label + input */
+  }
+
+  ::ng-deep .dark-dialog .p-field label {
+    margin-bottom: 0.4rem;
+  }
+
+  ::ng-deep .dark-dialog .form-actions .p-button {
+    width: 100% !important;
+  }
+}
+
+/* ============================= */
+/* Table Responsiveness           */
+/* ============================= */
+::ng-deep .dark-table .p-datatable-wrapper {
+  overflow-x: auto;
+}
+
+::ng-deep .dark-table table {
+  min-width: 800px; /* allows horizontal scroll on small screens */
+}
+
+/* ============================= */
+/* Input, Dropdown, Calendar      */
+/* ============================= */
+@media (max-width: 600px) {
+  ::ng-deep .dark-dialog .p-inputtext,
+  ::ng-deep .dark-dialog .p-dropdown,
+  ::ng-deep .dark-dialog .p-calendar,
+  ::ng-deep .dark-dialog .p-inputnumber,
+  ::ng-deep .dark-dialog input[type="file"] {
+    width: 100% !important;
+  }
+}
+

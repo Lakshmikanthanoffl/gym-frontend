@@ -209,3 +209,63 @@
 .text-warning { color: #ffc107; } /* yellow */
 .text-success { color: #28a745; } /* green */
 .font-bold { font-weight: bold; }
+/* ================================
+   ✅ Responsive Layout
+================================ */
+
+/* 🔹 Page Header: Search + Button */
+@media (max-width: 768px) {
+  .page-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .page-header .search-bar {
+    flex: 1 1 auto !important;
+    width: 100% !important;
+  }
+
+  .page-header button {
+    align-self: flex-end;
+  }
+}
+
+/* 🔹 Form Fields: Stack on smaller screens */
+@media (max-width: 600px) {
+  .field-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .field-row label {
+    width: 100% !important;
+    margin-bottom: 0.5rem;
+  }
+
+  .field-row .flex-grow-1,
+  .field-row input,
+  .field-row p-dropdown,
+  .field-row p-calendar,
+  .field-row p-inputNumber {
+    width: 100% !important;
+  }
+}
+
+/* 🔹 Dialog: Full width on mobile */
+@media (max-width: 768px) {
+  ::ng-deep .dark-dialog .p-dialog {
+    width: 95% !important;
+    max-width: 95% !important;
+  }
+}
+
+/* 🔹 Table: Scrollable on small screens */
+::ng-deep .dark-table .p-datatable-wrapper {
+  overflow-x: auto;
+}
+
+/* 🔹 Table cells shrink properly */
+::ng-deep .dark-table table {
+  min-width: 800px; /* allow horizontal scroll if content is too wide */
+}
