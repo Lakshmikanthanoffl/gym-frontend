@@ -6,7 +6,7 @@
   margin-bottom: 1.5rem;
 }
 
-/* Subtle divider between cards */
+/* Optional subtle divider between cards */
 .dashboard-grid p-card:not(:last-child) {
   border-right: 1px solid #333;
 }
@@ -58,9 +58,9 @@
   text-align: center;
 }
 
-.text-green-600 { color: #00c853; }  /* Active */
-.text-red-600 { color: #f44336; }    /* Expired */
-.text-yellow-500 { color: #ffb300; } /* Expiring soon */
+.text-green-600 { color: #00c853; }  
+.text-red-600 { color: #f44336; }    
+.text-yellow-500 { color: #ffb300; } 
 
 /* ---------------- UPI Logos ---------------- */
 .upi-logos {
@@ -133,7 +133,8 @@
 }
 
 /* ---------------- Tables inside cards ---------------- */
-::ng-deep table.table {
+::ng-deep table.table,
+.admin-expiry-table {
   width: 100%;
   border-collapse: collapse;
   background-color: #1e1e1e;
@@ -145,24 +146,26 @@
 }
 
 /* Table headers */
-::ng-deep table.table th {
+::ng-deep table.table th,
+.admin-expiry-table thead th {
   background-color: #2a2a2a;
   color: #ffffff;
   font-weight: 600;
   font-size: 0.95rem;
   padding: 0.35rem 0.5rem;
   border: 1px solid #333;
-  text-align: left;
+  text-align: center;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 /* Table body cells */
-::ng-deep table.table td {
+::ng-deep table.table td,
+.admin-expiry-table td {
   border: 1px solid #333;
   padding: 0.35rem 0.5rem;
-  text-align: left;
+  text-align: center;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -176,35 +179,40 @@
 }
 
 /* Striping and hover */
-::ng-deep table.table tbody tr:nth-child(even) {
+::ng-deep table.table tbody tr:nth-child(even),
+.admin-expiry-table tbody tr:nth-child(even) {
   background-color: #252525;
 }
 
-::ng-deep table.table tbody tr:hover {
+::ng-deep table.table tbody tr:hover,
+.admin-expiry-table tbody tr:hover {
   background-color: #333333;
 }
 
 /* Scrollable body */
-::ng-deep table.table tbody {
+::ng-deep table.table tbody,
+.admin-expiry-table tbody {
   display: block;
   max-height: 250px;
   overflow-y: auto;
   box-shadow: inset 0 -5px 5px -5px #000;
 }
 
-::ng-deep table.table thead {
+::ng-deep table.table thead,
+.admin-expiry-table thead {
   display: table;
   width: 100%;
   table-layout: fixed;
 }
 
-::ng-deep table.table tbody tr {
+::ng-deep table.table tbody tr,
+.admin-expiry-table tbody tr {
   display: table;
   width: 100%;
   table-layout: fixed;
 }
 
-/* Scrollbar for dark theme tables */
+/* Scrollbar for dark tables */
 ::-webkit-scrollbar {
   width: 6px;
 }
@@ -224,192 +232,38 @@
 }
 
 /* ---------------- Utility classes ---------------- */
-.mt-4 {
-  margin-top: 1.5rem;
-}
-
-.text-center {
-  text-align: center;
-}
-
-/* Optional small spacing for card paragraphs */
-::ng-deep p-card p {
-  margin: 0.25rem 0;
-}
+.mt-4 { margin-top: 1.5rem; }
+.text-center { text-align: center; }
+::ng-deep p-card p { margin: 0.25rem 0; }
 
 /* ---------------- Responsive ---------------- */
 @media screen and (max-width: 1024px) {
-  .grid-layout {
-    grid-template-columns: 1fr; /* Stack graph & QR vertically */
-  }
-
-  .qr-image {
-    width: 150px;
-    height: 150px;
-  }
-
-  .upi-logos img {
-    height: 32px;
-  }
+  .grid-layout { grid-template-columns: 1fr; gap: 1rem; }
+  .qr-image { width: 150px; height: 150px; }
+  .upi-logos img { height: 32px; }
 }
 
 @media screen and (max-width: 768px) {
-  .dashboard-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .grid-layout {
-    grid-template-columns: 1fr; /* full width graph then QR */
-  }
-
+  .dashboard-grid { grid-template-columns: 1fr; }
+  .grid-layout { grid-template-columns: 1fr; }
   ::ng-deep table.table td,
-  ::ng-deep table.table th {
-    max-width: 120px;
-    font-size: 0.85rem;
-    padding: 0.25rem 0.4rem;
+  ::ng-deep table.table th,
+  .admin-expiry-table td,
+  .admin-expiry-table th {
+    min-width: 120px; font-size: 0.85rem; padding: 8px 6px;
   }
-
-  ::ng-deep p-card .p-card-body {
-    font-size: 1rem;
-  }
-
-  .qr-image {
-    width: 120px;
-    height: 120px;
-  }
-
-  .upi-logos {
-    gap: 0.8rem;
-  }
-
-  .upi-logos img {
-    height: 26px;
-  }
+  ::ng-deep p-card .p-card-body { font-size: 1rem; }
+  .qr-image { width: 120px; height: 120px; }
+  .upi-logos { gap: 0.8rem; }
+  .upi-logos img { height: 26px; }
 }
 
 @media screen and (max-width: 480px) {
-  .qr-image {
-    width: 100px;
-    height: 100px;
-    border-width: 4px;
-  }
-
-  .upi-logos img {
-    height: 22px;
-  }
-
-  ::ng-deep p-card .p-card-body {
-    font-size: 0.9rem;
-  }
-}
-/* Ensure the table takes full width and columns are evenly spaced */
-.admin-expiry-table {
-  width: 100%;
-  table-layout: fixed; /* key for equal column widths */
-  border-collapse: collapse;
-}
-
-.admin-expiry-table th,
-.admin-expiry-table td {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  padding: 12px 8px;
-  text-align: center; /* center content */
-}
-
-/* Optional: alternate row colors */
-.admin-expiry-table tbody tr:nth-child(even) {
-  background-color: #2d2d2d; /* dark gray */
-}
-
-.admin-expiry-table tbody tr:nth-child(odd) {
-  background-color: #1f1f1f; /* slightly darker gray */
-}
-
-/* Smooth hover effect */
-.admin-expiry-table tbody tr:hover {
-  background-color: #444444;
-  transition: background-color 0.3s;
-}
-
-/* Header style */
-.admin-expiry-table thead th {
-  background-color: #111111;
-  color: #ffffff;
-  font-weight: bold;
-  border-bottom: 2px solid #333333;
-}
-/* ---------------- Mobile Friendly Tables ---------------- */
-@media screen and (max-width: 768px) {
-  /* Make tables scrollable horizontally instead of squeezing */
-  .admin-expiry-table,
-  ::ng-deep table.table {
-    display: block;
-    overflow-x: auto;
-    white-space: nowrap;
-    border-radius: 8px;
-  }
-
-  /* Prevent squished columns */
-  .admin-expiry-table th,
-  .admin-expiry-table td,
-  ::ng-deep table.table th,
-  ::ng-deep table.table td {
-    min-width: 120px; /* ensures tap-friendly cells */
-    font-size: 0.85rem;
-    padding: 8px 6px;
-  }
-
-  /* Make QR + Graph stack full width */
-  .grid-layout {
-    grid-template-columns: 1fr !important;
-    gap: 1rem;
-  }
-
-  /* Dashboard summary cards full width */
-  .dashboard-grid {
-    grid-template-columns: 1fr !important;
-  }
-
-  /* Shrink QR image for small screens */
-  .qr-image {
-    width: 100px;
-    height: 100px;
-  }
-
-  .upi-logos img {
-    height: 24px;
-  }
-}
-
-@media screen and (max-width: 480px) {
-  /* Smaller text for very small screens */
-  .admin-expiry-table th,
-  .admin-expiry-table td,
-  ::ng-deep table.table th,
-  ::ng-deep table.table td {
-    font-size: 0.8rem;
-    min-width: 100px;
-    padding: 6px 4px;
-  }
-
-  /* Card body text */
-  ::ng-deep p-card .p-card-body {
-    font-size: 0.85rem;
-  }
-
-  /* QR code even smaller */
-  .qr-image {
-    width: 80px;
-    height: 80px;
-  }
-
-  .upi-logos {
-    gap: 0.5rem;
-  }
-
-  .upi-logos img {
-    height: 20px;
+  .qr-image { width: 80-100px; height: 80-100px; border-width: 4px; }
+  .upi-logos img { height: 20px; }
+  ::ng-deep p-card .p-card-body { font-size: 0.85rem; }
+  ::ng-deep table.table td, ::ng-deep table.table th,
+  .admin-expiry-table td, .admin-expiry-table th {
+    font-size: 0.8rem; min-width: 100px; padding: 6px 4px;
   }
 }

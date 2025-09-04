@@ -4,10 +4,36 @@
   padding: 20px 10px;
   width: 220px;
   height: 100vh;
-  transition: width 0.3s ease;
-  overflow: hidden;
+  transition: transform 0.3s ease;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1100; /* higher than overlay */
 }
 
+.sidebar-closed {
+  transform: translateX(-100%);
+}
+
+/* Sidebar Header (Close Button) */
+.sidebar-header {
+  display: flex;
+  justify-content: flex-end;
+  padding: 10px;
+}
+
+.close-btn {
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #fff;
+  transition: color 0.2s ease;
+}
+
+.close-btn:hover {
+  color: #ffcc00;
+}
+
+/* Links */
 .sidebar a {
   display: flex;
   align-items: center;
@@ -23,27 +49,59 @@
   border-radius: 4px;
 }
 
-
-
-.sidebar a span {
-  transition: opacity 0.2s;
-  white-space: nowrap;
+/* Dark overlay */
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000; /* just below sidebar */
 }
 
-.toggle-btn {
+/* Desktop behavior */
+@media (min-width: 992px) {
+  .sidebar {
+    transform: translateX(0); /* always visible on desktop */
+    position: relative;
+  }
+  .close-btn {
+    display: none; /* hide close button on desktop */
+  }
+  .sidebar-overlay {
+    display: none; /* no overlay on desktop */
+  }
+}
+/* Close button (top-right) */
+.close-btn {
+  font-size: 1.5rem;
   cursor: pointer;
-  margin-bottom: 20px;
-  text-align: right;
-  padding-right: 10px;
+  color: #ffcc00;
 }
 
-.sidebar-title {
-  margin-bottom: 20px;
-  font-size: 1.2rem;
+/* Mobile user section */
+.mobile-user-section {
+  border-bottom: 1px solid #444;
+  padding-bottom: 10px;
 }
-.pi-bell {
-  animation: pulse 1.5s infinite;
-  font-size: 14px;
+
+/* Hide big title on mobile */
+@media (max-width: 768px) {
+  .big-title.d-none.d-md-block {
+    display: none !important;
+  }
+}
+
+/* Sidebar overlay */
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  z-index: 999;
 }
 
 .subscription-text {

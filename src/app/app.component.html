@@ -14,9 +14,11 @@
 
 <!-- Normal App Layout -->
 <div *ngIf="!isMaintenanceMode && !isLoginPage" class="app-wrapper d-flex">
-  <app-sidebar></app-sidebar>
+  <app-sidebar #sidebar></app-sidebar>
   <div class="main-content">
-    <app-header></app-header>
+    <app-header (sidebarToggle)="sidebar.toggleSidebar()"></app-header>
+
+
     <app-loader></app-loader>
     <div class="content-wrapper p-3">
       <router-outlet></router-outlet>

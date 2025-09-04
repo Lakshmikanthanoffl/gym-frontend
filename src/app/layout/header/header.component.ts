@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, HostListener, OnInit, Output, ViewChild } from '@angular/core';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service'; // adjust the path
 import Swal from 'sweetalert2';
@@ -13,6 +13,7 @@ import {
 } from '@angular/animations';
 import { filter, map } from 'rxjs/operators';
 import { GymService } from '../../services/gym.service';
+import { SidebarService } from '../../services/sidebar.service';
 
 @Component({
   selector: 'app-header',
@@ -42,6 +43,7 @@ import { GymService } from '../../services/gym.service';
   ]
 })
 export class HeaderComponent implements OnInit {
+  @Output() sidebarToggle = new EventEmitter<void>();
   
   headerTitle = 'Dashboard';
   
@@ -58,9 +60,11 @@ export class HeaderComponent implements OnInit {
   @ViewChild('logoutItem') logoutItem!: ElementRef;
   userrole: any;
   username: any;
+  sidebarOpen: boolean = false;           // Track sidebar state
+  isMobileView: boolean = false;          // Track mobile viewport
   subscriptionExpiring: boolean = false;
   validUntil: Date | null = null; // ✅ live expiry from service
-  constructor(private router: Router, private activatedRoute: ActivatedRoute,private authService: AuthService,private gymService: GymService) {
+  constructor(private router: Router, private activatedRoute: ActivatedRoute,private sidebarService: SidebarService,private authService: AuthService,private gymService: GymService) {
     this.router.events
       .pipe(
         filter(event => event instanceof NavigationEnd),
@@ -82,10 +86,14 @@ export class HeaderComponent implements OnInit {
     this.authService.role$.subscribe(role => {
       this.userrole = role;
     });
+    
     this.authService.username$.subscribe(username => {
       this.username = username;
     });
-
+ // Subscribe to sidebar open state
+ this.sidebarService.sidebarOpen$.subscribe(state => {
+  this.sidebarOpen = state;
+});
      // Listen for subscription updates
   this.authService.validUntil$.subscribe(validUntil => {
     if (validUntil) {
@@ -93,10 +101,19 @@ export class HeaderComponent implements OnInit {
       this.checkSubscriptionExpiry();
     }
   });
+  this.updateMobileView();
     this.checkSubscriptionExpiry();
 
     this.scheduleSubscriptionPopup();
   }
+
+    // Track window resize
+    @HostListener('window:resize')
+    updateMobileView() {
+      this.isMobileView = window.innerWidth <= 991; // show hamburger for 991px and below
+    }
+    
+
   
   togglePopup() {
     this.popupVisible = !this.popupVisible;
@@ -106,6 +123,9 @@ export class HeaderComponent implements OnInit {
         this.logoutItem?.nativeElement.focus();
       }, 0);
     }
+  }
+  toggleSidebar() {
+    this.sidebarService.toggleSidebar();
   }
   scheduleSubscriptionPopup() {
     const validUntilStr = this.validUntil;
