@@ -6,7 +6,14 @@
   </div>
 </div>
 
-<div *ngIf="!isMaintenanceMode" class="app-wrapper d-flex">
+<!-- Login Page -->
+<div *ngIf="isLoginPage" class="login-wrapper">
+  <router-outlet></router-outlet>
+  <app-loader></app-loader>
+</div>
+
+<!-- Normal App Layout -->
+<div *ngIf="!isMaintenanceMode && !isLoginPage" class="app-wrapper d-flex">
   <app-sidebar></app-sidebar>
   <div class="main-content">
     <app-header></app-header>

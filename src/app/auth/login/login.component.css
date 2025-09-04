@@ -1,26 +1,80 @@
-/* Background */
-.login-container {
-  background: linear-gradient(135deg, #0a0a0a, #1a1a1a);
+/* Split screen layout */
+.login-page {
+  display: flex;
+  min-height: 100vh;
   overflow: hidden;
-  color: #eaeaea;
+}
+
+/* Left Section (Welcome) */
+.login-left {
+  flex: 1;
+  background: linear-gradient(135deg, #0a0a0f, #111122, #1a0033);
+  color: #fff;
+  padding: 3rem;
+  position: relative;
+  z-index: 1;
+}
+
+/* Abstract glow */
+.login-left::before {
+  content: '';
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(255, 35, 204, 0.5), rgba(76, 8, 87, 0.4), transparent);
+  border-radius: 50%;
+  filter: blur(120px);
+  animation: floatGlow 10s infinite alternate ease-in-out;
+  top: 20%;
+  left: 20%;
+  z-index: 0;
+}
+
+
+
+/* Branding */
+.brand-logo {
+  font-size: 4rem;
+  color: #00d084;
+  z-index: 1;
+}
+
+.welcome-title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  z-index: 1;
+}
+
+.welcome-title span {
+  color: #00d084;
+}
+
+.welcome-text {
+  font-size: 1.2rem;
+  color: #ccc;
+  max-width: 400px;
+  z-index: 1;
+}
+
+/* Right Section (Login Form) */
+.login-right {
+  flex: 1;
+  background: #0f0f1a;
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
-  padding: 1rem; /* extra space on mobile */
+  padding: 2rem;
 }
 
-/* Card */
-.login-card-dark {
-  max-width: 420px;
+.login-box {
   width: 100%;
-  border-radius: 1rem;
-  background: #111;
-  color: #eaeaea;
-  border: 1px solid #222;
-  box-shadow: 0 8px 25px rgba(0,0,0,0.6);
+  max-width: 380px;
+  background: rgba(20, 20, 30, 0.95);
   padding: 2rem;
-  box-sizing: border-box;
+  border-radius: 1rem;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
+  text-align: center;
 }
 
 /* Inputs */
@@ -31,8 +85,8 @@
   padding: 0.9rem 1rem;
   width: 100%;
   margin-bottom: 1rem;
-  transition: all 0.3s ease-in-out;
-  box-sizing: border-box;
+  border-radius: 0.5rem;
+  transition: 0.3s;
 }
 
 .dark-input:focus {
@@ -41,7 +95,7 @@
   outline: none;
 }
 
-/* Eye icon button */
+/* Eye Icon */
 .toggle-eye {
   right: 15px;
   top: 50%;
@@ -61,19 +115,16 @@
   border: none;
   color: #fff;
   font-weight: 600;
-  letter-spacing: 0.5px;
-  padding: 0.9rem 1.5rem;
-  width: 100%;
-  transition: all 0.3s ease-in-out;
-  border-radius: 0.5rem;
+  padding: 0.9rem;
+  transition: 0.3s;
 }
 
 .gym-btn:hover {
   background: linear-gradient(135deg, #00b36b, #0055cc);
-  transform: scale(1.03);
+  transform: scale(1.05);
 }
 
-/* Signup link */
+/* Accent Links */
 .text-accent {
   color: #00d084;
 }
@@ -81,8 +132,7 @@
 .text-accent:hover {
   text-decoration: underline;
 }
-
-/* Override autofill styles for dark theme */
+/* Autofill override */
 .dark-input:-webkit-autofill,
 .dark-input:-webkit-autofill:hover,
 .dark-input:-webkit-autofill:focus,
@@ -93,33 +143,165 @@
   transition: background-color 9999s ease-in-out 0s;
 }
 
-/* Responsive Mobile Layout */
-@media (max-width: 600px) {
-  .login-card-dark {
-    padding: 1.5rem 1rem;
-    max-width: 95%;
+/* Logo image styling */
+.logo-img {
+  max-width: 220px;  /* adjust as needed */
+  height: auto;
+  display: block;
+  margin: 0 auto;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.5));
+}
+
+/* Make "Member Login" white */
+.login-title {
+  color: #fff;
+}
+/* Responsive Styles */
+@media (max-width: 1024px) {
+  .welcome-title {
+    font-size: 2rem;
   }
 
-  .gym-btn {
-    padding: 1rem;
+  .brand-logo img {
+    max-width: 180px;
+  }
+}
+
+@media (max-width: 768px) {
+  .login-page {
+    flex-direction: column;
+  }
+
+  .login-left {
+    padding: 2rem 1.5rem;
+    min-height: 40vh;
+  }
+
+  .login-left::before {
+    width: 350px;
+    height: 350px;
+    top: 10%;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .welcome-title {
+    font-size: 1.8rem;
+  }
+
+  .welcome-text {
     font-size: 1rem;
+    max-width: 320px;
+  }
+
+  .login-right {
+    padding: 1.5rem;
+    min-height: 60vh;
+  }
+
+  .login-box {
+    max-width: 100%;
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .login-left {
+    padding: 1.5rem 1rem;
+  }
+
+  .brand-logo img {
+    max-width: 140px;
+  }
+
+  .welcome-title {
+    font-size: 1.5rem;
+  }
+
+  .welcome-text {
+    font-size: 0.9rem;
+    max-width: 260px;
+  }
+
+  .login-box {
+    padding: 1rem;
+    border-radius: 0.8rem;
   }
 
   .dark-input {
-    padding: 0.8rem;
+    padding: 0.7rem;
+    font-size: 0.9rem;
+  }
+
+  .gym-btn {
+    padding: 0.7rem;
     font-size: 0.95rem;
   }
+}
+/* Tablet & below (stack layout) */
+@media (max-width: 991px) {
+  .login-page {
+    flex-direction: column;
+  }
 
-  .toggle-eye {
-    right: 10px;
+  .login-left {
+    padding: 2rem 1.5rem;
+    min-height: 40vh;
+  }
+
+  .login-left::before {
+    width: 350px;
+    height: 350px;
+    top: 10%;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .login-right {
+    padding: 1.5rem;
+    min-height: 60vh;
+  }
+
+  .login-box {
+    max-width: 100%;
+    padding: 1.5rem;
   }
 }
-.swal-popup-professional {
-  border-radius: 12px;
-  padding: 25px;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
+/* Tablet & smaller desktops: stack layout */
+@media (max-width: 1199px) {
+  .login-page {
+    flex-direction: column;
+  }
 
-.swal-title-professional {
-  color: #ffffff;
+  .login-left {
+    padding: 2rem 1.5rem;
+    min-height: 40vh;
+  }
+
+  .login-left::before {
+    width: 350px;
+    height: 350px;
+    top: 10%;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .welcome-title {
+    font-size: 2rem;
+  }
+
+  .welcome-text {
+    font-size: 1rem;
+    max-width: 320px;
+  }
+
+  .login-right {
+    padding: 1.5rem;
+    min-height: 60vh;
+  }
+
+  .login-box {
+    max-width: 100%;
+    padding: 1.5rem;
+  }
 }

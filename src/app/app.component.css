@@ -1,6 +1,18 @@
 *{
     background-color: rgb(42, 42, 42);
 }
+.login-container {
+    background: transparent;  /* let the global gradient show */
+    overflow: hidden;
+    color: #eaeaea;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 1rem;
+  }
+  
+  
 .maintenance-screen {
     position: fixed;
     top: 0;
