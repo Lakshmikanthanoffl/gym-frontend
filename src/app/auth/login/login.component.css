@@ -1,11 +1,16 @@
-/* Split screen layout */
+/* ============================= */
+/* Split screen layout           */
+/* ============================= */
 .login-page {
   display: flex;
-  min-height: 100vh;
-  overflow: hidden;
+  min-height: 100vh;        /* allow full height but not fixed */
+  overflow-y: auto;         /* enable scrolling if needed */
+  flex-wrap: wrap;          /* wrap sections on smaller screens */
 }
 
-/* Left Section (Welcome) */
+/* ============================= */
+/* Left Section (Welcome)        */
+/* ============================= */
 .login-left {
   flex: 1;
   background: linear-gradient(135deg, #0a0a0f, #111122, #1a0033);
@@ -13,6 +18,10 @@
   padding: 3rem;
   position: relative;
   z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 /* Abstract glow */
@@ -29,8 +38,6 @@
   left: 20%;
   z-index: 0;
 }
-
-
 
 /* Branding */
 .brand-logo {
@@ -57,7 +64,9 @@
   z-index: 1;
 }
 
-/* Right Section (Login Form) */
+/* ============================= */
+/* Right Section (Login Form)    */
+/* ============================= */
 .login-right {
   flex: 1;
   background: #0f0f1a;
@@ -65,6 +74,7 @@
   justify-content: center;
   align-items: center;
   padding: 2rem;
+  min-height: 100%;   /* adjust naturally */
 }
 
 .login-box {
@@ -75,9 +85,12 @@
   border-radius: 1rem;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
   text-align: center;
+  margin: 2rem 0;   /* prevents cutting at bottom */
 }
 
-/* Inputs */
+/* ============================= */
+/* Inputs                        */
+/* ============================= */
 .dark-input {
   background: #1a1a1a;
   border: 1px solid #333;
@@ -109,7 +122,9 @@
   color: #00d084;
 }
 
-/* Button */
+/* ============================= */
+/* Button                        */
+/* ============================= */
 .gym-btn {
   background: linear-gradient(135deg, #00d084, #0072ff);
   border: none;
@@ -132,6 +147,7 @@
 .text-accent:hover {
   text-decoration: underline;
 }
+
 /* Autofill override */
 .dark-input:-webkit-autofill,
 .dark-input:-webkit-autofill:hover,
@@ -145,7 +161,7 @@
 
 /* Logo image styling */
 .logo-img {
-  max-width: 220px;  /* adjust as needed */
+  max-width: 220px;
   height: auto;
   display: block;
   margin: 0 auto;
@@ -156,25 +172,20 @@
 .login-title {
   color: #fff;
 }
-/* Responsive Styles */
-@media (max-width: 1024px) {
-  .welcome-title {
-    font-size: 2rem;
-  }
 
-  .brand-logo img {
-    max-width: 180px;
-  }
-}
+/* ============================= */
+/* Responsive Styles             */
+/* ============================= */
 
-@media (max-width: 768px) {
+/* Large Tablets & Below */
+@media (max-width: 1199px) {
   .login-page {
     flex-direction: column;
   }
 
   .login-left {
     padding: 2rem 1.5rem;
-    min-height: 40vh;
+    min-height: auto;
   }
 
   .login-left::before {
@@ -186,7 +197,7 @@
   }
 
   .welcome-title {
-    font-size: 1.8rem;
+    font-size: 2rem;
   }
 
   .welcome-text {
@@ -196,7 +207,7 @@
 
   .login-right {
     padding: 1.5rem;
-    min-height: 60vh;
+    min-height: auto;
   }
 
   .login-box {
@@ -205,6 +216,29 @@
   }
 }
 
+/* Tablets */
+@media (max-width: 768px) {
+  .login-left {
+    padding: 2rem 1rem;
+    min-height: auto;
+  }
+
+  .welcome-title {
+    font-size: 1.8rem;
+  }
+
+  .welcome-text {
+    font-size: 1rem;
+    max-width: 300px;
+  }
+
+  .login-box {
+    max-width: 95%;
+    padding: 1.5rem;
+  }
+}
+
+/* Phones */
 @media (max-width: 480px) {
   .login-left {
     padding: 1.5rem 1rem;
@@ -236,72 +270,5 @@
   .gym-btn {
     padding: 0.7rem;
     font-size: 0.95rem;
-  }
-}
-/* Tablet & below (stack layout) */
-@media (max-width: 991px) {
-  .login-page {
-    flex-direction: column;
-  }
-
-  .login-left {
-    padding: 2rem 1.5rem;
-    min-height: 40vh;
-  }
-
-  .login-left::before {
-    width: 350px;
-    height: 350px;
-    top: 10%;
-    left: 50%;
-    transform: translateX(-50%);
-  }
-
-  .login-right {
-    padding: 1.5rem;
-    min-height: 60vh;
-  }
-
-  .login-box {
-    max-width: 100%;
-    padding: 1.5rem;
-  }
-}
-/* Tablet & smaller desktops: stack layout */
-@media (max-width: 1199px) {
-  .login-page {
-    flex-direction: column;
-  }
-
-  .login-left {
-    padding: 2rem 1.5rem;
-    min-height: 40vh;
-  }
-
-  .login-left::before {
-    width: 350px;
-    height: 350px;
-    top: 10%;
-    left: 50%;
-    transform: translateX(-50%);
-  }
-
-  .welcome-title {
-    font-size: 2rem;
-  }
-
-  .welcome-text {
-    font-size: 1rem;
-    max-width: 320px;
-  }
-
-  .login-right {
-    padding: 1.5rem;
-    min-height: 60vh;
-  }
-
-  .login-box {
-    max-width: 100%;
-    padding: 1.5rem;
   }
 }
