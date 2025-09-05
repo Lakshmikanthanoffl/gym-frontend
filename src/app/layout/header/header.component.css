@@ -136,6 +136,15 @@
     display: none; /* hide bell, username, logout on mobile */
   }
 }
+@media (max-width: 764px) {
+  .header-right {
+    display: none !important;
+  }
+  .mobile-user-section {
+    display: flex !important;
+  }
+}
+
 
 /* Hamburger button */
 .hamburger-btn {
