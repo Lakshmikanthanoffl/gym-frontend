@@ -12,9 +12,8 @@
     <h5 class="m-0">{{ headerTitle }}</h5>
   </div>
 
-  <!-- Right Section: Bell + Username + Logout -->
-  <div class="header-right d-flex align-items-center position-relative"
-       [class.hidden-mobile]="sidebarOpen && isMobileView">
+  <!-- Right Section: Bell + Username + Logout (desktop only) -->
+  <div class="header-right d-none d-lg-flex align-items-center position-relative">
 
     <!-- 🔔 Notification bell -->
     <ng-container *ngIf="subscriptionExpiring">
@@ -26,18 +25,16 @@
     </ng-container>
 
     <!-- Username -->
-    <span class="username-text" *ngIf="!isMobileView">{{ username }}</span>
+    <span class="username-text">{{ username }}</span>
 
     <!-- User Icon -->
-    <i *ngIf="!isMobileView"
-       class="pi pi-user user-icon"
-       (click)="togglePopup()" tabindex="0"></i>
+    <i class="pi pi-user user-icon" (click)="togglePopup()" tabindex="0"></i>
 
     <!-- Popup -->
     <div class="custom-popup-menu"
          [@popupAnimation]="popupVisible ? 'visible' : 'hidden'">
       <ul>
-        <li (click)="logout()" tabindex="0" #logoutItem>
+        <li (click)="logout()" tabindex="0">
           <i class="pi pi-sign-out me-2"></i> Logout
         </li>
       </ul>

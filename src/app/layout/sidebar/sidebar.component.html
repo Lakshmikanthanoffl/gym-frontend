@@ -8,12 +8,12 @@
 
   <!-- Close button (only visible on mobile) -->
   <div class="sidebar-header d-flex justify-content-between align-items-center">
-    <h5 class="m-0 d-md-none"> {{ userrole === 'superadmin' ? 'Zyct' : defaultGymName }}</h5>
+    <h5 class="m-0 d-lg-none">{{ userrole === 'superadmin' ? 'Zyct' : defaultGymName }}</h5>
     <i class="pi pi-times close-btn" (click)="toggleSidebar()"></i>
   </div>
 
   <!-- Mobile: Username & Logout -->
-  <div class="mobile-user-section d-md-none mt-3 mb-3">
+  <div class="mobile-user-section d-lg-none mt-3 mb-3">
     <div class="d-flex justify-content-between align-items-center">
       <span class="username-text">{{ username }}</span>
       <i class="pi pi-sign-out user-icon" (click)="logout()"></i>
@@ -21,7 +21,7 @@
   </div>
 
   <!-- Sidebar Content -->
-  <h4 class="mb-4 text-center big-title d-none d-md-block">
+  <h4 class="mb-4 text-center big-title d-none d-lg-block">
     {{ userrole === 'superadmin' ? 'Zyct' : defaultGymName }}
   </h4>
 
