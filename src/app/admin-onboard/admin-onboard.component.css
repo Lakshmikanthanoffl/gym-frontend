@@ -1,14 +1,53 @@
 /* ================================
-   ✅ Page Header
+   ✅ Theme Variables
+================================ */
+
+/* Dark Theme (default) */
+:host-context(body) {
+  --bg-primary: #121212;        /* Container background */
+  --bg-secondary: #1f1f1f;      /* Inputs, dialogs, tables */
+  --text-primary: #f5f5f5;      /* Main text */
+  --text-secondary: #ccc;       /* Labels, placeholders */
+  --accent: #00bcd4;            /* Buttons, highlights */
+  --button-text: #121212;       /* Button text */
+  --button-hover: #0097a7;      /* Button hover */
+  --border-color: #333;
+  --link-color: #00aaff;
+  --link-hover: #ffaa00;
+  --shadow-color: rgba(0,0,0,0.5);
+  --loader-bg: #f3f3f3;
+  --loader-accent: #00bcd4;
+}
+
+/* Light Theme Overrides */
+:host-context(body.light-theme) {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f5f5f5;
+  --text-primary: #111111;
+  --text-secondary: #555555;
+  --accent: #007bb5;
+  --button-text: #ffffff;
+  --button-hover: #005f8a;
+  --border-color: #ccc;
+  --link-color: #0077cc;
+  --link-hover: #ffaa00;
+  --shadow-color: rgba(0,0,0,0.2);
+  --loader-bg: #e0e0e0;
+  --loader-accent: #007bb5;
+}
+
+/* ================================
+   ✅ Page Header & Table Wrapper
 ================================ */
 .table-wrapper {
-  background-color: #2e2e2e;
+  background-color: var(--bg-secondary);
   border-radius: 12px;
   padding: 1rem;
-  box-shadow: 0 0 12px rgba(0, 0, 0, 0.4);
-  border: 1px solid #444;
+  box-shadow: 0 0 12px var(--shadow-color);
+  border: 1px solid var(--border-color);
   margin: 1rem 0;
 }
+
 .page-header {
   display: flex;
   align-items: center;
@@ -17,6 +56,7 @@
 
 .page-header h2 {
   margin: 0;
+  color: var(--text-primary);
 }
 
 .ml-3 {
@@ -33,17 +73,21 @@
 }
 
 .field-row label {
-  width: 120px; /* fixed width for all labels */
+  width: 120px;
   margin-right: 1rem;
   font-weight: 500;
+  color: var(--text-secondary);
 }
 
 .flex-grow-1 {
-  flex: 1; /* input/dropdown takes remaining width */
+  flex: 1;
 }
 
 .field-row input {
-  flex: 1; /* input takes remaining space */
+  flex: 1;
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
 }
 
 .text-right {
@@ -55,139 +99,102 @@
 }
 
 /* ================================
-   ✅ Dark Table Wrapper
+   ✅ DataTable
 ================================ */
-.table-wrapper {
-  background-color: #2e2e2e;
-  border-radius: 12px;
-  padding: 1rem;
-  box-shadow: 0 0 12px rgba(0, 0, 0, 0.4);
-  border: 1px solid #444;
-  margin: 1rem 0;
-}
-
-/* DataTable Styling */
 ::ng-deep .dark-table .p-datatable-wrapper,
 ::ng-deep .dark-table .p-datatable-thead > tr > th,
 ::ng-deep .dark-table .p-datatable-tbody > tr > td,
 ::ng-deep .dark-table .p-paginator {
-  background-color: #2e2e2e;
-  color: white;
-  border-color: #444;
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  border-color: var(--border-color);
 }
 
-/* Paginator highlight */
 ::ng-deep .p-paginator .p-highlight {
-  background-color: #333 !important;
-  color: #fff !important;
-  border-color: #333 !important;
+  background-color: var(--accent) !important;
+  color: var(--button-text) !important;
+  border-color: var(--accent) !important;
 }
 
-/* Paginator layout */
 ::ng-deep .dark-table .p-paginator {
   justify-content: flex-end !important;
   padding: 0.75rem 1rem;
-  border-top: 1px solid #444;
+  border-top: 1px solid var(--border-color);
   border-bottom-left-radius: 12px;
   border-bottom-right-radius: 12px;
 }
 
-/* Table border radius */
 ::ng-deep .dark-table .p-datatable {
   border-radius: 12px;
 }
 
 /* ================================
-   ✅ Search Bar Dark Theme
+   ✅ Search Bar
 ================================ */
 .search-bar input {
-  background-color: #1f1f1f;
-  color: #fff;
-  border: none;
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
 }
 
 .search-bar .p-inputgroup-addon {
-  background-color: #1a1919; /* slightly darker than input */
-  color: #fff;
-  border: none;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
 }
 
 .search-bar input::placeholder {
-  color: #ccc;
+  color: var(--text-secondary);
 }
 
 /* ================================
-   ✅ Dark Dialog (Onboard/Edit)
+   ✅ Dialogs (Onboard/Edit & Delete)
 ================================ */
-::ng-deep .dark-dialog .p-dialog-header {
-  background-color: #1e1e1e !important;
-  color: #ffffff !important;
-  border-bottom: 1px solid #333;
-  font-weight: 600;
+::ng-deep .dark-dialog .p-dialog-header,
+::ng-deep .delete-dialog .p-dialog-header,
+::ng-deep .dark-dialog .p-dialog-footer,
+::ng-deep .delete-dialog .p-dialog-footer {
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-color);
 }
 
-::ng-deep .dark-dialog .p-dialog-content {
-  background-color: #121212 !important;
-  color: #e0e0e0 !important;
+::ng-deep .dark-dialog .p-dialog-content,
+::ng-deep .delete-dialog .p-dialog-content {
+  background-color: var(--bg-primary) !important;
+  color: var(--text-primary) !important;
   padding: 1.5rem;
   border: none;
 }
 
-::ng-deep .dark-dialog .p-dialog-footer {
-  background-color: #1e1e1e !important;
-  border-top: 1px solid #333;
-}
-
-/* Inputs & Dropdowns inside dialog */
 ::ng-deep .dark-dialog .p-inputtext,
 ::ng-deep .dark-dialog .p-dropdown,
 ::ng-deep .dark-dialog .p-password,
-::ng-deep .dark-dialog .p-multiselect {
-  background-color: #1f1f1f !important;
-  color: #ffffff !important;
-  border: 1px solid #444 !important;
+::ng-deep .dark-dialog .p-multiselect,
+::ng-deep .delete-dialog .p-inputtext {
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-color) !important;
   border-radius: 8px;
 }
 
 ::ng-deep .dark-dialog .p-dropdown-label,
 ::ng-deep .dark-dialog .p-multiselect-label {
-  color: #ffffff !important;
+  color: var(--text-primary) !important;
 }
 
-/* Input Placeholder */
 ::ng-deep .dark-dialog .p-inputtext::placeholder {
-  color: #aaa !important;
+  color: var(--text-secondary) !important;
 }
 
-/* Buttons inside dialog */
-::ng-deep .dark-dialog .p-button {
+::ng-deep .dark-dialog .p-button,
+::ng-deep .delete-dialog .p-button {
   border-radius: 8px;
   font-weight: 500;
 }
 
 /* ================================
-   ✅ Delete Confirmation Dialog
-================================ */
-::ng-deep .delete-dialog .p-dialog-header,
-::ng-deep .delete-dialog .p-dialog-footer {
-  background-color: #1e1e1e !important;
-  color: #fff !important;
-}
-
-::ng-deep .delete-dialog .p-dialog-content {
-  background-color: #121212 !important;
-  color: #e0e0e0 !important;
-}
-
-/* Input inside delete dialog */
-::ng-deep .delete-dialog .p-inputtext {
-  background-color: #1f1f1f !important;
-  color: #ffffff !important;
-  border: 1px solid #444 !important;
-}
-
-/* ================================
-   ✅ Buttons (General Tweaks)
+   ✅ Buttons
 ================================ */
 ::ng-deep .p-button-success {
   background-color: #28a745 !important;
@@ -195,25 +202,27 @@
   color: #fff !important;
 }
 
-
 ::ng-deep .p-button-secondary {
-  background-color: #444 !important;
+  background-color: var(--bg-secondary) !important;
   border: none !important;
-  color: #fff !important;
+  color: var(--text-primary) !important;
 }
 
 ::ng-deep .p-button-secondary:hover {
-  background-color: #555 !important;
+  background-color: var(--accent) !important;
 }
-.text-danger { color: #dc3545; }   /* red */
-.text-warning { color: #ffc107; } /* yellow */
-.text-success { color: #28a745; } /* green */
+
+/* ================================
+   ✅ Text Helpers
+================================ */
+.text-danger { color: #dc3545; }
+.text-warning { color: #ffc107; }
+.text-success { color: #28a745; }
 .font-bold { font-weight: bold; }
+
 /* ================================
    ✅ Responsive Layout
 ================================ */
-
-/* 🔹 Page Header: Search + Button */
 @media (max-width: 768px) {
   .page-header {
     flex-direction: column;
@@ -231,7 +240,6 @@
   }
 }
 
-/* 🔹 Form Fields: Stack on smaller screens */
 @media (max-width: 600px) {
   .field-row {
     flex-direction: column;
@@ -252,7 +260,6 @@
   }
 }
 
-/* 🔹 Dialog: Full width on mobile */
 @media (max-width: 768px) {
   ::ng-deep .dark-dialog .p-dialog {
     width: 95% !important;
@@ -260,12 +267,10 @@
   }
 }
 
-/* 🔹 Table: Scrollable on small screens */
 ::ng-deep .dark-table .p-datatable-wrapper {
   overflow-x: auto;
 }
 
-/* 🔹 Table cells shrink properly */
 ::ng-deep .dark-table table {
-  min-width: 800px; /* allow horizontal scroll if content is too wide */
+  min-width: 800px;
 }

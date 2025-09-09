@@ -1,10 +1,37 @@
+/* ============================= */
+/* THEME VARIABLES (Dark default) */
+/* ============================= */
+:host-context(body) {
+  --sidebar-bg: #1f1f1f;
+  --sidebar-text: #ffffff;
+  --sidebar-link-hover: #333333;
+  --close-btn-color: #ffcc00;
+  --mobile-border: #444;
+  --dot-yellow: #f1c40f;
+  --dot-red: #e74c3c;
+}
+
+/* Light theme */
+:host-context(body.light-theme) {
+  --sidebar-bg: #eeeeee;
+  --sidebar-text: #111111;
+  --sidebar-link-hover: #dddddd;
+  --close-btn-color: #ff8800;
+  --mobile-border: #aaa;
+  --dot-yellow: #d4a017; /* darker gold for light bg */
+  --dot-red: #c0392b;    /* softer red */
+}
+
+/* ============================= */
+/* SIDEBAR STYLES */
+/* ============================= */
 .sidebar {
-  background-color: #1f1f1f;
-  color: white;
+  background-color: var(--sidebar-bg);
+  color: var(--sidebar-text);
   padding: 20px 10px;
   width: 220px;
   height: 100vh;
-  transition: transform 0.3s ease;
+  transition: transform 0.3s ease, background-color 0.3s ease, color 0.3s ease;
   position: fixed;
   top: 0;
   left: 0;
@@ -25,12 +52,12 @@
 .close-btn {
   font-size: 1.5rem;
   cursor: pointer;
-  color: #fff;
+  color: var(--close-btn-color);
   transition: color 0.2s ease;
 }
 
 .close-btn:hover {
-  color: #ffcc00;
+  opacity: 0.8;
 }
 
 /* Links */
@@ -38,15 +65,22 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  color: white;
+  color: var(--sidebar-text);
   padding: 10px 8px;
   text-decoration: none;
-  transition: background 0.3s;
+  transition: background 0.3s, color 0.3s;
 }
 
 .sidebar a:hover {
-  background-color: #333;
+  background-color: var(--sidebar-link-hover);
   border-radius: 4px;
+}
+
+/* Active link */
+.sidebar a.active {
+  font-weight: 600;
+  border-left: 4px solid var(--close-btn-color);
+  padding-left: 6px;
 }
 
 /* Dark overlay */
@@ -73,16 +107,10 @@
     display: none; /* no overlay on desktop */
   }
 }
-/* Close button (top-right) */
-.close-btn {
-  font-size: 1.5rem;
-  cursor: pointer;
-  color: #ffcc00;
-}
 
 /* Mobile user section */
 .mobile-user-section {
-  border-bottom: 1px solid #444;
+  border-bottom: 1px solid var(--mobile-border);
   padding-bottom: 10px;
 }
 
@@ -93,23 +121,7 @@
   }
 }
 
-/* Sidebar overlay */
-.sidebar-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.5);
-  z-index: 999;
-}
-
-.subscription-text {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-}
-
+/* Subscription text */
 .subscription-text {
   position: relative;
   display: inline-flex;
@@ -129,13 +141,13 @@
 
 /* Yellow dot (1–7 days) */
 .sub-dot-yellow {
-  background-color: #f1c40f; /* gold yellow */
+  background-color: var(--dot-yellow);
   box-shadow: 0 0 0 rgba(241, 196, 15, 0.7);
 }
 
 /* Red dot (today) */
 .sub-dot-red {
-  background-color: #e74c3c; /* bright red */
+  background-color: var(--dot-red);
   box-shadow: 0 0 0 rgba(231, 76, 60, 0.7);
 }
 
@@ -154,10 +166,8 @@
     box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
   }
 }
+
 .big-title {
   font-size: 2rem; /* adjust as needed */
   font-weight: 600; /* optional: makes it a bit bolder */
 }
-
-
-

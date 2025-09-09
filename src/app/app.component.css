@@ -1,6 +1,91 @@
-*{
-    background-color: rgb(42, 42, 42);
+/* 🔹 Global Styles Respecting Theme */
+* {
+  background-color: var(--app-bg); /* uses dark or light theme variable */
+  color: var(--header-text);       /* optional: sets default text color */
 }
+/* ============================= */
+/* THEME VARIABLES (Dark default) */
+/* ============================= */
+:host-context(body) {
+  --app-bg: #121212;         /* Main background */
+  --header-bg: #1f1f1f;      /* Header background */
+  --header-text: #ffffff;    /* Header text */
+  --header-border: #333;     /* Divider/bottom border */
+}
+
+/* Light theme */
+:host-context(body.light-theme) {
+  --app-bg: #f4f4f4;
+  --header-bg: #ffffff;
+  --header-text: #111111;
+  --header-border: #ddd;
+}
+
+.login-container {
+  background: transparent;  /* let the global gradient show */
+  overflow: hidden;
+  color: #eaeaea;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 1rem;
+}
+
+
+.maintenance-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: #1e1e1e; /* dark professional background */
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  z-index: 9999;
+  padding: 2rem;
+}
+
+.maintenance-content {
+  max-width: 600px; /* slightly wider to fit heading */
+}
+
+.maintenance-screen h1 {
+  font-size: 2.2rem; /* reduce slightly if needed */
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #ffd700; /* subtle professional accent */
+  white-space: nowrap; /* prevent breaking */
+}
+
+.maintenance-screen p {
+  font-size: 1.2rem;
+  margin: 0.5rem 0;
+  color: #ccc;
+  line-height: 1.5;
+}
+
+/* ============================= */
+/* THEME VARIABLES (Dark default) */
+/* ============================= */
+:host-context(body) {
+    --app-bg: #121212;         /* Main background */
+    --header-bg: #1f1f1f;      /* Header background */
+    --header-text: #ffffff;    /* Header text */
+    --header-border: #333;     /* Divider/bottom border */
+  }
+  
+  /* Light theme */
+  :host-context(body.light-theme) {
+    --app-bg: #f4f4f4;
+    --header-bg: #ffffff;
+    --header-text: #111111;
+    --header-border: #ddd;
+  }
+  
 .login-container {
     background: transparent;  /* let the global gradient show */
     overflow: hidden;

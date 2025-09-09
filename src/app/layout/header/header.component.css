@@ -1,7 +1,30 @@
-/* Header Base */
+/* ========================= */
+/* THEME VARIABLES           */
+/* ========================= */
+:host-context(body) {
+  --header-bg: #2e2e2e;
+  --header-text: #ffffff;
+  --highlight: #ffcc00;
+  --highlight-alt: #ff6600;
+  --menu-bg: #1f1f1f;
+  --menu-hover: #333;
+}
+
+:host-context(body.light-theme) {
+  --header-bg: #f5f5f5;
+  --header-text: #1a1a1a;
+  --highlight: #0077ff;
+  --highlight-alt: #3399ff;
+  --menu-bg: #ffffff;
+  --menu-hover: #eaeaea;
+}
+
+/* ========================= */
+/* HEADER BASE               */
+/* ========================= */
 .header {
-  background-color: #2e2e2e;
-  color: white;
+  background-color: var(--header-bg);
+  color: var(--header-text);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -34,7 +57,7 @@
 .hamburger-btn {
   font-size: 1.5rem;
   cursor: pointer;
-  color: #ffcc00;
+  color: var(--highlight);
 }
 
 /* Notification Bell */
@@ -44,7 +67,7 @@
 
 .notification-bell {
   font-size: 1.3rem;
-  color: #ffcc00;
+  color: var(--highlight);
   animation: bell-blink 1.2s infinite;
 }
 
@@ -61,8 +84,8 @@
 }
 
 @keyframes bell-blink {
-  0%, 100% { color: #ffcc00; }
-  50% { color: #ff6600; }
+  0%, 100% { color: var(--highlight); }
+  50% { color: var(--highlight-alt); }
 }
 
 @keyframes pulse {
@@ -75,7 +98,7 @@
 .username-text {
   font-size: 0.95rem;
   font-weight: 500;
-  color: #f1f1f1;
+  color: var(--header-text);
   max-width: 150px;
   text-overflow: ellipsis;
   overflow: hidden;
@@ -86,24 +109,27 @@
   font-size: 1.3rem;
   cursor: pointer;
   transition: color 0.2s;
+  color: var(--header-text);
 }
 
 .user-icon:hover {
-  color: #ffcc00;
+  color: var(--highlight);
 }
-
-/* Popup Menu */
+/* ========================= */
+/* Popup Menu (Themed)       */
+/* ========================= */
 .custom-popup-menu {
   position: absolute;
   top: 120%;
   right: 0;
-  background: #1f1f1f;
-  border: 1px solid #333;
+  background: var(--menu-bg);
+  border: 1px solid var(--menu-hover);
   border-radius: 8px;
   min-width: 150px;
   z-index: 1000;
   padding: 8px 0;
 }
+
 
 .custom-popup-menu ul {
   list-style: none;
@@ -114,15 +140,16 @@
 .custom-popup-menu li {
   padding: 10px 15px;
   cursor: pointer;
-  color: #eee;
+  color: var(--header-text);         /* adapts text color */
   display: flex;
   align-items: center;
 }
 
 .custom-popup-menu li:hover {
-  background: #333;
+  background: var(--menu-hover);     /* adapts hover bg */
   border-radius: 6px;
 }
+
 
 /* Responsive */
 @media (max-width: 991px) {
@@ -143,14 +170,6 @@
   .mobile-user-section {
     display: flex !important;
   }
-}
-
-
-/* Hamburger button */
-.hamburger-btn {
-  font-size: 1.5rem;
-  cursor: pointer;
-  color: #ffffff;
 }
 
 /* Hide right section on mobile when sidebar is closed */

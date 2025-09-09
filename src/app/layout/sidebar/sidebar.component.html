@@ -69,4 +69,13 @@
       <i class="pi pi-envelope"></i> <span> Contact Us</span>
     </a>
   </div>
+
+  <div class="theme-toggle mt-4 d-flex align-items-center justify-content-between">
+    <span>{{ themeService.isDarkMode() ? 'Dark Mode' : 'Light Mode' }}</span>
+    <i class="pi" 
+       [ngClass]="themeService.isDarkMode() ? 'pi-moon' : 'pi-sun'" 
+       (click)="themeService.toggleTheme()">
+    </i>
+  </div>
+  
 </div>

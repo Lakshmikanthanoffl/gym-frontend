@@ -4,16 +4,63 @@ html, body {
   touch-action: none; /* Prevent double-tap zoom / gestures */
 }
 
+/* ============================= */
+/* THEME VARIABLES               */
+/* ============================= */
+
+/* Dark (default) */
+:host-context(body) {
+  --bg-primary: #2e2e2e;
+  --bg-secondary: #1f1f1f;
+  --bg-tertiary: #2c2c2c;
+  --bg-addon: #1a1919;
+
+  --border-color: #444;
+  --border-color-alt: #555;
+
+  --text-primary: #ffffff;
+  --text-secondary: #eee;
+  --text-placeholder: #bbb;
+
+  --highlight: #ffcc00;
+  --highlight-alt: #ff6600;
+
+  --success: #28a745;
+  --danger: #dc3545;
+  --warning: #ffc107;
+}
+
+/* Light */
+:host-context(body.light-theme) {
+  --bg-primary: #f5f5f5;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #eeeeee;
+  --bg-addon: #f1f1f1;
+
+  --border-color: #ccc;
+  --border-color-alt: #aaa;
+
+  --text-primary: #111111;
+  --text-secondary: #333;
+  --text-placeholder: #666;
+
+  --highlight: #ff8800;
+  --highlight-alt: #ff6600;
+
+  --success: #198754;
+  --danger: #c0392b;
+  --warning: #d4a017;
+}
 
 /* ============================= */
 /* Wrapper Styling               */
 /* ============================= */
 .table-wrapper {
-  background-color: #2e2e2e;
+  background-color: var(--bg-primary);
   border-radius: 12px;
   padding: 1rem;
   box-shadow: 0 0 12px rgba(0, 0, 0, 0.4);
-  border: 1px solid #444;
+  border: 1px solid var(--border-color);
   margin: 1rem 0;
 }
 .page-locked {
@@ -29,9 +76,9 @@ html, body {
 ::ng-deep .dark-table .p-datatable-thead > tr > th,
 ::ng-deep .dark-table .p-datatable-tbody > tr > td,
 ::ng-deep .dark-table .p-paginator {
-  background-color: #2e2e2e;
-  color: white;
-  border-color: #444;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  border-color: var(--border-color);
 }
 
 ::ng-deep .dark-table .p-datatable {
@@ -42,39 +89,39 @@ html, body {
 ::ng-deep .p-paginator {
   justify-content: flex-end !important;
   padding: 0.75rem 1rem;
-  border-top: 1px solid #444;
+  border-top: 1px solid var(--border-color);
   border-bottom-left-radius: 12px;
   border-bottom-right-radius: 12px;
 }
 
 ::ng-deep .p-paginator .p-highlight {
-  background-color: #333 !important;
-  color: #fff !important;
-  border-color: #333 !important;
+  background-color: var(--bg-tertiary) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--bg-tertiary) !important;
 }
 
 ::ng-deep .p-paginator .p-paginator-page:hover {
-  background-color: #444 !important;
-  color: #fff !important;
+  background-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
 }
 
 /* ============================= */
 /* Search Bar                    */
 /* ============================= */
 .search-bar input {
-  background-color:#1f1f1f;
-  color: #fff;
-  border: 1px solid #444;
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
 }
 
 .search-bar .p-inputgroup-addon {
-  background-color: #1a1919;
-  color: #fff;
-  border: 1px solid #444;
+  background-color: var(--bg-addon);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
 }
 
 .search-bar input::placeholder {
-  color: #ccc;
+  color: var(--text-placeholder);
 }
 
 /* ============================= */
@@ -93,23 +140,23 @@ html, body {
 ::ng-deep .p-dropdown,
 ::ng-deep .p-calendar input,
 ::ng-deep .p-inputtextarea {
-  background-color: #1f1f1f !important;
-  color: #fff !important;
-  
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-color) !important;
   border-radius: 6px !important;
 }
 
 ::ng-deep .p-inputtext::placeholder,
 ::ng-deep .p-inputtextarea::placeholder {
-  color: #bbb !important;
+  color: var(--text-placeholder) !important;
 }
 
 ::ng-deep .p-inputtext:focus,
 ::ng-deep .p-dropdown:focus,
 ::ng-deep .p-calendar input:focus,
 ::ng-deep .p-inputtextarea:focus {
-  border-color: #666 !important;
-  box-shadow: 0 0 4px rgba(255, 255, 255, 0.2);
+  border-color: var(--border-color-alt) !important;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.15);
 }
 ::ng-deep .p-button {
   border-radius: 25px !important;
@@ -117,7 +164,7 @@ html, body {
 }
 
 ::ng-deep .p-button-success {
-  background-color: #28a745 !important;
+  background-color: var(--success) !important;
   border: none !important;
   color: #fff !important;
 }
@@ -136,30 +183,30 @@ html, body {
 /* Dialogs (Add/Edit/Delete/OTP) */
 /* ============================= */
 ::ng-deep .p-dialog {
-  background-color: #2e2e2e !important;
-  color: #fff !important;
+  background-color: var(--bg-primary) !important;
+  color: var(--text-primary) !important;
   border-radius: 12px !important;
-  border: 1px solid #444 !important;
+  border: 1px solid var(--border-color) !important;
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.6) !important;
 }
 
 ::ng-deep .p-dialog .p-dialog-header {
-  background-color: #2c2c2c !important;
-  color: #fff !important;
-  border-bottom: 1px solid #444 !important;
+  background-color: var(--bg-tertiary) !important;
+  color: var(--text-primary) !important;
+  border-bottom: 1px solid var(--border-color) !important;
   font-weight: 500;
   padding: 1rem;
 }
 
 ::ng-deep .p-dialog .p-dialog-content {
-  background-color: #2e2e2e !important;
-  color: #eee !important;
+  background-color: var(--bg-primary) !important;
+  color: var(--text-secondary) !important;
   padding: 1rem;
 }
 
 ::ng-deep .p-dialog .p-dialog-footer {
-  background-color: #2c2c2c !important;
-  border-top: 1px solid #444 !important;
+  background-color: var(--bg-tertiary) !important;
+  border-top: 1px solid var(--border-color) !important;
   padding: 0.75rem 1rem;
 }
 
@@ -169,38 +216,35 @@ html, body {
   font-size: 1.1rem;
   text-align: center;
   padding: 0.5rem;
-  background-color: #1f1f1f !important;
-  border: 1px solid #555 !important;
-  color: #fff !important;
+  background-color: var(--bg-secondary) !important;
+  border: 1px solid var(--border-color-alt) !important;
+  color: var(--text-primary) !important;
 }
 
 /* ============================= */
 /* Status Badges (Optional)      */
 /* ============================= */
 .status-active {
-  color: #28a745;
+  color: var(--success);
   font-weight: 600;
 }
 
 .status-expired {
-  color: #dc3545;
+  color: var(--danger);
   font-weight: 600;
 }
 
 .status-soon {
-  color: #ffc107;
+  color: var(--warning);
   font-weight: 600;
 }
-.attendance-grid {
-  display: grid;
-  grid-template-columns: repeat(3, auto); /* 3 per row, adjust as needed */
-  gap: 6px;
-  justify-content: center;
-}
 
+/* ============================= */
+/* Attendance Grid               */
+/* ============================= */
 .attendance-grid {
   display: grid;
-  grid-template-columns: repeat(3, auto); /* 3 per row, adjust as needed */
+  grid-template-columns: repeat(3, auto); /* 3 per row */
   gap: 6px;
   justify-content: center;
 }
@@ -210,11 +254,14 @@ html, body {
   padding: 2px 6px;
   border-radius: 8px;
 }
-.mt-2{
-  color: white;
+
+.mt-2 {
+  color: var(--text-primary);
 }
 
-
+/* ============================= */
+/* Scanner                       */
+/* ============================= */
 .scanner-wrapper {
   position: relative;
   width: 100%;
@@ -224,11 +271,13 @@ html, body {
 
 .scanner {
   width: 100%;
-  border: 1px solid #ccc;
+  border: 1px solid var(--border-color);
   border-radius: 6px;
 }
 
-/* Make header actions wrap on mobile */
+/* ============================= */
+/* Page Header                   */
+/* ============================= */
 .page-header {
   flex-wrap: wrap; /* allow buttons to move to next line */
   gap: 0.5rem;
