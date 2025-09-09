@@ -1,14 +1,16 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import emailjs, { EmailJSResponseStatus } from 'emailjs-com';
 import Swal from 'sweetalert2';
-
+import { RecaptchaComponent } from 'ng-recaptcha';
+import { ThemeService } from '../services/theme.service';
 @Component({
   selector: 'app-contact-us',
   standalone: false,
   templateUrl: './contact-us.component.html',
   styleUrls: ['./contact-us.component.css']
 })
-export class ContactUsComponent {
+export class ContactUsComponent implements OnInit {
+  @ViewChild('captchaRef') captchaRef!: RecaptchaComponent;
   formData = {
     from_name: '',
     reply_to: '',
@@ -16,7 +18,26 @@ export class ContactUsComponent {
   };
   isLoading = false;
   submitted = false;
+  showCaptcha = true;
+  currentTheme: 'light' | 'dark' = 'dark'; // default
+  
+  constructor(private themeService: ThemeService) {}
+  ngOnInit() {
+    this.themeService.theme$.subscribe(theme => {
+      this.currentTheme = theme;
+  
+      if (this.captchaRef) {
+        // Force re-render
+        this.showCaptcha = false; // remove from DOM
+        setTimeout(() => {
+          this.showCaptcha = true; // re-add to DOM with new theme
+        }, 0);
+      }
+    });
+  }
+  
 
+  
   // ✅ reCAPTCHA token
   recaptchaToken: string | null = null;
 
@@ -31,6 +52,7 @@ export class ContactUsComponent {
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return regex.test(email);
   }
+  
 
   public sendEmail(e: Event) {
     e.preventDefault();

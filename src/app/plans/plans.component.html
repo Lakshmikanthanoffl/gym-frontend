@@ -1,4 +1,5 @@
-<h2 class="text-center text-white mt-4">Gym Membership Plans</h2>
+<h2 class="text-center theme-text mt-4">Gym Membership Plans</h2>
+
 
 <!-- SuperAdmin view -->
 <div *ngIf="isSuperAdminView; else normalView">
@@ -16,7 +17,7 @@
   </div>
 
   <div *ngFor="let gym of filteredPlans">
-    <h3 class="text-white mt-3">{{ gym.gymName }}</h3>
+    <h3 class="theme-text mt-3">{{ gym.gymName }}</h3>
     <div class="dashboard-grid mt-2">
       <div *ngFor="let plan of gym.plans" class="pricing-card dark-theme">
         <div class="price-tag">

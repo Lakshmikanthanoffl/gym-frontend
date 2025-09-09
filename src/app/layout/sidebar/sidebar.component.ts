@@ -4,6 +4,7 @@ import { GymService } from '../../services/gym.service';
 import { SidebarService } from '../../services/sidebar.service';
 import Swal from 'sweetalert2';
 import { Router } from '@angular/router';
+import { ThemeService } from '../../services/theme.service';
 @Component({
   selector: 'app-sidebar',
   standalone: false,
@@ -23,7 +24,8 @@ export class SidebarComponent implements OnInit {
     private authService: AuthService,
     private gymService: GymService,
     private sidebarService: SidebarService,
-    private router: Router
+    private router: Router,
+    public themeService: ThemeService
   ) {}
 
   ngOnInit() {
