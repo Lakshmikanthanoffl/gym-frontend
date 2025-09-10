@@ -155,12 +155,14 @@ statusClass: string = "active";
     const emailAddress = 'zyct.official@gmail.com';
   
     // Helper: generate properly encoded UPI deep link
-    const generateUpiLink = (amount: number) =>
-      `upi://pay?pa=${encodeURIComponent('merchant@upi')}` +
-      `&pn=${encodeURIComponent(gymName)}` +
-      `&am=${encodeURIComponent(amount)}` +
-      `&cu=INR` +
-      `&tn=${encodeURIComponent('Subscription Payment')}`;
+    // Helper: generate properly encoded UPI deep link
+const generateUpiLink = (amount: number) =>
+`upi://pay?pa=${encodeURIComponent('lakshmikanthan.b.2001-1@okhdfcbank')}` +
+`&pn=${encodeURIComponent(gymName)}` +
+`&am=${encodeURIComponent(amount)}` +
+`&cu=INR` +
+`&tn=${encodeURIComponent('Subscription Payment')}`;
+
   
     // Initial plan
     let selectedPlan = this.subscriptionPlans[0];
