@@ -155,14 +155,12 @@ statusClass: string = "active";
     const emailAddress = 'zyct.official@gmail.com';
   
     // Helper: generate properly encoded UPI deep link
-    // Helper: generate properly encoded UPI deep link
-const generateUpiLink = (amount: number) =>
-`upi://pay?pa=${encodeURIComponent('lakshmikanthan.b.2001-1@okhdfcbank')}` +
-`&pn=${encodeURIComponent(gymName)}` +
-`&am=${encodeURIComponent(amount)}` +
-`&cu=INR` +
-`&tn=${encodeURIComponent('Subscription Payment')}`;
-
+    const generateUpiLink = (amount: number) =>
+      `upi://pay?pa=${encodeURIComponent('lakshmikanthan.b.2001-1@okhdfcbank')}` +
+      `&pn=${encodeURIComponent(gymName)}` +
+      `&am=${encodeURIComponent(amount)}` +
+      `&cu=INR` +
+      `&tn=${encodeURIComponent('Subscription Payment')}`;
   
     // Initial plan
     let selectedPlan = this.subscriptionPlans[0];
@@ -239,22 +237,34 @@ const generateUpiLink = (amount: number) =>
         qrWrapper.addEventListener('touchstart', () => qrOverlay.style.opacity = '1');
         qrWrapper.addEventListener('touchend', () => qrOverlay.style.opacity = '0');
   
-        // QR click: open UPI link on mobile
+        // QR click: open UPI link on mobile with proper fallback
         qrWrapper.addEventListener('click', () => {
           const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
   
           if (isMobile) {
+            let fallbackTimeout: any;
+  
+            const handleVisibilityChange = () => {
+              if (document.hidden) {
+                clearTimeout(fallbackTimeout);
+              }
+            };
+            document.addEventListener('visibilitychange', handleVisibilityChange);
+  
+            // Open UPI app
             window.location.href = upiLink;
   
-            // fallback if app not installed
-            setTimeout(() => {
+            // fallback after 1.5s if still on page
+            fallbackTimeout = setTimeout(() => {
               Swal.fire({
                 icon: 'info',
                 title: 'Could not open UPI app',
                 html: `Please scan the QR code or use this UPI link:<br><strong style="word-break:break-word;">${upiLink}</strong>`,
               });
+              document.removeEventListener('visibilitychange', handleVisibilityChange);
             }, 1500);
           } else {
+            // Desktop: show QR and link
             Swal.fire({
               icon: 'info',
               title: 'Scan QR to Pay',
@@ -319,6 +329,7 @@ const generateUpiLink = (amount: number) =>
       }
     });
   }
+  
   
   
   
