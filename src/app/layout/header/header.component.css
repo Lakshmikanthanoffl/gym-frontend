@@ -32,6 +32,7 @@
   padding: 0 15px;
 }
 
+
 /* Left (Hamburger) */
 .header-left {
   display: none; /* hidden on desktop */
@@ -69,6 +70,31 @@
   font-size: 1.3rem;
   color: var(--highlight);
   animation: bell-blink 1.2s infinite;
+}
+/* Right section: space items evenly */
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 20px; /* equal spacing */
+}
+
+/* Mobile bell */
+.bell-mobile {
+  display: flex;
+  align-items: center;
+  margin-left: 10px;
+  cursor: pointer;
+}
+/* Mobile bell */
+.bell-desktop {
+  
+  cursor: pointer;
+}
+/* Hide mobile bell on desktop */
+@media (min-width: 992px) {
+  .bell-mobile {
+    display: none;
+  }
 }
 
 .pulse-dot {

@@ -5,7 +5,6 @@ import { BehaviorSubject } from 'rxjs';
 export class ThemeService {
   private darkMode = true;
   
-  // Observable to notify components
   private themeSubject = new BehaviorSubject<'dark' | 'light'>('dark');
   theme$ = this.themeSubject.asObservable();
 
@@ -14,24 +13,37 @@ export class ThemeService {
   }
 
   toggleTheme(): void {
+    const body = document.body;
+  
+    // Add wipe overlay
+    body.classList.add('theme-wipe');
+  
+    // Switch theme
     this.darkMode = !this.darkMode;
     this.applyTheme();
     localStorage.setItem('theme', this.darkMode ? 'dark' : 'light');
     this.themeSubject.next(this.darkMode ? 'dark' : 'light');
+  
+    // Remove class after animation completes
+    setTimeout(() => {
+      body.classList.remove('theme-wipe');
+    }, 700); // must match animation duration
   }
+  
 
   private loadTheme(): void {
     const savedTheme = localStorage.getItem('theme');
-    this.darkMode = savedTheme !== 'light'; // default dark
+    this.darkMode = savedTheme !== 'light';
     this.applyTheme();
     this.themeSubject.next(this.darkMode ? 'dark' : 'light');
   }
 
   private applyTheme(): void {
+    const body = document.body;
     if (this.darkMode) {
-      document.body.classList.remove('light-theme');
+      body.classList.remove('light-theme');
     } else {
-      document.body.classList.add('light-theme');
+      body.classList.add('light-theme');
     }
   }
 

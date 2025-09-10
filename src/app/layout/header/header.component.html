@@ -12,12 +12,21 @@
     <h5 class="m-0">{{ headerTitle }}</h5>
   </div>
 
+  <!-- 🔔 Notification bell (mobile only) -->
+  <ng-container *ngIf="subscriptionExpiring">
+    <div class="notification-wrapper bell-mobile" (click)="showSubscriptionPopup()">
+      <i class="pi pi-bell notification-bell"
+         title="Your subscription is about to expire"></i>
+      <span class="pulse-dot"></span>
+    </div>
+  </ng-container>
+
   <!-- Right Section: Bell + Username + Logout (desktop only) -->
   <div class="header-right d-none d-lg-flex align-items-center position-relative">
 
-    <!-- 🔔 Notification bell -->
+    <!-- 🔔 Notification bell (desktop clickable) -->
     <ng-container *ngIf="subscriptionExpiring">
-      <div class="notification-wrapper" (click)="showSubscriptionPopup()">
+      <div class="notification-wrapper bell-desktop" (click)="showSubscriptionPopup()">
         <i class="pi pi-bell notification-bell"
            title="Your subscription is about to expire"></i>
         <span class="pulse-dot"></span>
@@ -34,7 +43,7 @@
     <div class="custom-popup-menu"
          [@popupAnimation]="popupVisible ? 'visible' : 'hidden'">
       <ul>
-        <li class="logout-btn" (click)="logout()" tabindex="0">
+        <li  #logoutItem class="logout-btn" (click)="logout()" tabindex="0">
           <i class="pi pi-sign-out me-2"></i> Logout
         </li>
       </ul>

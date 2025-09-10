@@ -53,7 +53,34 @@ export class ContactUsComponent implements OnInit {
     return regex.test(email);
   }
   
-
+  openEmailCompose(event: Event) {
+    event.preventDefault(); // Prevent default mailto action
+  
+    const email = 'zyct.official@gmail.com';
+    const subject = encodeURIComponent('Contact Us');
+    const body = encodeURIComponent('Hello');
+  
+    // Gmail app URL scheme
+    const gmailUrl = `googlegmail://co?to=${email}&subject=${subject}&body=${body}`;
+    const mailtoUrl = `mailto:${email}?subject=${subject}&body=${body}`;
+  
+    // Detect mobile or desktop
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  
+    if (isMobile) {
+      // Try Gmail app first, fallback to mailto
+      window.location.href = gmailUrl;
+      setTimeout(() => {
+        // If Gmail not installed, fallback to mailto
+        window.location.href = mailtoUrl;
+      }, 500);
+    } else {
+      // On desktop, open Gmail in browser compose
+      const gmailWebUrl = `https://mail.google.com/mail/?view=cm&to=${email}&su=${subject}&body=${body}`;
+      window.open(gmailWebUrl, '_blank');
+    }
+  }
+  
   public sendEmail(e: Event) {
     e.preventDefault();
   

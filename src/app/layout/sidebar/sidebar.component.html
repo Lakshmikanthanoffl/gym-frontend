@@ -70,12 +70,23 @@
     </a>
   </div>
 
-  <div class="theme-toggle mt-4 d-flex align-items-center justify-content-between">
-    <span>{{ themeService.isDarkMode() ? 'Dark Mode' : 'Light Mode' }}</span>
-    <i class="pi" 
-       [ngClass]="themeService.isDarkMode() ? 'pi-moon' : 'pi-sun'" 
-       (click)="themeService.toggleTheme()">
-    </i>
+ 
+  
+ <div class="mt-4">
+  <h5 class="mb-2">Settings</h5>
+
+  <!-- Appearance -->
+  <div class="appearance-section d-flex justify-content-between align-items-center px-2 py-2">
+    <span class="appearance-label">{{ themeService.isDarkMode() ? 'Dark Mode' : 'Light Mode' }}</span>
+
+    <div class="toggle-switch-wrapper" (click)="themeService.toggleTheme()">
+      <div class="toggle-switch">
+        <div class="toggle-knob" [class.active]="!themeService.isDarkMode()">
+          <i class="pi theme-icon" [ngClass]="themeService.isDarkMode() ? 'pi-moon' : 'pi-sun'"></i>
+        </div>
+      </div>
+    </div>
   </div>
+</div>
   
 </div>

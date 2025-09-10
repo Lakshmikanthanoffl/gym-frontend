@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { AuthService } from '../../services/auth.service';
 import { GymService } from '../../services/gym.service';
 import { SidebarService } from '../../services/sidebar.service';
@@ -27,7 +27,14 @@ export class SidebarComponent implements OnInit {
     private router: Router,
     public themeService: ThemeService
   ) {}
-
+// Listen for Alt + D key press
+@HostListener('window:keydown', ['$event'])
+handleKeyboardEvent(event: KeyboardEvent) {
+  if (event.altKey && event.key.toLowerCase() === 'q') {
+    this.themeService.toggleTheme();
+    event.preventDefault(); // prevent browser default behavior
+  }
+}
   ngOnInit() {
     // ✅ Subscribe to SidebarService for responsive toggle
     this.sidebarService.sidebarOpen$.subscribe(state => {
