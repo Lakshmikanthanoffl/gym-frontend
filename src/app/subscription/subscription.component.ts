@@ -163,6 +163,33 @@ statusClass: string = "active";
     let upiLink = generateUpiLink(selectedPlan.amount);
     let qrDataUrl = await this.generateUpiQr(upiLink);
   
+    // CSS for QR wrapper & overlay
+    const qrWrapperStyle = `
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      margin: 15px auto;
+    `;
+    const qrOverlayStyle = `
+      position: absolute;
+      top: 0;
+      left: 137;
+      width: 180px;
+      height: 180px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffcc00;
+      font-weight: bold;
+      background: rgba(0,0,0,0.5);
+      opacity: 0;
+      transition: opacity 0.3s;
+      border-radius: 6px;
+      text-align: center;
+    `;
+  
     await Swal.fire({
       title: '<strong style="color:#ffcc00;">Renew Subscription</strong>',
       html: `
@@ -172,11 +199,11 @@ statusClass: string = "active";
             ${this.subscriptionPlans.map(p => `<option value="${p.amount}" data-name="${p.name}">${p.name} - ₹${p.amount}</option>`).join('')}
           </select>
   
-          <div style="margin-top:15px; text-align:center;">
-            <a id="upiQrLink" href="${upiLink}" target="_blank">
-              <img id="upiQrImg" src="${qrDataUrl}" style="width:180px; height:180px;" />
-            </a>
+          <div id="qrWrapper" style="${qrWrapperStyle}">
+            <img id="upiQrImg" src="${qrDataUrl}" style="width:180px; height:180px; border-radius:6px;" />
+            <div id="qrOverlay" style="${qrOverlayStyle}">Tap / Scan to Pay</div>
           </div>
+          <p style="font-size:12px; color:#cccccc; margin-top:5px; text-align:center;">Tap the QR for UPI link / instructions</p>
   
           <div id="emailNote" style="margin-top:10px; text-align:center; cursor:pointer;" title="Click here to send payment email">
             <p id="emailId" style="color:#f0f0f0; text-decoration:underline; font-weight:500; margin:0;">
@@ -201,9 +228,33 @@ statusClass: string = "active";
       didOpen: () => {
         const selectEl: HTMLSelectElement = document.getElementById('planSelect') as HTMLSelectElement;
         const qrImgEl: HTMLImageElement = document.getElementById('upiQrImg') as HTMLImageElement;
-        const qrLinkEl: HTMLAnchorElement = document.getElementById('upiQrLink') as HTMLAnchorElement;
+        const qrWrapper: HTMLElement = document.getElementById('qrWrapper') as HTMLElement;
+        const qrOverlay: HTMLElement = document.getElementById('qrOverlay') as HTMLElement;
         const countdownEl: HTMLElement = document.getElementById('countdown') as HTMLElement;
         const emailNote: HTMLElement = document.getElementById('emailNote') as HTMLElement;
+  
+        // Hover / tap overlay effect
+        qrWrapper.addEventListener('mouseenter', () => qrOverlay.style.opacity = '1');
+        qrWrapper.addEventListener('mouseleave', () => qrOverlay.style.opacity = '0');
+        qrWrapper.addEventListener('touchstart', () => qrOverlay.style.opacity = '1');
+        qrWrapper.addEventListener('touchend', () => qrOverlay.style.opacity = '0');
+  
+        // QR click: show instructions + copy link
+        qrWrapper.addEventListener('click', () => {
+          Swal.fire({
+            icon: 'info',
+            title: 'Scan QR to Pay',
+            html: `
+              <p>Open GPay, PhonePe, or Paytm and scan this QR to complete payment.</p>
+              <p style="word-break:break-word; color:#ffcc00;">${upiLink}</p>
+              <p>You can also copy this UPI link manually.</p>
+            `,
+            showCloseButton: true,
+            showConfirmButton: true,
+            confirmButtonText: 'Copy Link',
+            preConfirm: () => navigator.clipboard.writeText(upiLink)
+          });
+        });
   
         // Handle email click (Gmail app / web)
         const openEmail = (planName: string, amount: number) => {
@@ -233,34 +284,7 @@ statusClass: string = "active";
           const amount = Number(event.target.value);
           const planName = selectEl.selectedOptions[0].getAttribute('data-name') || 'Plan';
           upiLink = generateUpiLink(amount);
-          qrLinkEl.href = upiLink;
           qrImgEl.src = await this.generateUpiQr(upiLink);
-        });
-  
-        // QR click for mobile tap-to-pay with fallback
-        qrLinkEl.addEventListener('click', (event) => {
-          event.preventDefault();
-          const start = Date.now();
-          window.location.href = upiLink;
-  
-          setTimeout(() => {
-            const elapsed = Date.now() - start;
-            if (elapsed < 1500) {
-              Swal.fire({
-                icon: 'warning',
-                title: 'UPI app not detected',
-                html: `
-                  <p>Please install a UPI app (GPay / PhonePe / Paytm) to make the payment.</p>
-                  <p>You can also copy this link and open it manually:</p>
-                  <p style="word-break:break-word; color:#ffcc00;">${upiLink}</p>
-                `,
-                showCloseButton: true,
-                showConfirmButton: true,
-                confirmButtonText: 'Copy Link',
-                preConfirm: () => navigator.clipboard.writeText(upiLink)
-              });
-            }
-          }, 1000);
         });
   
         // Countdown timer
@@ -286,6 +310,8 @@ statusClass: string = "active";
       }
     });
   }
+  
+  
   
   
   
