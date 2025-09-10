@@ -1,9 +1,13 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { MemberService } from '../services/member.service';
 import { AuthService } from '../services/auth.service';
 import { Router } from '@angular/router';
 import Swal from 'sweetalert2';
 import { interval, Subscription } from 'rxjs';
+import { ThemeService } from '../services/theme.service';
+import type { Chart } from 'chart.js';
+
+;
 
 @Component({
   selector: 'app-dashboard',
@@ -12,10 +16,14 @@ import { interval, Subscription } from 'rxjs';
   styleUrls: ['./dashboard.component.css']
 })
 export class DashboardComponent implements OnInit {
+  @ViewChild('memberChart') memberChartRef: any; // template ref
+
+
   userrole: any;
   isAdmin: boolean = false;
   isSuperAdmin!: boolean;
   isAdminOrSuperAdmin!: boolean;
+ 
 
   // Hardcoded UPI IDs and display names for each gym
   gymUpiMap: { [gymId: number]: { upi?: string; phone?: string; name: string } } = {
@@ -55,10 +63,14 @@ export class DashboardComponent implements OnInit {
   constructor(
     private authService: AuthService,
     private router: Router,
-    private memberService: MemberService
+    private memberService: MemberService,
+    public themeService: ThemeService
   ) {}
 
   ngOnInit() {
+    this.themeService.theme$.subscribe(theme => {
+      this.updateMemberChartColors(theme === 'dark');
+    });
     this.defaultGymName = localStorage.getItem('GymName') ?? '';
     this.defaultGymId = Number(localStorage.getItem('GymId')) || 0;
     this.userrole = localStorage.getItem("role");
@@ -110,6 +122,33 @@ export class DashboardComponent implements OnInit {
       }
     });
   }
+  
+  updateMemberChartColors(isDark: boolean) {
+    const chartComponent = this.memberChartRef;
+    if (!chartComponent) return;
+  
+    const chart: Chart = chartComponent.chart; // actual Chart.js instance
+  
+    chart.data.datasets[0].backgroundColor = isDark ? '#5bc0de' : '#f0ad4e';
+  
+    chart.options.plugins!.legend!.labels!.color = isDark ? '#e0e0e0' : '#222';
+    chart.options.plugins!.title!.color = isDark ? '#e0e0e0' : '#222';
+    chart.options.plugins!.tooltip!.backgroundColor = isDark ? '#2a2a2a' : '#f5f5f5';
+    chart.options.plugins!.tooltip!.titleColor = isDark ? '#fff' : '#000';
+    chart.options.plugins!.tooltip!.bodyColor = isDark ? '#e0e0e0' : '#222';
+  
+    // Use bracket notation for scales
+    chart.options.scales!['x']!.ticks!.color = isDark ? '#e0e0e0' : '#222';
+    chart.options.scales!['x']!.grid!.color = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
+    chart.options.scales!['y']!.ticks!.color = isDark ? '#e0e0e0' : '#222';
+    chart.options.scales!['y']!.grid!.color = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
+  
+    chart.update();
+  }
+  
+  
+  
+  
   goToAdminOnboard() {
     this.router.navigate(['/admin-onboard']);
   }
@@ -156,7 +195,9 @@ export class DashboardComponent implements OnInit {
   processMembers(data: any[]) {
     this.members = data || [];
     const now = new Date();
-
+    const isDark = this.themeService.isDarkMode();
+  console.log("isdark",isDark)
+    // Member counts
     this.totalMembers = this.members.length;
     this.activeMembers = this.members.filter(m => new Date(m.ValidUntil) >= now).length;
     this.expiredMembers = this.members.filter(m => new Date(m.ValidUntil) < now).length;
@@ -164,28 +205,60 @@ export class DashboardComponent implements OnInit {
       const joined = new Date(m.PaidDate);
       return joined.getMonth() === now.getMonth() && joined.getFullYear() === now.getFullYear();
     }).length;
-
+  
+    // Monthly data
     const monthCounts = Array(12).fill(0);
     this.members.forEach(member => {
       const paidDate = new Date(member.PaidDate);
       monthCounts[paidDate.getMonth()]++;
     });
-
+  
+    // Chart data
     this.memberChartData = {
       labels: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
       datasets: [
-        { label: 'Members Joined', data: monthCounts, backgroundColor: '#42A5F5' }
+        {
+          label: 'Members Joined',
+          data: monthCounts,
+          backgroundColor: isDark ? '#5bc0de' : '#f0ad4e', // bar color based on theme
+          borderRadius: 6
+        }
       ]
     };
-
+  
+    // Chart options
     this.memberChartOptions = {
       responsive: true,
       plugins: {
-        legend: { position: 'top', labels: { color: '#e0e0e0' } },
-        title: { display: true, text: 'Members Joined per Month', color: '#e0e0e0' }
+        legend: {
+          position: 'top',
+          labels: { color: isDark ? '#e0e0e0' : '#222', font: { weight: '600' } }
+        },
+        title: {
+          display: true,
+          text: 'Members Joined per Month',
+          color: isDark ? '#e0e0e0' : '#222',
+          font: { size: 16, weight: '600' }
+        },
+        tooltip: {
+          backgroundColor: isDark ? '#2a2a2a' : '#f5f5f5',
+          titleColor: isDark ? '#fff' : '#000',
+          bodyColor: isDark ? '#e0e0e0' : '#222'
+        }
+      },
+      scales: {
+        x: {
+          ticks: { color: isDark ? '#e0e0e0' : '#222' },
+          grid: { color: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' }
+        },
+        y: {
+          ticks: { color: isDark ? '#e0e0e0' : '#222' },
+          grid: { color: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' }
+        }
       }
     };
   }
+  
 
   processMembersSuperAdmin(data: any[]) {
     this.members = data || [];

@@ -15,8 +15,9 @@
   <div class="grid-layout">
     <!-- Member Trend Graph -->
     <p-card [header]="isSuperAdmin ? 'Members per Admin' : 'New Members Trend'" class="full-height">
-      <p-chart type="bar" [data]="memberChartData" [options]="memberChartOptions"></p-chart>
+      <p-chart #memberChart type="bar" [data]="memberChartData" [options]="memberChartOptions"></p-chart>
     </p-card>
+    
 
     <!-- SuperAdmin: Admin Subscription Expiry -->
    <!-- SuperAdmin: Admin Subscription Expiry (Modern Dark Theme) -->

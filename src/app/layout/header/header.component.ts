@@ -42,9 +42,10 @@ import { SidebarService } from '../../services/sidebar.service';
     ]),
   ]
 })
+
 export class HeaderComponent implements OnInit {
   @Output() sidebarToggle = new EventEmitter<void>();
-  
+
   headerTitle = 'Dashboard';
   
   popupVisible = false;
@@ -509,13 +510,12 @@ async generateUpiQr(amount: number) {
       this.togglePopup();
     }
 
-    // Focus logout item when popup is open and down arrow is pressed
     if (event.key === 'ArrowDown' && this.popupVisible) {
       event.preventDefault();
-      this.logoutItem?.nativeElement.focus();
+      // Wait for the element to be rendered and focusable
+      setTimeout(() => this.logoutItem?.nativeElement.focus());
     }
-
-    // Trigger logout on Enter if logoutItem is focused
+    
     if (
       event.key === 'Enter' &&
       this.popupVisible &&
@@ -524,6 +524,7 @@ async generateUpiQr(amount: number) {
       event.preventDefault();
       this.logout();
     }
+    
   }
 
   @HostListener('document:click', ['$event'])

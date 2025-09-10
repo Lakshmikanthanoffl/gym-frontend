@@ -149,15 +149,19 @@ statusClass: string = "active";
   
 
   async renewSubscription() {
-    let selectedPlan = this.subscriptionPlans[0]; // default Monthly
-    let qrDataUrl = '';
-  
-    // generate initial QR
-    qrDataUrl = await this.generateUpiQr(selectedPlan.amount);
-  
-    const gymName = localStorage.getItem('GymName') || 'Gym';
+    const gymName = 'zyct';
     const validUntilStr = localStorage.getItem('validUntil');
     const expiryDate = validUntilStr ? new Date(validUntilStr) : null;
+    const emailAddress = 'zyct.official@gmail.com';
+  
+    // Helper: generate UPI deep link
+    const generateUpiLink = (amount: number) =>
+      `upi://pay?pa=merchant@upi&pn=${encodeURIComponent(gymName)}&am=${amount}&cu=INR&tn=${encodeURIComponent('Subscription Payment')}`;
+  
+    // Initial plan
+    let selectedPlan = this.subscriptionPlans[0];
+    let upiLink = generateUpiLink(selectedPlan.amount);
+    let qrDataUrl = await this.generateUpiQr(upiLink);
   
     await Swal.fire({
       title: '<strong style="color:#ffcc00;">Renew Subscription</strong>',
@@ -169,12 +173,14 @@ statusClass: string = "active";
           </select>
   
           <div style="margin-top:15px; text-align:center;">
-            <img id="upiQrImg" src="${qrDataUrl}" style="width:180px; height:180px;" />
+            <a id="upiQrLink" href="${upiLink}" target="_blank">
+              <img id="upiQrImg" src="${qrDataUrl}" style="width:180px; height:180px;" />
+            </a>
           </div>
   
           <div id="emailNote" style="margin-top:10px; text-align:center; cursor:pointer;" title="Click here to send payment email">
-            <p style="color:#f0f0f0; text-decoration:underline; font-weight:500; margin:0;">
-              lakshmikanthan.b.2001@gmail.com
+            <p id="emailId" style="color:#f0f0f0; text-decoration:underline; font-weight:500; margin:0;">
+              ${emailAddress.replace('@', '&#64;')}
             </p>
             <p style="font-size:12px; color:#cccccc; margin-top:5px;">
               Note: Please pay using <span style="color:#ffcc00; font-weight:bold;">GPay</span>, <span style="color:#ffcc00; font-weight:bold;">PhonePe</span>, or <span style="color:#ffcc00; font-weight:bold;">Paytm</span> and upload the paid screenshot to this mail.
@@ -195,29 +201,69 @@ statusClass: string = "active";
       didOpen: () => {
         const selectEl: HTMLSelectElement = document.getElementById('planSelect') as HTMLSelectElement;
         const qrImgEl: HTMLImageElement = document.getElementById('upiQrImg') as HTMLImageElement;
+        const qrLinkEl: HTMLAnchorElement = document.getElementById('upiQrLink') as HTMLAnchorElement;
         const countdownEl: HTMLElement = document.getElementById('countdown') as HTMLElement;
         const emailNote: HTMLElement = document.getElementById('emailNote') as HTMLElement;
   
-        // Gmail link generator
-        const getEmailLink = (planName: string, amount: number) =>
-          `https://mail.google.com/mail/?view=cm&fs=1&to=lakshmikanthan.b.2001@gmail.com&su=${encodeURIComponent('Subscription Renew - ' + gymName)}&body=${encodeURIComponent(`Gym: ${gymName}\nPlan: ${planName}\nAmount: ₹${amount}\nPlease pay using GPay, PhonePe, or Paytm and attach the paid screenshot.`)}`;
+        // Handle email click (Gmail app / web)
+        const openEmail = (planName: string, amount: number) => {
+          const subject = encodeURIComponent(`Subscription Renew - ${gymName}`);
+          const body = encodeURIComponent(`Gym: ${gymName}\nPlan: ${planName}\nAmount: ₹${amount}\nPlease pay using GPay, PhonePe, or Paytm and attach the paid screenshot.`);
+          const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
   
-        // Open Gmail when user clicks anywhere in the emailNote div
+          if (isMobile) {
+            const gmailAppUrl = `googlegmail://co?to=${emailAddress}&subject=${subject}&body=${body}`;
+            const mailtoUrl = `mailto:${emailAddress}?subject=${subject}&body=${body}`;
+            window.location.href = gmailAppUrl;
+            setTimeout(() => window.location.href = mailtoUrl, 500);
+          } else {
+            const gmailWebUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${emailAddress}&su=${subject}&body=${body}`;
+            window.open(gmailWebUrl, '_blank');
+          }
+        };
+  
         emailNote.addEventListener('click', () => {
           const amount = Number(selectEl.value);
           const planName = selectEl.selectedOptions[0].getAttribute('data-name') || 'Plan';
-          const link = getEmailLink(planName, amount);
-          window.open(link, '_blank');
+          openEmail(planName, amount);
         });
   
-        // Update QR dynamically when plan changes
+        // Update QR when plan changes
         selectEl.addEventListener('change', async (event: any) => {
           const amount = Number(event.target.value);
           const planName = selectEl.selectedOptions[0].getAttribute('data-name') || 'Plan';
-          qrImgEl.src = await this.generateUpiQr(amount);
+          upiLink = generateUpiLink(amount);
+          qrLinkEl.href = upiLink;
+          qrImgEl.src = await this.generateUpiQr(upiLink);
         });
   
-        // Start live countdown
+        // QR click for mobile tap-to-pay with fallback
+        qrLinkEl.addEventListener('click', (event) => {
+          event.preventDefault();
+          const start = Date.now();
+          window.location.href = upiLink;
+  
+          setTimeout(() => {
+            const elapsed = Date.now() - start;
+            if (elapsed < 1500) {
+              Swal.fire({
+                icon: 'warning',
+                title: 'UPI app not detected',
+                html: `
+                  <p>Please install a UPI app (GPay / PhonePe / Paytm) to make the payment.</p>
+                  <p>You can also copy this link and open it manually:</p>
+                  <p style="word-break:break-word; color:#ffcc00;">${upiLink}</p>
+                `,
+                showCloseButton: true,
+                showConfirmButton: true,
+                confirmButtonText: 'Copy Link',
+                preConfirm: () => navigator.clipboard.writeText(upiLink)
+              });
+            }
+          }, 1000);
+        });
+  
+        // Countdown timer
         if (expiryDate) {
           const interval = setInterval(() => {
             const now = new Date().getTime();
@@ -240,8 +286,11 @@ statusClass: string = "active";
       }
     });
   }
+  
+  
+  
  // QR generation helper
- async generateUpiQr(amount: number) {
+ async generateUpiQr(amount: string) {
   const note = "Payment for Zyct"; // ✅ your note/message
   const upiString = `upi://pay?pa=${this.upiId}&pn=Zyct&am=${amount}&cu=INR&tn=${encodeURIComponent(note)}`;
 
