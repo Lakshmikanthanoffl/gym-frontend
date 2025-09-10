@@ -345,16 +345,26 @@ export class HeaderComponent implements OnInit {
   }
   
   
+  
   async showPaymentPopup() {
-    let selectedPlan = this.subscriptionPlans[0]; // default Monthly
-    let qrDataUrl = '';
-  
-    // generate initial QR
-    qrDataUrl = await this.generateUpiQr(selectedPlan.amount);
-  
+    const zyct = 'Zyct';
     const gymName = localStorage.getItem('GymName') || 'Gym';
     const validUntilStr = localStorage.getItem('validUntil');
     const expiryDate = validUntilStr ? new Date(validUntilStr) : null;
+    const emailAddress = 'zyct.official@gmail.com';
+  
+    // Helper: generate properly encoded UPI deep link
+    const generateUpiLink = (amount: number) =>
+      `upi://pay?pa=${encodeURIComponent('lakshmikanthan.b.2001-1@okhdfcbank')}` +
+      `&pn=${encodeURIComponent(zyct)}` +
+      `&am=${encodeURIComponent(amount)}` +
+      `&cu=INR` +
+      `&tn=${encodeURIComponent('Subscription Payment')}`;
+  
+    // Initial plan
+    let selectedPlan = this.subscriptionPlans[0];
+    let upiLink = generateUpiLink(selectedPlan.amount);
+    let qrDataUrl = await this.generateUpiQr(upiLink);
   
     await Swal.fire({
       title: '<strong style="color:#ffcc00;">Renew Subscription</strong>',
@@ -365,13 +375,36 @@ export class HeaderComponent implements OnInit {
             ${this.subscriptionPlans.map(p => `<option value="${p.amount}" data-name="${p.name}">${p.name} - ₹${p.amount}</option>`).join('')}
           </select>
   
-          <div style="margin-top:15px; text-align:center;">
-            <img id="upiQrImg" src="${qrDataUrl}" style="width:180px; height:180px;" />
+          <!-- QR wrapper centered using flex -->
+          <div style="display: flex; justify-content: center; margin: 15px 0;">
+            <div id="qrWrapper" style="position: relative; cursor: pointer;">
+              <img id="upiQrImg" src="${qrDataUrl}" style="width:180px; height:180px; border-radius:6px; display:block;" />
+              <div id="qrOverlay" style="
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: #ffcc00;
+                font-weight: bold;
+                background: rgba(0,0,0,0.5);
+                opacity: 0;
+                transition: opacity 0.3s;
+                border-radius: 6px;
+                text-align: center;
+              ">
+                Tap / Scan to Pay
+              </div>
+            </div>
           </div>
+          <p style="font-size:12px; color:#cccccc; margin-top:5px; text-align:center;">Tap the QR for UPI payment</p>
   
           <div id="emailNote" style="margin-top:10px; text-align:center; cursor:pointer;" title="Click here to send payment email">
-            <p style="color:#f0f0f0; text-decoration:underline; font-weight:500; margin:0;">
-              lakshmikanthan.b.2001@gmail.com
+            <p id="emailId" style="color:#f0f0f0; text-decoration:underline; font-weight:500; margin:0;">
+              ${emailAddress.replace('@', '&#64;')}
             </p>
             <p style="font-size:12px; color:#cccccc; margin-top:5px;">
               Note: Please pay using <span style="color:#ffcc00; font-weight:bold;">GPay</span>, <span style="color:#ffcc00; font-weight:bold;">PhonePe</span>, or <span style="color:#ffcc00; font-weight:bold;">Paytm</span> and upload the paid screenshot to this mail.
@@ -390,31 +423,89 @@ export class HeaderComponent implements OnInit {
       background: '#1f1f1f',
       color: '#f0f0f0',
       didOpen: () => {
-        const selectEl: HTMLSelectElement = document.getElementById('planSelect') as HTMLSelectElement;
-        const qrImgEl: HTMLImageElement = document.getElementById('upiQrImg') as HTMLImageElement;
-        const countdownEl: HTMLElement = document.getElementById('countdown') as HTMLElement;
-        const emailNote: HTMLElement = document.getElementById('emailNote') as HTMLElement;
+        const selectEl = document.getElementById('planSelect') as HTMLSelectElement;
+        const qrImgEl = document.getElementById('upiQrImg') as HTMLImageElement;
+        const qrWrapper = document.getElementById('qrWrapper') as HTMLElement;
+        const qrOverlay = document.getElementById('qrOverlay') as HTMLElement;
+        const countdownEl = document.getElementById('countdown') as HTMLElement;
+        const emailNote = document.getElementById('emailNote') as HTMLElement;
   
-        // Gmail link generator
-        const getEmailLink = (planName: string, amount: number) =>
-          `https://mail.google.com/mail/?view=cm&fs=1&to=lakshmikanthan.b.2001@gmail.com&su=${encodeURIComponent('Subscription Renew - ' + gymName)}&body=${encodeURIComponent(`Gym: ${gymName}\nPlan: ${planName}\nAmount: ₹${amount}\nPlease pay using GPay, PhonePe, or Paytm and attach the paid screenshot.`)}`;
+        // Hover / tap overlay effect
+        qrWrapper.addEventListener('mouseenter', () => qrOverlay.style.opacity = '1');
+        qrWrapper.addEventListener('mouseleave', () => qrOverlay.style.opacity = '0');
+        qrWrapper.addEventListener('touchstart', () => qrOverlay.style.opacity = '1');
+        qrWrapper.addEventListener('touchend', () => qrOverlay.style.opacity = '0');
   
-        // Open Gmail when user clicks anywhere in the emailNote div
+        // QR click: open UPI link on mobile with proper fallback
+        qrWrapper.addEventListener('click', () => {
+          const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  
+          if (isMobile) {
+            let fallbackTimeout: any;
+  
+            const handleVisibilityChange = () => {
+              if (document.hidden) {
+                clearTimeout(fallbackTimeout);
+              }
+            };
+            document.addEventListener('visibilitychange', handleVisibilityChange);
+  
+            // Open UPI app
+            window.location.href = upiLink;
+  
+            // fallback after 1.5s if still on page
+            fallbackTimeout = setTimeout(() => {
+              Swal.fire({
+                icon: 'info',
+                title: 'Could not open UPI app',
+                html: `Please scan the QR code or use this UPI link:<br><strong style="word-break:break-word;">${upiLink}</strong>`,
+              });
+              document.removeEventListener('visibilitychange', handleVisibilityChange);
+            }, 1500);
+          } else {
+            // Desktop: show QR and link
+            Swal.fire({
+              icon: 'info',
+              title: 'Scan QR to Pay',
+              html: `<p>Scan this QR code using your UPI app to complete payment.</p>
+                     <p style="word-break:break-word; color:#ffcc00;">${upiLink}</p>`,
+              showCloseButton: true
+            });
+          }
+        });
+  
+        // Handle email click
+        const openEmail = (planName: string, amount: number) => {
+          const subject = encodeURIComponent(`Subscription Renew - ${gymName}`);
+          const body = encodeURIComponent(`Gym: ${gymName}\nPlan: ${planName}\nAmount: ₹${amount}\nPlease pay using GPay, PhonePe, or Paytm and attach the paid screenshot.`);
+          const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  
+          if (isMobile) {
+            const gmailAppUrl = `googlegmail://co?to=${emailAddress}&subject=${subject}&body=${body}`;
+            const mailtoUrl = `mailto:${emailAddress}?subject=${subject}&body=${body}`;
+            window.location.href = gmailAppUrl;
+            setTimeout(() => window.location.href = mailtoUrl, 500);
+          } else {
+            const gmailWebUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${emailAddress}&su=${subject}&body=${body}`;
+            window.open(gmailWebUrl, '_blank');
+          }
+        };
+  
         emailNote.addEventListener('click', () => {
           const amount = Number(selectEl.value);
           const planName = selectEl.selectedOptions[0].getAttribute('data-name') || 'Plan';
-          const link = getEmailLink(planName, amount);
-          window.open(link, '_blank');
+          openEmail(planName, amount);
         });
   
-        // Update QR dynamically when plan changes
+        // Update QR when plan changes
         selectEl.addEventListener('change', async (event: any) => {
           const amount = Number(event.target.value);
           const planName = selectEl.selectedOptions[0].getAttribute('data-name') || 'Plan';
-          qrImgEl.src = await this.generateUpiQr(amount);
+          upiLink = generateUpiLink(amount);
+          qrImgEl.src = await this.generateUpiQr(upiLink);
         });
   
-        // Start live countdown
+        // Countdown timer
         if (expiryDate) {
           const interval = setInterval(() => {
             const now = new Date().getTime();
@@ -438,9 +529,8 @@ export class HeaderComponent implements OnInit {
     });
   }
   
-  
  // QR generation helper
-async generateUpiQr(amount: number) {
+async generateUpiQr(amount: string) {
   const note = "Payment for Zyct"; // ✅ your note/message
   const upiString = `upi://pay?pa=${this.upiId}&pn=Zyct&am=${amount}&cu=INR&tn=${encodeURIComponent(note)}`;
 

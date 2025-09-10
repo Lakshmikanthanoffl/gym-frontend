@@ -149,6 +149,7 @@ statusClass: string = "active";
   
 
   async renewSubscription() {
+    const zyct = 'Zyct';
     const gymName = localStorage.getItem('GymName') || 'Gym';
     const validUntilStr = localStorage.getItem('validUntil');
     const expiryDate = validUntilStr ? new Date(validUntilStr) : null;
@@ -157,7 +158,7 @@ statusClass: string = "active";
     // Helper: generate properly encoded UPI deep link
     const generateUpiLink = (amount: number) =>
       `upi://pay?pa=${encodeURIComponent('lakshmikanthan.b.2001-1@okhdfcbank')}` +
-      `&pn=${encodeURIComponent(gymName)}` +
+      `&pn=${encodeURIComponent(zyct)}` +
       `&am=${encodeURIComponent(amount)}` +
       `&cu=INR` +
       `&tn=${encodeURIComponent('Subscription Payment')}`;
