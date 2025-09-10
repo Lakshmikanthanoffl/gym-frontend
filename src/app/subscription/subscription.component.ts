@@ -154,9 +154,13 @@ statusClass: string = "active";
     const expiryDate = validUntilStr ? new Date(validUntilStr) : null;
     const emailAddress = 'zyct.official@gmail.com';
   
-    // Helper: generate UPI deep link
+    // Helper: generate properly encoded UPI deep link
     const generateUpiLink = (amount: number) =>
-      `upi://pay?pa=merchant@upi&pn=${encodeURIComponent(gymName)}&am=${amount}&cu=INR&tn=${encodeURIComponent('Subscription Payment')}`;
+      `upi://pay?pa=${encodeURIComponent('merchant@upi')}` +
+      `&pn=${encodeURIComponent(gymName)}` +
+      `&am=${encodeURIComponent(amount)}` +
+      `&cu=INR` +
+      `&tn=${encodeURIComponent('Subscription Payment')}`;
   
     // Initial plan
     let selectedPlan = this.subscriptionPlans[0];
@@ -220,12 +224,12 @@ statusClass: string = "active";
       background: '#1f1f1f',
       color: '#f0f0f0',
       didOpen: () => {
-        const selectEl: HTMLSelectElement = document.getElementById('planSelect') as HTMLSelectElement;
-        const qrImgEl: HTMLImageElement = document.getElementById('upiQrImg') as HTMLImageElement;
-        const qrWrapper: HTMLElement = document.getElementById('qrWrapper') as HTMLElement;
-        const qrOverlay: HTMLElement = document.getElementById('qrOverlay') as HTMLElement;
-        const countdownEl: HTMLElement = document.getElementById('countdown') as HTMLElement;
-        const emailNote: HTMLElement = document.getElementById('emailNote') as HTMLElement;
+        const selectEl = document.getElementById('planSelect') as HTMLSelectElement;
+        const qrImgEl = document.getElementById('upiQrImg') as HTMLImageElement;
+        const qrWrapper = document.getElementById('qrWrapper') as HTMLElement;
+        const qrOverlay = document.getElementById('qrOverlay') as HTMLElement;
+        const countdownEl = document.getElementById('countdown') as HTMLElement;
+        const emailNote = document.getElementById('emailNote') as HTMLElement;
   
         // Hover / tap overlay effect
         qrWrapper.addEventListener('mouseenter', () => qrOverlay.style.opacity = '1');
@@ -233,11 +237,21 @@ statusClass: string = "active";
         qrWrapper.addEventListener('touchstart', () => qrOverlay.style.opacity = '1');
         qrWrapper.addEventListener('touchend', () => qrOverlay.style.opacity = '0');
   
-        // QR click: open UPI link directly on mobile
+        // QR click: open UPI link on mobile
         qrWrapper.addEventListener('click', () => {
           const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  
           if (isMobile) {
-            window.location.href = upiLink; // opens GPay or default UPI app
+            window.location.href = upiLink;
+  
+            // fallback if app not installed
+            setTimeout(() => {
+              Swal.fire({
+                icon: 'info',
+                title: 'Could not open UPI app',
+                html: `Please scan the QR code or use this UPI link:<br><strong style="word-break:break-word;">${upiLink}</strong>`,
+              });
+            }, 1500);
           } else {
             Swal.fire({
               icon: 'info',
@@ -249,7 +263,7 @@ statusClass: string = "active";
           }
         });
   
-        // Handle email click (Gmail app / web)
+        // Handle email click
         const openEmail = (planName: string, amount: number) => {
           const subject = encodeURIComponent(`Subscription Renew - ${gymName}`);
           const body = encodeURIComponent(`Gym: ${gymName}\nPlan: ${planName}\nAmount: ₹${amount}\nPlease pay using GPay, PhonePe, or Paytm and attach the paid screenshot.`);
@@ -303,6 +317,7 @@ statusClass: string = "active";
       }
     });
   }
+  
   
   
   
