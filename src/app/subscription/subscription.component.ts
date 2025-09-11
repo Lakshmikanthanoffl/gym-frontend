@@ -335,6 +335,7 @@ statusClass: string = "active";
   
   
   
+  
  // QR generation helper
  async generateUpiQr(amount: string) {
   const note = "Payment for Zyct"; // ✅ your note/message
