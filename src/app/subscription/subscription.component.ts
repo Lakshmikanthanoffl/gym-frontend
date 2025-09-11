@@ -1,6 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import Swal from 'sweetalert2';
 import QRCode from 'qrcode';
+import { PaymentService } from '../services/payment.service';
 @Component({
   selector: 'app-subscription',
   standalone: false,
@@ -25,6 +26,7 @@ statusClass: string = "active";
     { name: 'Yearly', amount: 38000 }
   ];
   isBlinking!: boolean;
+  constructor(private paymentService: PaymentService) { }
   ngOnInit(): void {
     const validUntilStr = localStorage.getItem('validUntil');
     if (!validUntilStr) return;
@@ -156,28 +158,7 @@ statusClass: string = "active";
     const expiryDate = validUntilStr ? new Date(validUntilStr) : null;
     const emailAddress = 'zyct.official@gmail.com';
   
-    // ⚡ Bank-safe amount threshold for auto-pay (can adjust)
-    const maxAutoAmount = 2000;
-  
-    // Helper: generate properly encoded UPI deep link
-    const generateUpiLink = (amount: number) => {
-      let link = `upi://pay?pa=${encodeURIComponent('lakshmikanthan.b.2001@okhdfcbank')}` +
-                 `&pn=${encodeURIComponent(zyct)}` +
-                 `&cu=INR` +
-                 `&tn=${encodeURIComponent('Subscription Payment')}`;
-  
-      // Add auto amount only if below safe threshold
-      if (amount <= maxAutoAmount) {
-        link += `&am=${encodeURIComponent(amount)}`;
-      }
-  
-      return link;
-    };
-  
-    // Initial plan
     let selectedPlan = this.subscriptionPlans[0];
-    let upiLink = generateUpiLink(selectedPlan.amount);
-    let qrDataUrl = await this.generateUpiQr(upiLink);
   
     await Swal.fire({
       title: '<strong style="color:#ffcc00;">Renew Subscription</strong>',
@@ -188,36 +169,13 @@ statusClass: string = "active";
             ${this.subscriptionPlans.map(p => `<option value="${p.amount}" data-name="${p.name}">${p.name} - ₹${p.amount}</option>`).join('')}
           </select>
   
-          <!-- QR wrapper centered -->
-          <div style="display: flex; justify-content: center; margin: 15px 0;">
-            <div id="qrWrapper" style="position: relative; cursor: pointer;">
-              <img id="upiQrImg" src="${qrDataUrl}" style="width:180px; height:180px; border-radius:6px; display:block;" />
-              <div id="qrOverlay" style="
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                color: #ffcc00;
-                font-weight: bold;
-                background: rgba(0,0,0,0.5);
-                opacity: 0;
-                transition: opacity 0.3s;
-                border-radius: 6px;
-                text-align: center;
-              ">
-                Tap / Scan to Pay
-              </div>
-            </div>
+          <div style="margin-top:15px; text-align:center;">
+            <button id="payBtn" style="padding:8px 15px; background:#ffcc00; color:#000; border:none; border-radius:6px; font-weight:bold; cursor:pointer;">
+              Pay Now
+            </button>
           </div>
-          <p style="font-size:12px; color:#cccccc; margin-top:5px; text-align:center;">
-            Tap the QR for UPI payment (if auto-payment fails, scan instead).
-          </p>
   
-          <div id="emailNote" style="margin-top:10px; text-align:center; cursor:pointer;" title="Click here to send payment email">
+          <div id="emailNote" style="margin-top:15px; text-align:center; cursor:pointer;" title="Click here to send payment email">
             <p id="emailId" style="color:#f0f0f0; text-decoration:underline; font-weight:500; margin:0;">
               ${emailAddress.replace('@', '&#64;')}
             </p>
@@ -241,84 +199,49 @@ statusClass: string = "active";
       color: '#f0f0f0',
       didOpen: () => {
         const selectEl = document.getElementById('planSelect') as HTMLSelectElement;
-        const qrImgEl = document.getElementById('upiQrImg') as HTMLImageElement;
-        const qrWrapper = document.getElementById('qrWrapper') as HTMLElement;
-        const qrOverlay = document.getElementById('qrOverlay') as HTMLElement;
+        const payBtn = document.getElementById('payBtn') as HTMLButtonElement;
         const countdownEl = document.getElementById('countdown') as HTMLElement;
         const emailNote = document.getElementById('emailNote') as HTMLElement;
   
-        // Hover overlay
-        qrWrapper.addEventListener('mouseenter', () => qrOverlay.style.opacity = '1');
-        qrWrapper.addEventListener('mouseleave', () => qrOverlay.style.opacity = '0');
-        qrWrapper.addEventListener('touchstart', () => qrOverlay.style.opacity = '1');
-        qrWrapper.addEventListener('touchend', () => qrOverlay.style.opacity = '0');
+        // ✅ Pay Now button → Razorpay
+        payBtn.addEventListener('click', () => {
+          const amount = Number(selectEl.value);
+          const planName = selectEl.selectedOptions[0].getAttribute('data-name') || 'Plan';
   
-        // ✅ QR click: open UPI link with fallback
-        qrWrapper.addEventListener('click', async () => {
-          const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-  
-          if (isMobile) {
-            let fallbackTimeout: any;
-  
-            const handleVisibilityChange = () => {
-              if (document.hidden) {
-                clearTimeout(fallbackTimeout); // user left → UPI app opened
-              }
+          this.paymentService.createOrder(amount).subscribe((order: any) => {
+            const options = {
+              key: 'rzp_test_RGGtv2W1TjYURz', // Only Key ID on frontend
+              amount: order.amount, // in paise
+              currency: order.currency,
+              name: 'Zyct Gym',
+              description: `Subscription: ${planName}`,
+              order_id: order.orderId,
+              handler: (response: any) => {
+                // Verify payment via backend
+                this.paymentService.verifyPayment({
+                  RazorpayOrderId: response.razorpay_order_id,
+                  RazorpayPaymentId: response.razorpay_payment_id,
+                  RazorpaySignature: response.razorpay_signature
+                }).subscribe((res: any) => {
+                  Swal.fire({
+                    icon: res.success ? 'success' : 'error',
+                    title: res.success ? 'Payment Successful!' : 'Payment Verification Failed!'
+                  });
+                });
+              },
+              prefill: { name: 'Customer Name', email: 'customer@example.com', contact: '9876543210' },
+              theme: { color: '#ffcc00' }
             };
-            document.addEventListener('visibilitychange', handleVisibilityChange);
   
-            // Try opening UPI app
-            window.location.href = upiLink;
-  
-            // Fallback → show QR again after 2s
-            fallbackTimeout = setTimeout(async () => {
-              document.removeEventListener('visibilitychange', handleVisibilityChange);
-  
-              Swal.fire({
-                icon: 'info',
-                title: 'Scan QR to Pay',
-                html: `
-                  <p>UPI auto-payment didn’t work (possibly blocked by bank).<br>
-                  Please scan the QR below instead:</p>
-                  <div style="display:flex; justify-content:center; margin:15px 0;">
-                    <img src="${await this.generateUpiQr(upiLink)}" 
-                         style="width:200px; height:200px; border-radius:8px;" />
-                  </div>
-                  <p style="word-break:break-word; color:#ffcc00; font-size:14px;">
-                    Or use this UPI ID:<br><strong>lakshmikanthan.b.2001@okhdfcbank</strong>
-                  </p>
-                `,
-                showCloseButton: true,
-                background: '#1f1f1f',
-                color: '#f0f0f0'
-              });
-            }, 2000);
-          } else {
-            // Desktop → always show QR
-            Swal.fire({
-              icon: 'info',
-              title: 'Scan QR to Pay',
-              html: `
-                <p>Scan this QR code using your UPI app to complete payment:</p>
-                <div style="display:flex; justify-content:center; margin:15px 0;">
-                  <img src="${await this.generateUpiQr(upiLink)}" 
-                       style="width:200px; height:200px; border-radius:8px;" />
-                </div>
-                <p style="word-break:break-word; color:#ffcc00; font-size:14px;">
-                  Or use this UPI ID:<br><strong>lakshmikanthan.b.2001@okhdfcbank</strong>
-                </p>
-              `,
-              showCloseButton: true,
-              background: '#1f1f1f',
-              color: '#f0f0f0'
-            });
-          }
+            const rzp = new (window as any).Razorpay(options);
+            rzp.open();
+          });
         });
   
-        // Handle email click
+        // Email fallback
         const openEmail = (planName: string, amount: number) => {
           const subject = encodeURIComponent(`Subscription Renew - ${gymName}`);
-          const body = encodeURIComponent(`Gym: ${gymName}\nPlan: ${planName}\nAmount: ₹${amount}\nPlease pay using GPay, PhonePe, or Paytm and attach the paid screenshot.`);
+          const body = encodeURIComponent(`Gym: ${gymName}\nPlan: ${planName}\nAmount: ₹${amount}\nPlease attach the paid screenshot.`);
           const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
   
           if (isMobile) {
@@ -336,14 +259,6 @@ statusClass: string = "active";
           const amount = Number(selectEl.value);
           const planName = selectEl.selectedOptions[0].getAttribute('data-name') || 'Plan';
           openEmail(planName, amount);
-        });
-  
-        // Update QR when plan changes
-        selectEl.addEventListener('change', async (event: any) => {
-          const amount = Number(event.target.value);
-          const planName = selectEl.selectedOptions[0].getAttribute('data-name') || 'Plan';
-          upiLink = generateUpiLink(amount);
-          qrImgEl.src = await this.generateUpiQr(upiLink);
         });
   
         // Countdown timer
@@ -369,6 +284,9 @@ statusClass: string = "active";
       }
     });
   }
+  
+  
+  
   
   
   

@@ -1,29 +1,35 @@
 <div class="subscription-card">
-    <div class="header">
-      <h3>⚠ Subscription Status</h3>
-      <span class="status" [ngClass]="statusClass">
-        {{ subscriptionStatus }}
-      </span>
-    </div>
-  
-    <div class="subscription-info">
-      <p><strong>Expiry Date & Time:</strong> {{ formattedExpiry }}</p>
-      
-      <p>
-        <strong>⏳ Time Remaining:</strong> 
-        <span [ngStyle]="{ color: countdownColor }" [ngClass]="{ 'blink-red': isBlinking }">
-          {{ countdown }}
-        </span>
-      </p>
-  
-      <div class="progress-bar">
-        <div class="progress-fill" 
-        [ngStyle]="{'width': progressPercent + '%', 'background-color': countdownColor}">
-        </div>
-   
-      </div>
-  
-      <button class="renew-btn" (click)="renewSubscription()">Renew Now</button>
-    </div>
+  <div class="header">
+    <h3>⚠ Subscription Status</h3>
+    <span class="status" [ngClass]="statusClass">
+      {{ subscriptionStatus }}
+    </span>
   </div>
-  
+
+  <div class="subscription-info">
+    <p><strong>Expiry Date & Time:</strong> {{ formattedExpiry }}</p>
+    
+    <p>
+      <strong>⏳ Time Remaining:</strong> 
+      <span [ngStyle]="{ color: countdownColor }" [ngClass]="{ 'blink-red': isBlinking }">
+        {{ countdown }}
+      </span>
+    </p>
+
+    <div class="progress-bar">
+      <div class="progress-fill" 
+           [ngStyle]="{'width': progressPercent + '%', 'background-color': countdownColor}">
+      </div>
+    </div>
+
+    <button class="renew-btn" (click)="renewSubscription()">Renew Now</button>
+
+    <!-- Footer with policy links -->
+    <p class="subscription-footer" style="font-size:12px; color:#cccccc; margin-top:10px; text-align:center;">
+      <a href="https://merchant.razorpay.com/policy/R8sabmUB9XJtMX/terms" target="_blank">Terms</a> | 
+      <a href="https://merchant.razorpay.com/policy/R8sabmUB9XJtMX/privacy" target="_blank">Privacy</a> | 
+      <a href="https://merchant.razorpay.com/policy/R8sabmUB9XJtMX/refund" target="_blank">Refund</a> | 
+      <a href="https://gym-managements.vercel.app/contact-us" target="_blank">Contact Us</a>
+    </p>
+  </div>
+</div>
