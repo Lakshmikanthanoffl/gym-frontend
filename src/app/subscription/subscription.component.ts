@@ -161,7 +161,7 @@ statusClass: string = "active";
   
     // Helper: generate properly encoded UPI deep link
     const generateUpiLink = (amount: number) => {
-      let link = `upi://pay?pa=${encodeURIComponent('lakshmikanthan.b.2001@oksbi')}` +
+      let link = `upi://pay?pa=${encodeURIComponent('lakshmikanthan.b.2001@okhdfcbank')}` +
                  `&pn=${encodeURIComponent(zyct)}` +
                  `&cu=INR` +
                  `&tn=${encodeURIComponent('Subscription Payment')}`;
@@ -253,8 +253,8 @@ statusClass: string = "active";
         qrWrapper.addEventListener('touchstart', () => qrOverlay.style.opacity = '1');
         qrWrapper.addEventListener('touchend', () => qrOverlay.style.opacity = '0');
   
-        // QR click: open UPI link
-        qrWrapper.addEventListener('click', () => {
+        // ✅ QR click: open UPI link with fallback
+        qrWrapper.addEventListener('click', async () => {
           const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
   
           if (isMobile) {
@@ -262,30 +262,55 @@ statusClass: string = "active";
   
             const handleVisibilityChange = () => {
               if (document.hidden) {
-                clearTimeout(fallbackTimeout);
+                clearTimeout(fallbackTimeout); // user left → UPI app opened
               }
             };
             document.addEventListener('visibilitychange', handleVisibilityChange);
   
-            // Open UPI app
+            // Try opening UPI app
             window.location.href = upiLink;
   
-            // fallback
-            fallbackTimeout = setTimeout(() => {
+            // Fallback → show QR again after 2s
+            fallbackTimeout = setTimeout(async () => {
+              document.removeEventListener('visibilitychange', handleVisibilityChange);
+  
               Swal.fire({
                 icon: 'info',
-                title: 'Could not open UPI app',
-                html: `Please scan the QR code or use this UPI link:<br><strong style="word-break:break-word;">${upiLink}</strong>`,
+                title: 'Scan QR to Pay',
+                html: `
+                  <p>UPI auto-payment didn’t work (possibly blocked by bank).<br>
+                  Please scan the QR below instead:</p>
+                  <div style="display:flex; justify-content:center; margin:15px 0;">
+                    <img src="${await this.generateUpiQr(upiLink)}" 
+                         style="width:200px; height:200px; border-radius:8px;" />
+                  </div>
+                  <p style="word-break:break-word; color:#ffcc00; font-size:14px;">
+                    Or use this UPI ID:<br><strong>lakshmikanthan.b.2001@okhdfcbank</strong>
+                  </p>
+                `,
+                showCloseButton: true,
+                background: '#1f1f1f',
+                color: '#f0f0f0'
               });
-              document.removeEventListener('visibilitychange', handleVisibilityChange);
-            }, 1500);
+            }, 2000);
           } else {
+            // Desktop → always show QR
             Swal.fire({
               icon: 'info',
               title: 'Scan QR to Pay',
-              html: `<p>Scan this QR code using your UPI app to complete payment.</p>
-                     <p style="word-break:break-word; color:#ffcc00;">${upiLink}</p>`,
-              showCloseButton: true
+              html: `
+                <p>Scan this QR code using your UPI app to complete payment:</p>
+                <div style="display:flex; justify-content:center; margin:15px 0;">
+                  <img src="${await this.generateUpiQr(upiLink)}" 
+                       style="width:200px; height:200px; border-radius:8px;" />
+                </div>
+                <p style="word-break:break-word; color:#ffcc00; font-size:14px;">
+                  Or use this UPI ID:<br><strong>lakshmikanthan.b.2001@okhdfcbank</strong>
+                </p>
+              `,
+              showCloseButton: true,
+              background: '#1f1f1f',
+              color: '#f0f0f0'
             });
           }
         });
@@ -344,6 +369,7 @@ statusClass: string = "active";
       }
     });
   }
+  
   
   
   
