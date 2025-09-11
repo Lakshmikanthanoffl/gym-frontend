@@ -47,7 +47,7 @@ const routes: Routes = [
   {
     path: 'subscription',                     // 👈 New Route
     component: SubscriptionComponent,
-    canActivate: [AuthGuard],                 // ✅ Only logged-in users
+    // canActivate: [AuthGuard],                 // ✅ Only logged-in users
     data: { title: 'Subscription', roles: ['admin', 'superadmin'] } // Only admin/superadmin
   },
   {
@@ -59,7 +59,7 @@ const routes: Routes = [
   {
     path: 'contact-us',                     // 👈 New Route
     component: ContactUsComponent,
-    canActivate: [AuthGuard],               // ✅ only logged-in users
+    // canActivate: [AuthGuard],               // ✅ only logged-in users
     data: { title: 'Contact Us' }
   },
    // 👈 Razorpay Demo Route (for reviewers)
