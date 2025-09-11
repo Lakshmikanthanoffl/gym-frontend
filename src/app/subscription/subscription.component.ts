@@ -156,13 +156,23 @@ statusClass: string = "active";
     const expiryDate = validUntilStr ? new Date(validUntilStr) : null;
     const emailAddress = 'zyct.official@gmail.com';
   
+    // ⚡ Bank-safe amount threshold for auto-pay (can adjust)
+    const maxAutoAmount = 2000;
+  
     // Helper: generate properly encoded UPI deep link
-    const generateUpiLink = (amount: number) =>
-      `upi://pay?pa=${encodeURIComponent('lakshmikanthan.b.2001-1@okhdfcbank')}` +
-      `&pn=${encodeURIComponent(zyct)}` +
-      `&am=${encodeURIComponent(amount)}` +
-      `&cu=INR` +
-      `&tn=${encodeURIComponent('Subscription Payment')}`;
+    const generateUpiLink = (amount: number) => {
+      let link = `upi://pay?pa=${encodeURIComponent('lakshmikanthan.b.2001-1@okhdfcbank')}` +
+                 `&pn=${encodeURIComponent(zyct)}` +
+                 `&cu=INR` +
+                 `&tn=${encodeURIComponent('Subscription Payment')}`;
+  
+      // Add auto amount only if below safe threshold
+      if (amount <= maxAutoAmount) {
+        link += `&am=${encodeURIComponent(amount)}`;
+      }
+  
+      return link;
+    };
   
     // Initial plan
     let selectedPlan = this.subscriptionPlans[0];
@@ -178,7 +188,7 @@ statusClass: string = "active";
             ${this.subscriptionPlans.map(p => `<option value="${p.amount}" data-name="${p.name}">${p.name} - ₹${p.amount}</option>`).join('')}
           </select>
   
-          <!-- QR wrapper centered using flex -->
+          <!-- QR wrapper centered -->
           <div style="display: flex; justify-content: center; margin: 15px 0;">
             <div id="qrWrapper" style="position: relative; cursor: pointer;">
               <img id="upiQrImg" src="${qrDataUrl}" style="width:180px; height:180px; border-radius:6px; display:block;" />
@@ -203,14 +213,18 @@ statusClass: string = "active";
               </div>
             </div>
           </div>
-          <p style="font-size:12px; color:#cccccc; margin-top:5px; text-align:center;">Tap the QR for UPI payment</p>
+          <p style="font-size:12px; color:#cccccc; margin-top:5px; text-align:center;">
+            Tap the QR for UPI payment (if auto-payment fails, scan instead).
+          </p>
   
           <div id="emailNote" style="margin-top:10px; text-align:center; cursor:pointer;" title="Click here to send payment email">
             <p id="emailId" style="color:#f0f0f0; text-decoration:underline; font-weight:500; margin:0;">
               ${emailAddress.replace('@', '&#64;')}
             </p>
             <p style="font-size:12px; color:#cccccc; margin-top:5px;">
-              Note: Please pay using <span style="color:#ffcc00; font-weight:bold;">GPay</span>, <span style="color:#ffcc00; font-weight:bold;">PhonePe</span>, or <span style="color:#ffcc00; font-weight:bold;">Paytm</span> and upload the paid screenshot to this mail.
+              Note: Please pay using <span style="color:#ffcc00; font-weight:bold;">GPay</span>, 
+              <span style="color:#ffcc00; font-weight:bold;">PhonePe</span>, or 
+              <span style="color:#ffcc00; font-weight:bold;">Paytm</span> and upload the paid screenshot to this mail.
             </p>
             <p style="font-size:12px; color:#cccccc; margin-top:2px;">
               It may take 5 to 10 minutes to reflect.
@@ -233,13 +247,13 @@ statusClass: string = "active";
         const countdownEl = document.getElementById('countdown') as HTMLElement;
         const emailNote = document.getElementById('emailNote') as HTMLElement;
   
-        // Hover / tap overlay effect
+        // Hover overlay
         qrWrapper.addEventListener('mouseenter', () => qrOverlay.style.opacity = '1');
         qrWrapper.addEventListener('mouseleave', () => qrOverlay.style.opacity = '0');
         qrWrapper.addEventListener('touchstart', () => qrOverlay.style.opacity = '1');
         qrWrapper.addEventListener('touchend', () => qrOverlay.style.opacity = '0');
   
-        // QR click: open UPI link on mobile with proper fallback
+        // QR click: open UPI link
         qrWrapper.addEventListener('click', () => {
           const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
   
@@ -256,7 +270,7 @@ statusClass: string = "active";
             // Open UPI app
             window.location.href = upiLink;
   
-            // fallback after 1.5s if still on page
+            // fallback
             fallbackTimeout = setTimeout(() => {
               Swal.fire({
                 icon: 'info',
@@ -266,7 +280,6 @@ statusClass: string = "active";
               document.removeEventListener('visibilitychange', handleVisibilityChange);
             }, 1500);
           } else {
-            // Desktop: show QR and link
             Swal.fire({
               icon: 'info',
               title: 'Scan QR to Pay',
@@ -331,6 +344,7 @@ statusClass: string = "active";
       }
     });
   }
+  
   
   
   
