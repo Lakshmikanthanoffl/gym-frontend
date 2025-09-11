@@ -148,6 +148,7 @@ statusClass: string = "active";
   
   
 
+  
   async renewSubscription() {
     const zyct = 'Zyct';
     const gymName = localStorage.getItem('GymName') || 'Gym';
@@ -238,35 +239,39 @@ statusClass: string = "active";
         qrWrapper.addEventListener('touchstart', () => qrOverlay.style.opacity = '1');
         qrWrapper.addEventListener('touchend', () => qrOverlay.style.opacity = '0');
   
-        // QR click: mobile open deep link (GPay) or scan QR (others)
+        // QR click: open UPI link on mobile with proper fallback
         qrWrapper.addEventListener('click', () => {
           const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
   
           if (isMobile) {
-            const userAgent = navigator.userAgent;
+            let fallbackTimeout: any;
   
-            // Open deep link for GPay reliably
-            if (/GPay/i.test(userAgent)) {
-              window.location.href = upiLink;
-            }
+            const handleVisibilityChange = () => {
+              if (document.hidden) {
+                clearTimeout(fallbackTimeout);
+              }
+            };
+            document.addEventListener('visibilitychange', handleVisibilityChange);
   
-            // Always show QR for Paytm / PhonePe / others
-            Swal.fire({
-              icon: 'info',
-              title: 'Scan QR to Pay',
-              html: `<p>Scan this QR code using your UPI app to complete payment.</p>
-                     <img src="${qrDataUrl}" style="width:180px;height:180px;border-radius:6px;margin-top:10px;" />
-                     <p style="word-break:break-word; color:#ffcc00;">UPI link: ${upiLink}</p>`,
-              showCloseButton: true
-            });
+            // Open UPI app
+            window.location.href = upiLink;
+  
+            // fallback after 1.5s if still on page
+            fallbackTimeout = setTimeout(() => {
+              Swal.fire({
+                icon: 'info',
+                title: 'Could not open UPI app',
+                html: `Please scan the QR code or use this UPI link:<br><strong style="word-break:break-word;">${upiLink}</strong>`,
+              });
+              document.removeEventListener('visibilitychange', handleVisibilityChange);
+            }, 1500);
           } else {
-            // Desktop: show QR and UPI link
+            // Desktop: show QR and link
             Swal.fire({
               icon: 'info',
               title: 'Scan QR to Pay',
               html: `<p>Scan this QR code using your UPI app to complete payment.</p>
-                     <img src="${qrDataUrl}" style="width:180px;height:180px;border-radius:6px;margin-top:10px;" />
-                     <p style="word-break:break-word; color:#ffcc00;">UPI link: ${upiLink}</p>`,
+                     <p style="word-break:break-word; color:#ffcc00;">${upiLink}</p>`,
               showCloseButton: true
             });
           }
@@ -326,8 +331,6 @@ statusClass: string = "active";
       }
     });
   }
-  
-  
   
   
   
