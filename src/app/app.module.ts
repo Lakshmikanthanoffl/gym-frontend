@@ -41,6 +41,7 @@ import { RecaptchaModule } from 'ng-recaptcha';
 import { TabViewModule } from 'primeng/tabview';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { InputSwitchModule } from 'primeng/inputswitch';
+import { MultiSelectModule } from 'primeng/multiselect'; // ✅ add this
 // Auth components
 import { LoginComponent } from './auth/login/login.component';
 import { SignupComponent } from './auth/signup/signup.component';
@@ -79,6 +80,7 @@ import { RazorpayDemoComponent } from './razorpay-demo/razorpay-demo.component';
     MonthFilterPipe,  // <-- add pipe here
     FormsModule,
     ReactiveFormsModule,
+    MultiSelectModule,  // ✅ here
     HttpClientModule,
     ZXingScannerModule,  // ✅ add here'
 

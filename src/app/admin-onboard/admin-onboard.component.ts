@@ -14,6 +14,7 @@ export interface Role {
   validUntil?: Date | null;
   amountPaid?: number;
   isActive?: boolean;
+  privileges: string[]; // ✅ array of menu keys
 }
 
 @Component({
@@ -30,6 +31,19 @@ export class AdminOnboardComponent implements OnInit {
     { label: '6 Months', value: '6months' },
     { label: 'Yearly', value: 'yearly' }
   ];
+  availableMenus = [
+    { label: 'Dashboard', value: 'dashboard' },
+    { label: 'Members', value: 'members' },
+    { label: 'Plans', value: 'plans' },
+    { label: 'Payments', value: 'payments' },
+    { label: 'Subscription', value: 'subscription' },
+    { label: 'Admin Onboard', value: 'admin-onboard' },
+    { label: 'Export Data', value: 'export' }, // ✅ new export option
+    { label: 'Qr Attendance Tracking', value: 'Qr Attendance-Tracking' },
+    { label: 'Manual Attendance Tracking', value: 'manual Attendance-Tracking' } // ✅ new export option // ✅ new export option
+    // ❌ not adding "Contact Us" since you don’t want it
+  ];
+  
   selectedSubscription: string = 'monthly';  // default
   rolesList: Role[] = [];
   filteredRolesList: Role[] = [];
@@ -54,7 +68,8 @@ export class AdminOnboardComponent implements OnInit {
     paidDate: null,
     validUntil: null,
     amountPaid: 0,
-    isActive: true
+    isActive: true,
+    privileges: [] // stores selected menus
   };
 
   availableGyms: { id: number; name: string }[] = [];
@@ -138,7 +153,8 @@ export class AdminOnboardComponent implements OnInit {
       paidDate: role.paidDate ? new Date(role.paidDate) : null,
       validUntil: role.validUntil ? new Date(role.validUntil) : null,
       amountPaid: role.amountPaid ?? 0,
-      isActive: role.isActive ?? true
+      isActive: role.isActive ?? true,
+      privileges: role.privileges ?? [] // ✅ keep DB privileges when editing
     };
   
     // Make sure the subscription dropdown shows correct period
@@ -258,7 +274,8 @@ export class AdminOnboardComponent implements OnInit {
       paidDate: null,
       validUntil: null,
       amountPaid: 0,
-      isActive: true
+      isActive: true,
+      privileges: [] // stores selected menus
     };
   }
 
@@ -305,7 +322,8 @@ export class AdminOnboardComponent implements OnInit {
           paidDate: r.PaidDate ? new Date(r.PaidDate) : null,
           validUntil: r.ValidUntil ? new Date(r.ValidUntil) : null,
           amountPaid: r.AmountPaid ?? 0,
-          isActive: r.IsActive ?? true
+          isActive: r.IsActive ?? true,
+          privileges: r.Privileges ?? [] // ✅ keep DB privileges if available
         }))
         // ✅ sort by RoleId ascending
         .sort((a, b) => a.roleId - b.roleId);

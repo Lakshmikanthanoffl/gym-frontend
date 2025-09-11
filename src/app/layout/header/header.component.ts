@@ -46,7 +46,8 @@ import { SidebarService } from '../../services/sidebar.service';
 export class HeaderComponent implements OnInit {
   @Output() sidebarToggle = new EventEmitter<void>();
 
-  headerTitle = 'Dashboard';
+  headerTitle = localStorage.getItem('role')?.toLowerCase() === 'superadmin' ? 'Dashboard' : 'Members';
+
   
   popupVisible = false;
 

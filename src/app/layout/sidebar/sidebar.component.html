@@ -25,30 +25,52 @@
     {{ userrole === 'superadmin' ? 'Zyct' : defaultGymName }}
   </h4>
 
-  <a routerLink="/dashboard" routerLinkActive="active" (click)="closeSidebarOnMobile()">
+  <!-- Dashboard -->
+  <a [class.disabled]="!hasPrivilege('Dashboard')" 
+     (click)="!hasPrivilege('Dashboard') ? showVipPopup('Dashboard') : closeSidebarOnMobile()"
+     routerLink="/dashboard"
+     routerLinkActive="active">
     <i class="pi pi-home"></i> <span> Dashboard</span>
+    <span *ngIf="!hasPrivilege('Dashboard')" class="vip-badge">VIP</span>
   </a>
 
-  <a *ngIf="userrole === 'admin' || userrole === 'superadmin'" 
-     routerLink="/members" routerLinkActive="active" (click)="closeSidebarOnMobile()">
+  <!-- Members -->
+  <a [class.disabled]="!hasPrivilege('members')" 
+     (click)="!hasPrivilege('members') ? showVipPopup('Members') : closeSidebarOnMobile()"
+     routerLink="/members"
+     routerLinkActive="active">
     <i class="pi pi-users"></i> <span> Members</span>
+    <span *ngIf="!hasPrivilege('members')" class="vip-badge">VIP</span>
   </a>
 
-  <a routerLink="/plans" routerLinkActive="active" (click)="closeSidebarOnMobile()">
+  <!-- Plans -->
+  <a [class.disabled]="!hasPrivilege('plans')" 
+     (click)="!hasPrivilege('plans') ? showVipPopup('Plans') : closeSidebarOnMobile()"
+     routerLink="/plans"
+     routerLinkActive="active">
     <i class="pi pi-book"></i> <span> Plans</span>
+    <span *ngIf="!hasPrivilege('plans')" class="vip-badge">VIP</span>
   </a>
 
-  <a *ngIf="userrole === 'admin' || userrole === 'superadmin'" 
-     routerLink="/payments" routerLinkActive="active" (click)="closeSidebarOnMobile()">
+  <!-- Payments -->
+  <a [class.disabled]="!hasPrivilege('payments')" 
+     (click)="!hasPrivilege('payments') ? showVipPopup('Payments') : closeSidebarOnMobile()"
+     routerLink="/payments"
+     routerLinkActive="active">
     <i class="pi pi-credit-card"></i> <span> Payments</span>
+    <span *ngIf="!hasPrivilege('payments')" class="vip-badge">VIP</span>
   </a>
 
-  <a *ngIf="userrole === 'admin' || userrole === 'superadmin'" 
-     routerLink="/subscription" routerLinkActive="active" class="subscription-link"
-     (click)="closeSidebarOnMobile()">
+  <!-- Subscription -->
+  <a [class.disabled]="!hasPrivilege('subscription')" 
+     (click)="!hasPrivilege('subscription') ? showVipPopup('Subscription') : closeSidebarOnMobile()"
+     routerLink="/subscription"
+     routerLinkActive="active"
+     class="subscription-link">
     <i class="pi pi-id-card"></i>
     <span class="subscription-text">
       Subscription
+      <span *ngIf="!hasPrivilege('subscription')" class="vip-badge">VIP</span>
       <span *ngIf="showBellIcon && !bellIsRed" class="sub-dot sub-dot-yellow"></span>
       <span *ngIf="bellIsRed" class="sub-dot sub-dot-red"></span>
     </span>

@@ -24,7 +24,7 @@
         (click)="showAddDialog()"
       ></button>
 
-      <button
+      <button *ngIf="hasPrivilege('export')"
         pButton
         label="Export"
         icon="pi pi-download"
@@ -32,7 +32,7 @@
         (click)="menu.toggle($event)"
       ></button>
       <p-menu #menu [popup]="true" [model]="exportItems" styleClass="dark-menu"></p-menu>
-      <button
+      <button *ngIf="hasPrivilege('Qr Attendance-Tracking')"
       pButton
       label="Open QR Scanner"
       icon="pi pi-qrcode"
@@ -136,7 +136,7 @@
         <th *ngIf="userrole === 'superadmin'">Gym ID</th>
         <th *ngIf="userrole === 'superadmin'">Gym Name</th>
         <th>Status</th>
-        <th>Attendance</th>
+        <th *ngIf="hasPrivilege('manual Attendance-Tracking')">Attendance</th>
         <th class="text-center">Actions</th>
       </tr>
     </ng-template>
@@ -159,8 +159,8 @@
         </td>
 
         <!-- Attendance Column -->
-        <td class="text-center">
-          <div class="d-flex flex-column align-items-center">
+        <td *ngIf="hasPrivilege('manual Attendance-Tracking')" class="text-center">
+          <div  class="d-flex flex-column align-items-center">
         
             <!-- Monthly attendance count -->
             <div class="mb-2">
@@ -203,7 +203,7 @@
 
         <!-- Actions -->
         <td class="text-center">
-          <button 
+          <button *ngIf="hasPrivilege('Qr Attendance-Tracking')"
     pButton 
     type="button" 
     icon="pi pi-qrcode" 

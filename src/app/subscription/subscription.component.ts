@@ -213,7 +213,7 @@ statusClass: string = "active";
               key: 'rzp_test_RGGtv2W1TjYURz', // Only Key ID on frontend
               amount: order.amount, // in paise
               currency: order.currency,
-              name: 'Zyct Gym',
+              name: 'Zyct',
               description: `Subscription: ${planName}`,
               order_id: order.orderId,
               handler: (response: any) => {
