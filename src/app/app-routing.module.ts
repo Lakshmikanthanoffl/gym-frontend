@@ -11,6 +11,7 @@ import { AuthGuard } from './guards/auth.guard';
 import { AdminOnboardComponent } from './admin-onboard/admin-onboard.component'; // Import later
 import { ContactUsComponent } from './contact-us/contact-us.component';  // 👈 Import here
 import { SubscriptionComponent } from './subscription/subscription.component';
+import { RazorpayDemoComponent } from './razorpay-demo/razorpay-demo.component';
 const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
 
@@ -60,6 +61,14 @@ const routes: Routes = [
     component: ContactUsComponent,
     canActivate: [AuthGuard],               // ✅ only logged-in users
     data: { title: 'Contact Us' }
+  },
+   // 👈 Razorpay Demo Route (for reviewers)
+  {
+    path: 'razorpay-demo',
+    component: RazorpayDemoComponent,
+    // Optionally, you can disable AuthGuard so Razorpay can access without login
+    // canActivate: [AuthGuard], 
+    data: { title: 'Razorpay Demo' }
   },
   // Fallback for unknown paths
   { path: '**', redirectTo: 'login' }

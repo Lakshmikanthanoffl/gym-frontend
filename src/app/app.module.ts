@@ -53,6 +53,7 @@ import { environment } from '../environments/environment';
 import { AdminOnboardComponent } from './admin-onboard/admin-onboard.component';
 import { ContactUsComponent } from './contact-us/contact-us.component';
 import { SubscriptionComponent } from './subscription/subscription.component';
+import { RazorpayDemoComponent } from './razorpay-demo/razorpay-demo.component';
 
 @NgModule({
   declarations: [
@@ -69,6 +70,7 @@ import { SubscriptionComponent } from './subscription/subscription.component';
     AdminOnboardComponent,
     ContactUsComponent,
     SubscriptionComponent,
+    RazorpayDemoComponent,
   ],
   imports: [
     BrowserModule,
