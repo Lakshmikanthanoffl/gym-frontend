@@ -346,6 +346,7 @@ export class HeaderComponent implements OnInit {
   
   
   
+ 
   async showPaymentPopup() {
     const zyct = 'Zyct';
     const gymName = localStorage.getItem('GymName') || 'Gym';
@@ -436,39 +437,35 @@ export class HeaderComponent implements OnInit {
         qrWrapper.addEventListener('touchstart', () => qrOverlay.style.opacity = '1');
         qrWrapper.addEventListener('touchend', () => qrOverlay.style.opacity = '0');
   
-        // QR click: open UPI link on mobile with proper fallback
+        // QR click: mobile open deep link (GPay) or scan QR (others)
         qrWrapper.addEventListener('click', () => {
           const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
   
           if (isMobile) {
-            let fallbackTimeout: any;
+            const userAgent = navigator.userAgent;
   
-            const handleVisibilityChange = () => {
-              if (document.hidden) {
-                clearTimeout(fallbackTimeout);
-              }
-            };
-            document.addEventListener('visibilitychange', handleVisibilityChange);
+            // Open deep link for GPay reliably
+            if (/GPay/i.test(userAgent)) {
+              window.location.href = upiLink;
+            }
   
-            // Open UPI app
-            window.location.href = upiLink;
-  
-            // fallback after 1.5s if still on page
-            fallbackTimeout = setTimeout(() => {
-              Swal.fire({
-                icon: 'info',
-                title: 'Could not open UPI app',
-                html: `Please scan the QR code or use this UPI link:<br><strong style="word-break:break-word;">${upiLink}</strong>`,
-              });
-              document.removeEventListener('visibilitychange', handleVisibilityChange);
-            }, 1500);
-          } else {
-            // Desktop: show QR and link
+            // Always show QR for Paytm / PhonePe / others
             Swal.fire({
               icon: 'info',
               title: 'Scan QR to Pay',
               html: `<p>Scan this QR code using your UPI app to complete payment.</p>
-                     <p style="word-break:break-word; color:#ffcc00;">${upiLink}</p>`,
+                     <img src="${qrDataUrl}" style="width:180px;height:180px;border-radius:6px;margin-top:10px;" />
+                     <p style="word-break:break-word; color:#ffcc00;">UPI link: ${upiLink}</p>`,
+              showCloseButton: true
+            });
+          } else {
+            // Desktop: show QR and UPI link
+            Swal.fire({
+              icon: 'info',
+              title: 'Scan QR to Pay',
+              html: `<p>Scan this QR code using your UPI app to complete payment.</p>
+                     <img src="${qrDataUrl}" style="width:180px;height:180px;border-radius:6px;margin-top:10px;" />
+                     <p style="word-break:break-word; color:#ffcc00;">UPI link: ${upiLink}</p>`,
               showCloseButton: true
             });
           }
@@ -528,7 +525,6 @@ export class HeaderComponent implements OnInit {
       }
     });
   }
-  
  // QR generation helper
 async generateUpiQr(amount: string) {
   const note = "Payment for Zyct"; // ✅ your note/message
