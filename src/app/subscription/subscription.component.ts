@@ -161,7 +161,7 @@ statusClass: string = "active";
   
     // Helper: generate properly encoded UPI deep link
     const generateUpiLink = (amount: number) => {
-      let link = `upi://pay?pa=${encodeURIComponent('lakshmikanthan.b.2001-1@okhdfcbank')}` +
+      let link = `upi://pay?pa=${encodeURIComponent('lakshmikanthan.b.2001@oksbi')}` +
                  `&pn=${encodeURIComponent(zyct)}` +
                  `&cu=INR` +
                  `&tn=${encodeURIComponent('Subscription Payment')}`;
