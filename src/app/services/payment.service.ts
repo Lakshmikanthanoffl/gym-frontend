@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class PaymentService {
-  private baseUrl = 'https://localhost:44363/api/Payment';
+  private baseUrl = 'https://gymmanagementapi.onrender.com/api/Payment';
 
   constructor(private http: HttpClient) {}
 
