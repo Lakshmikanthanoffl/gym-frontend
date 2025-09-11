@@ -189,6 +189,22 @@
                 title="Back" (click)="manualGymEntry = false"></button>
       </ng-template>
     </div>
+<!-- Privileges Section -->
+<!-- Privileges Section -->
+<div class="field-row mt-3">
+  <label class="w-30">Menu Privileges</label>
+  <p-multiSelect 
+    [options]="availableMenus"
+    [(ngModel)]="admin.privileges"
+    optionLabel="label"
+    optionValue="value"
+    display="chip"
+    placeholder="Select Menus"
+    class="flex-grow-1"
+    appendTo="body">
+  </p-multiSelect>
+</div>
+
 
     <!-- Save / Update -->
     <div class="text-right mt-3">

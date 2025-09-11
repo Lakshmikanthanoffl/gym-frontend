@@ -295,6 +295,20 @@
   border-radius: 50%;
   animation: pulse 1.5s infinite;
 }
+a.disabled {
+  pointer-events: none; /* prevent clicks */
+  opacity: 0.5;         /* faded look */
+}
+
+.vip-badge {
+  background-color: gold;
+  color: black;
+  font-size: 0.7rem;
+  padding: 2px 5px;
+  margin-left: 5px;
+  border-radius: 3px;
+  font-weight: bold;
+}
 
 /* Yellow dot (1–7 days) */
 .sub-dot-yellow {

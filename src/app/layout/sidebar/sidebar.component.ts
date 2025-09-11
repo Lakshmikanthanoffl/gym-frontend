@@ -19,7 +19,7 @@ export class SidebarComponent implements OnInit {
 
   sidebarOpen: boolean = false; // controlled by SidebarService
   username!: string | null;
-
+  privileges: string[] = [];
   constructor(
     private authService: AuthService,
     private gymService: GymService,
@@ -40,7 +40,7 @@ handleKeyboardEvent(event: KeyboardEvent) {
     this.sidebarService.sidebarOpen$.subscribe(state => {
       this.sidebarOpen = state;
     });
-
+    this.privileges = this.authService.getPrivileges();
     // ✅ Role updates
     this.authService.role$.subscribe(role => {
       this.userrole = role;
@@ -63,6 +63,23 @@ handleKeyboardEvent(event: KeyboardEvent) {
       this.defaultGymName = name;
     });
   }
+  hasPrivilege(menu: string): boolean {
+    // superadmin bypass → always see all menus
+    if (this.authService.getRole() === 'superadmin') return true;
+    return this.privileges.includes(menu);
+  }
+  showVipPopup(feature: string) {
+  Swal.fire({
+    icon: 'info',
+    title: 'VIP Feature',
+    text: `You need to purchase the required plan to access ${feature}.`,
+    confirmButtonText: 'OK',
+    background: '#1e1e1e',
+    color: '#f1f1f1',
+    confirmButtonColor: '#3085d6'
+  });
+}
+
   logout() {
     Swal.fire({
       title: 'Are you sure?',

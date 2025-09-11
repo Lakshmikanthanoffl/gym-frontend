@@ -20,9 +20,22 @@ export class LoginComponent implements OnInit {
 
   ngOnInit() {
     if (this.authService.isLoggedIn()) {
-      this.router.navigate(['/dashboard']);
+      const userRole = (localStorage.getItem('role') || '').toLowerCase();
+      const userPrivileges = JSON.parse(localStorage.getItem('privileges') || '[]') as string[];
+  
+      // Determine the first route based on role/privileges
+      let firstRoute = '/members'; // default fallback
+      if (userRole === 'superadmin') {
+        firstRoute = '/dashboard';
+      } else if (userPrivileges.includes('dashboard')) {
+        firstRoute = '/dashboard';
+      }
+  
+      // Navigate once to the correct route
+      this.router.navigate([firstRoute]);
     }
   }
+  
 
   login() {
     const loginData = {
@@ -34,7 +47,19 @@ export class LoginComponent implements OnInit {
       next: (role) => {
         this.authService.setRole(role.RoleName);
         this.showContactUs = false; // reset flag on successful login
+   // Determine the first route after login
+const userRole = role.RoleName.toLowerCase();
+const userPrivileges = role.Privileges || []; // make sure backend returns privileges array
 
+let firstRoute = '/members'; // default fallback
+if (userRole === 'superadmin') {
+  firstRoute = '/dashboard';
+} else if (userPrivileges.includes('dashboard')) {
+  firstRoute = '/dashboard';
+}
+
+// Navigate once to the correct route
+this.router.navigate([firstRoute]);
         if (role.RoleName === 'superadmin') {
           this.router.navigate(['/dashboard']);
         
@@ -223,7 +248,7 @@ export class LoginComponent implements OnInit {
             }
           });
         } else {
-          this.router.navigate(['/dashboard']);
+          
           Swal.fire({
             icon: 'success',
             title: `Welcome Back, ${role.UserName}!`,
@@ -238,55 +263,52 @@ export class LoginComponent implements OnInit {
         
       },
       error: (err) => {
-        if (err.status === 401) {
-          if (err.error?.message === 'Invalid email or password') {
-            Swal.fire({
-              icon: 'error',
-              title: 'Invalid Credentials',
-              text: err.error.message,
-              background: '#1a1a1a',
-              color: '#eaeaea',
-              confirmButtonColor: '#ff4d4d'
-            });
-          } else if (err.error?.message === 'Account expired. Please renew subscription.') {
-            this.showContactUs = true; // ✅ Show Contact Us link for non-superadmins
-            const role = this.authService.getRole();
-            if (role !== 'superadmin') {
-              Swal.fire({
-                icon: 'warning',
-                title: 'Subscription Expired',
-                text: err.error.message,
-                background: '#1a1a1a',
-                color: '#eaeaea',
-                confirmButtonColor: '#ff9900'
-              });
-            } else {
-              this.router.navigate(['/dashboard']);
-            }
-          } else {
-            Swal.fire({
-              icon: 'error',
-              title: 'Unauthorized',
-              text: 'Unauthorized access. Please try again.',
-              background: '#1a1a1a',
-              color: '#eaeaea',
-              confirmButtonColor: '#ff4d4d'
-            });
-          }
-        } else {
-          Swal.fire({
-            icon: 'warning',
-            title: 'Login Failed',
-            text: 'Something went wrong. Please try again.',
-            background: '#1a1a1a',
-            color: '#eaeaea',
-            confirmButtonColor: '#ff9900'
-          });
-        }
+        this.handleLoginError(err);
       }
     });
   }
-
+  private handleLoginError(err: any) {
+    if (err.status === 401) {
+      if (err.error?.message === 'Invalid email or password') {
+        Swal.fire({
+          icon: 'error',
+          title: 'Invalid Credentials',
+          text: err.error.message,
+          background: '#1a1a1a',
+          color: '#eaeaea',
+          confirmButtonColor: '#ff4d4d'
+        });
+      } else if (err.error?.message === 'Account expired. Please renew subscription.') {
+        this.showContactUs = true; 
+        Swal.fire({
+          icon: 'warning',
+          title: 'Subscription Expired',
+          text: err.error.message,
+          background: '#1a1a1a',
+          color: '#eaeaea',
+          confirmButtonColor: '#ff9900'
+        });
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Unauthorized',
+          text: 'Unauthorized access. Please try again.',
+          background: '#1a1a1a',
+          color: '#eaeaea',
+          confirmButtonColor: '#ff4d4d'
+        });
+      }
+    } else {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Login Failed',
+        text: 'Something went wrong. Please try again.',
+        background: '#1a1a1a',
+        color: '#eaeaea',
+        confirmButtonColor: '#ff9900'
+      });
+    }
+  }
   togglePasswordVisibility() {
     this.showPassword = !this.showPassword;
   }

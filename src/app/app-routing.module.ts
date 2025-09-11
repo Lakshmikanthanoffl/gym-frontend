@@ -8,10 +8,11 @@ import { PaymentsComponent } from './payments/payments.component';
 import { LoginComponent } from './auth/login/login.component';
 import { SignupComponent } from './auth/signup/signup.component';
 import { AuthGuard } from './guards/auth.guard';
-import { AdminOnboardComponent } from './admin-onboard/admin-onboard.component'; // Import later
-import { ContactUsComponent } from './contact-us/contact-us.component';  // 👈 Import here
+import { AdminOnboardComponent } from './admin-onboard/admin-onboard.component';
+import { ContactUsComponent } from './contact-us/contact-us.component';
 import { SubscriptionComponent } from './subscription/subscription.component';
 import { RazorpayDemoComponent } from './razorpay-demo/razorpay-demo.component';
+
 const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
 
@@ -24,53 +25,51 @@ const routes: Routes = [
     path: 'dashboard',
     component: DashboardComponent,
     canActivate: [AuthGuard],
-    data: { title: 'Dashboard' }
+    data: { title: 'Dashboard', roles: ['admin', 'superadmin'], privileges: ['dashboard'] } // accessible by all logged-in users
   },
   {
     path: 'members',
     component: MembersComponent,
     canActivate: [AuthGuard],
-    data: { title: 'Members', roles: ['admin', 'superadmin'] } // ❗️Only admin
+    data: { title: 'Members', roles: ['admin', 'superadmin'], privileges: ['members'] }
   },
   {
     path: 'plans',
     component: PlansComponent,
     canActivate: [AuthGuard],
-    data: { title: 'Plans' } // ✅ All authenticated users
+    data: { title: 'Plans', privileges: ['plans'] } // any logged-in user with plan privilege
   },
   {
     path: 'payments',
     component: PaymentsComponent,
     canActivate: [AuthGuard],
-    data: { title: 'Payments', roles: ['admin', 'superadmin'] } // ❗️Only admin
+    data: { title: 'Payments', roles: ['admin', 'superadmin'], privileges: ['payments'] }
   },
   {
-    path: 'subscription',                     // 👈 New Route
+    path: 'subscription',
     component: SubscriptionComponent,
-    // canActivate: [AuthGuard],                 // ✅ Only logged-in users
-    data: { title: 'Subscription', roles: ['admin', 'superadmin'] } // Only admin/superadmin
+    canActivate: [AuthGuard],
+    data: { title: 'Subscription', roles: ['admin', 'superadmin'], privileges: ['subscription'] }
   },
   {
     path: 'admin-onboard',
-    component: AdminOnboardComponent, // Create this later
+    component: AdminOnboardComponent,
     canActivate: [AuthGuard],
-    data: { title: 'Admin Onboard', roles: ['superadmin'] }
+    data: { title: 'Admin Onboard', roles: ['superadmin'], privileges: ['adminOnboard'] }
   },
   {
-    path: 'contact-us',                     // 👈 New Route
+    path: 'contact-us',
     component: ContactUsComponent,
-    // canActivate: [AuthGuard],               // ✅ only logged-in users
-    data: { title: 'Contact Us' }
+    canActivate: [AuthGuard],
+    data: { title: 'Contact Us' } // all logged-in users with contact privilege
   },
-   // 👈 Razorpay Demo Route (for reviewers)
-  {
-    path: 'razorpay-demo',
-    component: RazorpayDemoComponent,
-    // Optionally, you can disable AuthGuard so Razorpay can access without login
-    // canActivate: [AuthGuard], 
-    data: { title: 'Razorpay Demo' }
-  },
-  // Fallback for unknown paths
+  // {
+  //   path: 'razorpay-demo',
+  //   component: RazorpayDemoComponent,
+  //   data: { title: 'Razorpay Demo' } // optional: accessible without AuthGuard
+  // },
+
+  // Fallback
   { path: '**', redirectTo: 'login' }
 ];
 

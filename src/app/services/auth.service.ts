@@ -15,6 +15,7 @@ export interface Role {
   IsActive: boolean;
   ValidUntil: string;  // ✅ from API
   PaidDate:string;
+  Privileges: string[];  // ✅ add this
 }
 
 @Injectable({
@@ -97,7 +98,11 @@ export class AuthService {
       });
     });
   }
-
+  getPrivileges(): string[] {
+    const privileges = localStorage.getItem('privileges');
+    return privileges ? JSON.parse(privileges) : [];
+  }
+  
   login(loginData: { email: string; password: string }): Observable<Role> {
     return this.http.post<Role>(this.apiUrl, loginData).pipe(
       tap(role => {
@@ -117,7 +122,10 @@ export class AuthService {
         }
         localStorage.setItem('isActive', role.IsActive ? 'true' : 'false');
         this.isActiveSubject.next(role.IsActive);
-
+        if (role.Privileges) {
+          localStorage.setItem('privileges', JSON.stringify(role.Privileges));
+        }
+        
         this.roleSubject.next(role.RoleName);
         this.usernameSubject.next(role.UserName);
         this.gymNameSubject.next(role.GymName);

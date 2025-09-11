@@ -11,6 +11,7 @@ import { BarcodeFormat } from '@zxing/library';
 // For styling support
 import * as XLSXStyle from 'xlsx-js-style';
 import { ZXingScannerComponent } from '@zxing/ngx-scanner';
+import { AuthService } from '../services/auth.service';
 
 
 export interface SubscriptionOption {
@@ -61,7 +62,7 @@ export class MembersComponent implements OnInit{
   gymname!: string | null;
   selectedMonth: number = new Date().getMonth(); // default current month
   currentYear: number = new Date().getFullYear();
-  constructor(private memberService: MemberService) {
+  constructor(private memberService: MemberService,private authService: AuthService) {
     
 
   }
@@ -96,6 +97,7 @@ selectedMemberId: number | null = null; // must be number, not string
 availableCameras: MediaDeviceInfo[] = [];
 selectedDevice: MediaDeviceInfo | undefined;
 videoConstraints: MediaTrackConstraints = {};
+privileges: string[] = [];
 isFrontCamera = false;
 isMobile = false;
 filteredSubscriptions: SubscriptionOption[] = [];
@@ -171,13 +173,18 @@ scannerActive: boolean = false;
     this.isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
     this.userrole = localStorage.getItem("role")
     this.isAdmin = this.userrole === 'admin';
-    
+    this.privileges = this.authService.getPrivileges();
     this.defaultGymName = localStorage.getItem('GymName') ?? '';
     this.defaultGymId = Number(localStorage.getItem('GymId')) || 0;
     this.fetchMembersFromAPI(); // 👈
     this.getgymname();
     this.loadSubscriptions();
     
+  }
+  hasPrivilege(menu: string): boolean {
+    // superadmin bypass → always see all menus
+    if (this.authService.getRole() === 'superadmin') return true;
+    return this.privileges.includes(menu);
   }
   ngOnDestroy(): void {
     this.enableRefresh();
