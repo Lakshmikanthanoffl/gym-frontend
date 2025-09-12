@@ -63,11 +63,11 @@ const routes: Routes = [
     canActivate: [AuthGuard],
     data: { title: 'Contact Us' } // all logged-in users with contact privilege
   },
-  // {
-  //   path: 'razorpay-demo',
-  //   component: RazorpayDemoComponent,
-  //   data: { title: 'Razorpay Demo' } // optional: accessible without AuthGuard
-  // },
+  {
+    path: 'razorpay-demo',
+    component: RazorpayDemoComponent,
+    data: { title: 'Razorpay Demo' } // optional: accessible without AuthGuard
+  },
 
   // Fallback
   { path: '**', redirectTo: 'login' }
