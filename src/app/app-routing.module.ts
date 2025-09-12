@@ -13,19 +13,25 @@ import { ContactUsComponent } from './contact-us/contact-us.component';
 import { SubscriptionComponent } from './subscription/subscription.component';
 import { RazorpayDemoComponent } from './razorpay-demo/razorpay-demo.component';
 
+// 👉 import your new Legal components
+import { PrivacyPolicyComponent } from './pages/privacy-policy/privacy-policy.component';
+import { RefundPolicyComponent } from './pages/refund-policy/refund-policy.component';
+import { TermsAndConditionsComponent } from './pages/terms-and-conditions/terms-and-conditions.component';
+
 const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
 
   // Public routes
   { path: 'login', component: LoginComponent },
   { path: 'signup', component: SignupComponent },
+  { path: 'razorpay-demo', component: RazorpayDemoComponent, data: { title: 'Razorpay Demo' } },
 
   // Protected routes
   {
     path: 'dashboard',
     component: DashboardComponent,
     canActivate: [AuthGuard],
-    data: { title: 'Dashboard', roles: ['admin', 'superadmin'], privileges: ['dashboard'] } // accessible by all logged-in users
+    data: { title: 'Dashboard', roles: ['admin', 'superadmin'], privileges: ['dashboard'] }
   },
   {
     path: 'members',
@@ -37,7 +43,7 @@ const routes: Routes = [
     path: 'plans',
     component: PlansComponent,
     canActivate: [AuthGuard],
-    data: { title: 'Plans', privileges: ['plans'] } // any logged-in user with plan privilege
+    data: { title: 'Plans', privileges: ['plans'] }
   },
   {
     path: 'payments',
@@ -61,13 +67,13 @@ const routes: Routes = [
     path: 'contact-us',
     component: ContactUsComponent,
     canActivate: [AuthGuard],
-    data: { title: 'Contact Us' } // all logged-in users with contact privilege
+    data: { title: 'Contact Us' }
   },
-  {
-    path: 'razorpay-demo',
-    component: RazorpayDemoComponent,
-    data: { title: 'Razorpay Demo' } // optional: accessible without AuthGuard
-  },
+
+  // Legal pages (usually public, no AuthGuard)
+  { path: 'privacy-policy', component: PrivacyPolicyComponent, data: { title: 'Privacy Policy' } },
+  { path: 'refund-policy', component: RefundPolicyComponent, data: { title: 'Refund Policy' } },
+  { path: 'terms-and-conditions', component: TermsAndConditionsComponent, data: { title: 'Terms & Conditions' } },
 
   // Fallback
   { path: '**', redirectTo: 'login' }
