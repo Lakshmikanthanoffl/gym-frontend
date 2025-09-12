@@ -1,0 +1,77 @@
+/* ============================= */
+/* THEME VARIABLES */
+/* ============================= */
+:host-context(body) {
+    --card-bg: #1f1f1f;
+    --card-text: #ffffff;
+    --card-link: #4ea1ff;
+    --card-link-hover: #66b2ff;
+    --card-border: #333;
+  }
+  
+  :host-context(body.light-theme) {
+    --card-bg: #ffffff;
+    --card-text: #111111;
+    --card-link: #1e40af;
+    --card-link-hover: #3b82f6;
+    --card-border: #ddd;
+  }
+  
+  /* ============================= */
+  /* Privacy Policy Styles */
+  /* ============================= */
+  .policy-container {
+    max-width: 48rem; /* 768px */
+    margin: 0 auto;
+    padding: 1.5rem;
+  }
+  
+  .policy-card {
+    background-color: var(--card-bg);
+    color: var(--card-text);
+    padding: 1.5rem;
+    border-radius: 1rem;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    transition: background-color 0.3s, color 0.3s;
+  }
+  
+  .policy-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: var(--card-text);
+  }
+  
+  .policy-updated {
+    font-size: 0.875rem;
+    color: #888;
+    margin-bottom: 1.5rem;
+  }
+  
+  .policy-card h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .policy-card ul {
+    list-style-type: disc;
+    margin-left: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  .policy-card a.policy-link {
+    color: var(--card-link);
+    text-decoration: underline;
+    transition: color 0.3s;
+  }
+  
+  .policy-card a.policy-link:hover {
+    color: var(--card-link-hover);
+  }
+  
+  .policy-card span {
+    font-weight: 500;
+  }
+  

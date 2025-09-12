@@ -1,84 +1,89 @@
 <div class="contact-container">
-    <h2 class="contact-title">Contact Us</h2>
-  
-    <!-- Contact Form -->
-    <form (submit)="sendEmail($event)" class="contact-form">
-      <!-- Name -->
-      <div class="form-group">
-        <label for="name">Name</label>
-        <input 
-          id="name" 
-          type="text" 
-          [(ngModel)]="formData.from_name" 
-          name="from_name" 
-          placeholder="Enter your name"
-          required>
-      </div>
-  
-      <!-- Email -->
-      <div class="form-group">
-        <label for="email">Email</label>
-        <input 
-          id="email" 
-          type="email" 
-          [(ngModel)]="formData.reply_to" 
-          name="reply_to" 
-          placeholder="Enter your email"
-          required>
-      </div>
-  
-      <!-- Message -->
-      <div class="form-group">
-        <label for="message">Message</label>
-        <textarea 
-          id="message" 
-          [(ngModel)]="formData.message" 
-          name="message" 
-          placeholder="Type your message..."
-          rows="5"
-          required>
-        </textarea>
-      </div>
-  
-      <!-- Google reCAPTCHA -->
-      <div class="form-group captcha-box">
-        <re-captcha
-          *ngIf="showCaptcha"
-          #captchaRef
-          siteKey="6LeZDKkrAAAAAEUJmCjDMx_AhxIsQ8yXS8YXEe6N"
-          [theme]="currentTheme"
-          (resolved)="onCaptchaResolved($event)">
-        </re-captcha>
-      </div>
-      
-  
-      <!-- Submit Button with Loader -->
-      <button type="submit" class="btn-submit" [disabled]="isLoading">
-        <span *ngIf="!isLoading">Send</span>
-        <span *ngIf="isLoading" class="loader"></span>
-      </button>
-    </form>
-  
-    <!-- Contact Info Section -->
-    <div class="contact-info">
-      <p>
-        <strong>Email:</strong>
-        <a href="mailto:zyct.official@gmail.com"
-        (click)="openEmailCompose($event)"
-        class="contact-link">
-        zyct.official&#64;gmail.com
-     </a>
-     
-     
-     
-      </p>
-  
-      <p>
-        <strong>Phone:</strong>
-        <a href="tel:+919025275948" class="contact-link">
-          +91 9025275948
-        </a>
-      </p>
+  <h2 class="contact-title">Contact Us</h2>
+
+  <!-- Contact Form -->
+  <form (submit)="sendEmail($event)" class="contact-form">
+    <!-- Name -->
+    <div class="form-group">
+      <label for="name">Name</label>
+      <input 
+        id="name" 
+        type="text" 
+        [(ngModel)]="formData.from_name" 
+        name="from_name" 
+        placeholder="Enter your name"
+        required>
     </div>
+
+    <!-- Email -->
+    <div class="form-group">
+      <label for="email">Email</label>
+      <input 
+        id="email" 
+        type="email" 
+        [(ngModel)]="formData.reply_to" 
+        name="reply_to" 
+        placeholder="Enter your email"
+        required>
+    </div>
+
+    <!-- Message -->
+    <div class="form-group">
+      <label for="message">Message</label>
+      <textarea 
+        id="message" 
+        [(ngModel)]="formData.message" 
+        name="message" 
+        placeholder="Type your message..."
+        rows="5"
+        required>
+      </textarea>
+    </div>
+
+    <!-- Google reCAPTCHA -->
+    <div class="form-group captcha-box">
+      <re-captcha
+        *ngIf="showCaptcha"
+        #captchaRef
+        siteKey="6LeZDKkrAAAAAEUJmCjDMx_AhxIsQ8yXS8YXEe6N"
+        [theme]="currentTheme"
+        (resolved)="onCaptchaResolved($event)">
+      </re-captcha>
+    </div>
+
+    <!-- Submit Button with Loader -->
+    <button type="submit" class="btn-submit" [disabled]="isLoading">
+      <span *ngIf="!isLoading">Send</span>
+      <span *ngIf="isLoading" class="loader"></span>
+    </button>
+  </form>
+
+  <!-- Contact Info Section -->
+  <div class="contact-info">
+    <p>
+      <strong>Address:</strong>
+      <a 
+        href="https://www.google.com/maps?q=8w2,+Pillayar+Kovil+Street,+Chengalpat,+Tamil+Nadu+-+603405" 
+        target="_blank" 
+        class="contact-link">
+        8w2, Pillayar Kovil Street, Chengalpat, Tamil Nadu - 603405
+      </a>
+    </p>
+
+    <p>
+      <strong>Email:</strong>
+      <a href="mailto:zyct.official@gmail.com"
+         (click)="openEmailCompose($event)"
+         class="contact-link">
+        zyct.official&#64;gmail.com
+      </a>
+    </p>
+
+    <p>
+      <strong>Phone:</strong>
+      <a href="tel:+919025275948" class="contact-link">
+        +91 9025275948
+      </a>
+    </p>
   </div>
-  
+</div>

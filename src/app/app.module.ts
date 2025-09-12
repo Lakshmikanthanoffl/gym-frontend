@@ -55,6 +55,10 @@ import { AdminOnboardComponent } from './admin-onboard/admin-onboard.component';
 import { ContactUsComponent } from './contact-us/contact-us.component';
 import { SubscriptionComponent } from './subscription/subscription.component';
 import { RazorpayDemoComponent } from './razorpay-demo/razorpay-demo.component';
+import { PrivacyPolicyComponent } from './pages/privacy-policy/privacy-policy.component';
+import { TermsAndConditionsComponent } from './pages/terms-and-conditions/terms-and-conditions.component';
+import { RefundPolicyComponent } from './pages/refund-policy/refund-policy.component';
+import { FooterComponent } from './shared/footer/footer.component';
 
 @NgModule({
   declarations: [
@@ -72,6 +76,10 @@ import { RazorpayDemoComponent } from './razorpay-demo/razorpay-demo.component';
     ContactUsComponent,
     SubscriptionComponent,
     RazorpayDemoComponent,
+    PrivacyPolicyComponent,
+    TermsAndConditionsComponent,
+    RefundPolicyComponent,
+    FooterComponent,
   ],
   imports: [
     BrowserModule,
