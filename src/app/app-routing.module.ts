@@ -13,10 +13,13 @@ import { ContactUsComponent } from './contact-us/contact-us.component';
 import { SubscriptionComponent } from './subscription/subscription.component';
 import { RazorpayDemoComponent } from './razorpay-demo/razorpay-demo.component';
 
-// 👉 import your new Legal components
+// 👉 Legal & Info Pages
 import { PrivacyPolicyComponent } from './pages/privacy-policy/privacy-policy.component';
 import { RefundPolicyComponent } from './pages/refund-policy/refund-policy.component';
 import { TermsAndConditionsComponent } from './pages/terms-and-conditions/terms-and-conditions.component';
+import { AboutUsComponent } from './pages/about-us/about-us.component';
+import { OurServicesComponent } from './pages/our-services/our-services.component';
+import { BusinessModelComponent } from './pages/business-model/business-model.component';
 
 const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -70,7 +73,10 @@ const routes: Routes = [
     data: { title: 'Contact Us' }
   },
 
-  // Legal pages (usually public, no AuthGuard)
+  // Public informational/legal pages
+  { path: 'about-us', component: AboutUsComponent, data: { title: 'About Us' } },
+  { path: 'our-services', component: OurServicesComponent, data: { title: 'Our Services' } },
+  { path: 'business-model', component: BusinessModelComponent, data: { title: 'Business Model' } },
   { path: 'privacy-policy', component: PrivacyPolicyComponent, data: { title: 'Privacy Policy' } },
   { path: 'refund-policy', component: RefundPolicyComponent, data: { title: 'Refund Policy' } },
   { path: 'terms-and-conditions', component: TermsAndConditionsComponent, data: { title: 'Terms & Conditions' } },
