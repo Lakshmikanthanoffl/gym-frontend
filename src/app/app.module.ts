@@ -59,6 +59,9 @@ import { PrivacyPolicyComponent } from './pages/privacy-policy/privacy-policy.co
 import { TermsAndConditionsComponent } from './pages/terms-and-conditions/terms-and-conditions.component';
 import { RefundPolicyComponent } from './pages/refund-policy/refund-policy.component';
 import { FooterComponent } from './shared/footer/footer.component';
+import { AboutUsComponent } from './pages/about-us/about-us.component';
+import { OurServicesComponent } from './pages/our-services/our-services.component';
+import { BusinessModelComponent } from './pages/business-model/business-model.component';
 
 @NgModule({
   declarations: [
@@ -80,6 +83,9 @@ import { FooterComponent } from './shared/footer/footer.component';
     TermsAndConditionsComponent,
     RefundPolicyComponent,
     FooterComponent,
+    AboutUsComponent,
+    OurServicesComponent,
+    BusinessModelComponent,
   ],
   imports: [
     BrowserModule,
