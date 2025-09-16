@@ -444,7 +444,6 @@ export class HeaderComponent implements OnInit {
                       icon: 'success',
                       title: 'Payment Successful! Subscription updated 🎉'
                     });
-                    window.location.reload();
 
                   } else {
                     Swal.fire({
