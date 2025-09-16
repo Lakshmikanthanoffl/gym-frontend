@@ -3,136 +3,143 @@
 
 <!-- Sidebar -->
 <div *ngIf="isLoggedIn()" 
-     class="sidebar px-3 py-3"
+     class="sidebar"
      [class.sidebar-closed]="!sidebarOpen">
 
-  <!-- Close button (only visible on mobile) -->
-  <div class="sidebar-header d-flex justify-content-between align-items-center">
-    <h5 class="m-0 d-lg-none">{{ userrole === 'superadmin' ? 'Zyct' : defaultGymName }}</h5>
-    <i class="pi pi-times close-btn" (click)="toggleSidebar()"></i>
-  </div>
-
-  <!-- Mobile: Username & Logout -->
-  <div class="mobile-user-section d-lg-none mt-3 mb-3">
-    <div class="d-flex justify-content-between align-items-center">
-      <span class="username-text">{{ username }}</span>
-      <i class="pi pi-sign-out user-icon" (click)="logout()"></i>
+  <!-- Sidebar Top (Sticky Zyct header + mobile user section) -->
+  <div class="sidebar-top sticky-top">
+    <!-- Close button (only visible on mobile) -->
+    <div class="sidebar-header d-flex justify-content-between align-items-center">
+      <h5 class="m-0 d-lg-none">Zyct</h5> <!-- Fixed for mobile -->
+      <i class="pi pi-times close-btn" (click)="toggleSidebar()"></i>
     </div>
+
+    <!-- Mobile: Username & Logout -->
+    <div class="mobile-user-section d-lg-none mt-3 mb-3">
+      <div class="d-flex justify-content-between align-items-center">
+        <span class="username-text">{{ username }}</span>
+        <i class="pi pi-sign-out user-icon" (click)="logout()"></i>
+      </div>
+    </div>
+
+    <!-- Big title (desktop only) -->
+    <h4 class="mb-0 text-center big-title d-none d-lg-block">
+      Zyct <!-- Fixed for desktop -->
+    </h4>
   </div>
 
-  <!-- Sidebar Content -->
-  <h4 class="mb-4 text-center big-title d-none d-lg-block">
-    {{ userrole === 'superadmin' ? 'Zyct' : defaultGymName }}
-  </h4>
+  <!-- Sidebar Content (scrollable) -->
+  <div class="sidebar-content">
 
-  <!-- Dashboard -->
-  <a [class.disabled]="!hasPrivilege('Dashboard')" 
-     (click)="!hasPrivilege('Dashboard') ? showVipPopup('Dashboard') : closeSidebarOnMobile()"
-     routerLink="/dashboard"
-     routerLinkActive="active">
-    <i class="pi pi-home"></i> <span> Dashboard</span>
-    <span *ngIf="!hasPrivilege('Dashboard')" class="vip-badge">VIP</span>
-  </a>
-
-  <!-- Members -->
-  <a [class.disabled]="!hasPrivilege('members')" 
-     (click)="!hasPrivilege('members') ? showVipPopup('Members') : closeSidebarOnMobile()"
-     routerLink="/members"
-     routerLinkActive="active">
-    <i class="pi pi-users"></i> <span> Members</span>
-    <span *ngIf="!hasPrivilege('members')" class="vip-badge">VIP</span>
-  </a>
-
-  <!-- Plans -->
-  <a [class.disabled]="!hasPrivilege('plans')" 
-     (click)="!hasPrivilege('plans') ? showVipPopup('Plans') : closeSidebarOnMobile()"
-     routerLink="/plans"
-     routerLinkActive="active">
-    <i class="pi pi-book"></i> <span> Plans</span>
-    <span *ngIf="!hasPrivilege('plans')" class="vip-badge">VIP</span>
-  </a>
-
-  <!-- Payments -->
-  <a [class.disabled]="!hasPrivilege('payments')" 
-     (click)="!hasPrivilege('payments') ? showVipPopup('Payments') : closeSidebarOnMobile()"
-     routerLink="/payments"
-     routerLinkActive="active">
-    <i class="pi pi-credit-card"></i> <span> Payments</span>
-    <span *ngIf="!hasPrivilege('payments')" class="vip-badge">VIP</span>
-  </a>
-
-  <!-- Subscription -->
-  <a [class.disabled]="!hasPrivilege('subscription')" 
-     (click)="!hasPrivilege('subscription') ? showVipPopup('Subscription') : closeSidebarOnMobile()"
-     routerLink="/subscription"
-     routerLinkActive="active"
-     class="subscription-link">
-    <i class="pi pi-id-card"></i>
-    <span class="subscription-text">
-      Subscription
-      <span *ngIf="!hasPrivilege('subscription')" class="vip-badge">VIP</span>
-      <span *ngIf="showBellIcon && !bellIsRed" class="sub-dot sub-dot-yellow"></span>
-      <span *ngIf="bellIsRed" class="sub-dot sub-dot-red"></span>
-    </span>
-  </a>
-
-  <!-- Admin Onboard -->
-  <div *ngIf="userrole === 'superadmin'" class="mt-4">
-    <h5 class="mb-2">Admin Onboard</h5>
-    <a routerLink="/admin-onboard" routerLinkActive="active" (click)="closeSidebarOnMobile()">
-      <i class="pi pi-user-plus"></i> <span> Onboard</span>
+    <!-- Dashboard -->
+    <a [class.disabled]="!hasPrivilege('Dashboard')" 
+       (click)="!hasPrivilege('Dashboard') ? showVipPopup('Dashboard') : closeSidebarOnMobile()"
+       routerLink="/dashboard"
+       routerLinkActive="active">
+      <i class="pi pi-home"></i> <span> Dashboard</span>
+      <span *ngIf="!hasPrivilege('Dashboard')" class="vip-badge">VIP</span>
     </a>
-  </div>
 
-  <!-- Support -->
-  <div class="mt-4">
-    <h5 class="mb-2">Support</h5>
-    <a routerLink="/contact-us" routerLinkActive="active" (click)="closeSidebarOnMobile()">
-      <i class="pi pi-envelope"></i> <span> Contact Us</span>
+    <!-- Members -->
+    <a [class.disabled]="!hasPrivilege('members')" 
+       (click)="!hasPrivilege('members') ? showVipPopup('Members') : closeSidebarOnMobile()"
+       routerLink="/members"
+       routerLinkActive="active">
+      <i class="pi pi-users"></i> <span> Members</span>
+      <span *ngIf="!hasPrivilege('members')" class="vip-badge">VIP</span>
     </a>
-  </div>
 
-  <!-- Settings -->
-  <div class="mt-4">
-    <h5 class="mb-2">Settings</h5>
-    <div class="appearance-section d-flex justify-content-between align-items-center px-2 py-2">
-      <span class="appearance-label">{{ themeService.isDarkMode() ? 'Dark Mode' : 'Light Mode' }}</span>
-      <div class="toggle-switch-wrapper" (click)="themeService.toggleTheme()">
-        <div class="toggle-switch">
-          <div class="toggle-knob" [class.active]="!themeService.isDarkMode()">
-            <i class="pi theme-icon" [ngClass]="themeService.isDarkMode() ? 'pi-moon' : 'pi-sun'"></i>
+    <!-- Plans -->
+    <a [class.disabled]="!hasPrivilege('plans')" 
+       (click)="!hasPrivilege('plans') ? showVipPopup('Plans') : closeSidebarOnMobile()"
+       routerLink="/plans"
+       routerLinkActive="active">
+      <i class="pi pi-book"></i> <span> Plans</span>
+      <span *ngIf="!hasPrivilege('plans')" class="vip-badge">VIP</span>
+    </a>
+
+    <!-- Payments -->
+    <a [class.disabled]="!hasPrivilege('payments')" 
+       (click)="!hasPrivilege('payments') ? showVipPopup('Payments') : closeSidebarOnMobile()"
+       routerLink="/payments"
+       routerLinkActive="active">
+      <i class="pi pi-credit-card"></i> <span> Payments</span>
+      <span *ngIf="!hasPrivilege('payments')" class="vip-badge">VIP</span>
+    </a>
+
+    <!-- Subscription -->
+    <a [class.disabled]="!hasPrivilege('subscription')" 
+       (click)="!hasPrivilege('subscription') ? showVipPopup('Subscription') : closeSidebarOnMobile()"
+       routerLink="/subscription"
+       routerLinkActive="active"
+       class="subscription-link">
+      <i class="pi pi-id-card"></i>
+      <span class="subscription-text">
+        Subscription
+        <span *ngIf="!hasPrivilege('subscription')" class="vip-badge">VIP</span>
+        <span *ngIf="showBellIcon && !bellIsRed" class="sub-dot sub-dot-yellow"></span>
+        <span *ngIf="bellIsRed" class="sub-dot sub-dot-red"></span>
+      </span>
+    </a>
+
+    <!-- Admin Onboard -->
+    <div *ngIf="userrole === 'superadmin'" class="mt-4">
+      <h5 class="mb-2">Admin Onboard</h5>
+      <a routerLink="/admin-onboard" routerLinkActive="active" (click)="closeSidebarOnMobile()">
+        <i class="pi pi-user-plus"></i> <span> Onboard</span>
+      </a>
+    </div>
+
+    <!-- Support -->
+    <div class="mt-4">
+      <h5 class="mb-2">Support</h5>
+      <a routerLink="/contact-us" routerLinkActive="active" (click)="closeSidebarOnMobile()">
+        <i class="pi pi-envelope"></i> <span> Contact Us</span>
+      </a>
+    </div>
+
+    <!-- Settings -->
+    <div class="mt-4">
+      <h5 class="mb-2">Settings</h5>
+      <div class="appearance-section d-flex justify-content-between align-items-center px-2 py-2">
+        <span class="appearance-label">{{ themeService.isDarkMode() ? 'Dark Mode' : 'Light Mode' }}</span>
+        <div class="toggle-switch-wrapper" (click)="themeService.toggleTheme()">
+          <div class="toggle-switch">
+            <div class="toggle-knob" [class.active]="!themeService.isDarkMode()">
+              <i class="pi theme-icon" [ngClass]="themeService.isDarkMode() ? 'pi-moon' : 'pi-sun'"></i>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- Info Section -->
-<div class="mt-4">
-  <h5 class="mb-2">Info</h5>
-  <a routerLink="/about-us" routerLinkActive="active" (click)="closeSidebarOnMobile()">
-    <i class="pi pi-info-circle"></i> <span> About Us</span>
-  </a>
-  <a routerLink="/our-services" routerLinkActive="active" (click)="closeSidebarOnMobile()">
-    <i class="pi pi-briefcase"></i> <span> Our Services</span>
-  </a>
-  <a routerLink="/business-model" routerLinkActive="active" (click)="closeSidebarOnMobile()">
-    <i class="pi pi-chart-line"></i> <span> Business Model</span>
-  </a>
-</div>
+    <!-- Info Section -->
+    <div class="mt-4">
+      <h5 class="mb-2">Info</h5>
+      <a routerLink="/about-us" routerLinkActive="active" (click)="closeSidebarOnMobile()">
+        <i class="pi pi-info-circle"></i> <span> About Us</span>
+      </a>
+      <a routerLink="/our-services" routerLinkActive="active" (click)="closeSidebarOnMobile()">
+        <i class="pi pi-briefcase"></i> <span> Our Services</span>
+      </a>
+      <a routerLink="/business-model" routerLinkActive="active" (click)="closeSidebarOnMobile()">
+        <i class="pi pi-chart-line"></i> <span> Business Model</span>
+      </a>
+    </div>
 
-<!-- Legal -->
-<div class="mt-4">
-  <h5 class="mb-2">Legal</h5>
-  <a routerLink="/privacy-policy" routerLinkActive="active" (click)="closeSidebarOnMobile()">
-    <i class="pi pi-shield"></i> <span> Privacy Policy</span>
-  </a>
-  <a routerLink="/refund-policy" routerLinkActive="active" (click)="closeSidebarOnMobile()">
-    <i class="pi pi-refresh"></i> <span> Refund Policy</span>
-  </a>
-  <a routerLink="/terms-and-conditions" routerLinkActive="active" (click)="closeSidebarOnMobile()">
-    <i class="pi pi-file"></i> <span> Terms & Conditions</span>
-  </a>
-</div>
+    <!-- Legal -->
+    <div class="mt-4">
+      <h5 class="mb-2">Legal</h5>
+      <a routerLink="/privacy-policy" routerLinkActive="active" (click)="closeSidebarOnMobile()">
+        <i class="pi pi-shield"></i> <span> Privacy Policy</span>
+      </a>
+      <a routerLink="/refund-policy" routerLinkActive="active" (click)="closeSidebarOnMobile()">
+        <i class="pi pi-refresh"></i> <span> Refund Policy</span>
+      </a>
+      <a routerLink="/terms-and-conditions" routerLinkActive="active" (click)="closeSidebarOnMobile()">
+        <i class="pi pi-file"></i> <span> Terms & Conditions</span>
+      </a>
+    </div>
 
+  </div> <!-- /sidebar-content -->
 </div>

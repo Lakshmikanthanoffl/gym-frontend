@@ -210,7 +210,7 @@ statusClass: string = "active";
   
           this.paymentService.createOrder(amount).subscribe((order: any) => {
             const options = {
-              key: 'rzp_test_RGGtv2W1TjYURz', // Only Key ID on frontend
+              key: 'rzp_live_RIIy4KDqcIQPqh', // Only Key ID on frontend
               amount: order.amount, // in paise
               currency: order.currency,
               name: 'Zyct',
