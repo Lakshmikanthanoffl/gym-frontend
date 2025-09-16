@@ -419,31 +419,35 @@ export class HeaderComponent implements OnInit {
                   RazorpayOrderId: response.razorpay_order_id,
                   RazorpayPaymentId: response.razorpay_payment_id,
                   RazorpaySignature: response.razorpay_signature,
-                  RoleId: Number(roleId),       // Pass RoleId
-                  Amount: amount,               // Paid amount
-                  PlanName: planName            // <-- Pass plan name for backend
+                  RoleId: Number(roleId),
+                  Amount: amount,
+                  PlanName: planName
                 }).subscribe((res: any) => {
                   if (res.success) {
-                    // ✅ Update subscription data in localStorage & BehaviorSubjects
                     const updatedRole = res.role;
-                
-                    if (updatedRole.ValidUntil) {
-                      localStorage.setItem('validUntil', updatedRole.ValidUntil);
-                      this.authService['validUntilSubject'].next(updatedRole.ValidUntil);
-                    }
-                
-                    if (updatedRole.PaidDate) {
-                      localStorage.setItem('startDate', updatedRole.PaidDate);
-                      this.authService['PaidDateSubject'].next(updatedRole.PaidDate);
-                    }
-                
-                    localStorage.setItem('isActive', updatedRole.IsActive ? 'true' : 'false');
-                    this.authService['isActiveSubject'].next(updatedRole.IsActive);
                 
                     Swal.fire({
                       icon: 'success',
-                      title: 'Payment Successful! Subscription updated 🎉'
+                      title: 'Payment Successful! Subscription updated 🎉',
+                      confirmButtonText: 'OK'
+                    }).then(() => {
+                      // ✅ Update subscription data in localStorage & BehaviorSubjects
+                      if (updatedRole.ValidUntil) {
+                        localStorage.setItem('validUntil', updatedRole.ValidUntil);
+                        this.authService['validUntilSubject'].next(updatedRole.ValidUntil);
+                      }
+                
+                      if (updatedRole.PaidDate) {
+                        localStorage.setItem('startDate', updatedRole.PaidDate);
+                        this.authService['PaidDateSubject'].next(updatedRole.PaidDate);
+                      }
+                
+                      localStorage.setItem('isActive', updatedRole.IsActive ? 'true' : 'false');
+                      this.authService['isActiveSubject'].next(updatedRole.IsActive);
+                
+                      window.location.reload();
                     });
+                   
 
                   } else {
                     Swal.fire({
