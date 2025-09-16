@@ -76,37 +76,37 @@ export class RazorpayDemoComponent implements OnInit {
         const emailNote = document.getElementById('emailNote') as HTMLElement;
 
         // Razorpay Test Mode Payment
-        payBtn.addEventListener('click', () => {
-          const amount = Number(selectEl.value);
-          const planName = selectEl.selectedOptions[0].getAttribute('data-name') || 'Plan';
+        // payBtn.addEventListener('click', () => {
+        //   const amount = Number(selectEl.value);
+        //   const planName = selectEl.selectedOptions[0].getAttribute('data-name') || 'Plan';
 
-          this.paymentService.createOrder(amount).subscribe((order: any) => {
-            const options = {
-              key: 'rzp_test_RGGtv2W1TjYURz', // Test Key
-              amount: order.amount,
-              currency: 'INR',
-              name: 'Zyct Gym',
-              description: `Subscription: ${planName}`,
-              order_id: order.id,
-              handler: (response: any) => {
-                this.paymentService.verifyPayment({
-                  RazorpayOrderId: response.razorpay_order_id,
-                  RazorpayPaymentId: response.razorpay_payment_id,
-                  RazorpaySignature: response.razorpay_signature
-                }).subscribe((res: any) => {
-                  Swal.fire({
-                    icon: res.success ? 'success' : 'error',
-                    title: res.success ? 'Payment Successful!' : 'Payment Verification Failed!'
-                  });
-                });
-              },
-              prefill: { name:'Demo User', email:'demo@example.com', contact:'9999999999' },
-              theme: { color:'#ffcc00' }
-            };
-            const rzp = new (window as any).Razorpay(options);
-            rzp.open();
-          });
-        });
+        //   this.paymentService.createOrder(amount).subscribe((order: any) => {
+        //     const options = {
+        //       key: 'rzp_test_RGGtv2W1TjYURz', // Test Key
+        //       amount: order.amount,
+        //       currency: 'INR',
+        //       name: 'Zyct Gym',
+        //       description: `Subscription: ${planName}`,
+        //       order_id: order.id,
+        //       handler: (response: any) => {
+        //         this.paymentService.verifyPayment({
+        //           RazorpayOrderId: response.razorpay_order_id,
+        //           RazorpayPaymentId: response.razorpay_payment_id,
+        //           RazorpaySignature: response.razorpay_signature
+        //         }).subscribe((res: any) => {
+        //           Swal.fire({
+        //             icon: res.success ? 'success' : 'error',
+        //             title: res.success ? 'Payment Successful!' : 'Payment Verification Failed!'
+        //           });
+        //         });
+        //       },
+        //       prefill: { name:'Demo User', email:'demo@example.com', contact:'9999999999' },
+        //       theme: { color:'#ffcc00' }
+        //     };
+        //     const rzp = new (window as any).Razorpay(options);
+        //     rzp.open();
+        //   });
+        // });
 
         // Email fallback
         const openEmail = (planName: string, amount: number) => {
