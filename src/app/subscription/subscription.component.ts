@@ -2,6 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import Swal from 'sweetalert2';
 import QRCode from 'qrcode';
 import { PaymentService } from '../services/payment.service';
+import { AuthService } from '../services/auth.service';
 @Component({
   selector: 'app-subscription',
   standalone: false,
@@ -21,14 +22,18 @@ statusClass: string = "active";
   upiId = 'lakshmikanthan.b.2001-1@okhdfcbank';
 
   subscriptionPlans = [
-    { name: 'Monthly', amount: 3499 },
-    { name: '3 Months', amount: 9999 },
-    { name: 'Yearly', amount: 38000 }
+    { name: 'Monthly', amount: 1 },
+    { name: '3 Months', amount: 1 },
+    { name: 'Yearly', amount: 1 }
   ];
   isBlinking!: boolean;
-  constructor(private paymentService: PaymentService) { }
+  currentUserRoleId!: string | null;
+  currentUserName!: string | null;
+  constructor(private paymentService: PaymentService,private authService:AuthService) { }
   ngOnInit(): void {
     const validUntilStr = localStorage.getItem('validUntil');
+    this.currentUserRoleId = localStorage.getItem('RoleId');
+    this.currentUserName = localStorage.getItem('currentUserName');
     if (!validUntilStr) return;
 
     this.expiryDate = new Date(validUntilStr);
@@ -180,12 +185,7 @@ statusClass: string = "active";
               ${emailAddress.replace('@', '&#64;')}
             </p>
             <p style="font-size:12px; color:#cccccc; margin-top:5px;">
-              Note: Please pay using <span style="color:#ffcc00; font-weight:bold;">GPay</span>, 
-              <span style="color:#ffcc00; font-weight:bold;">PhonePe</span>, or 
-              <span style="color:#ffcc00; font-weight:bold;">Paytm</span> and upload the paid screenshot to this mail.
-            </p>
-            <p style="font-size:12px; color:#cccccc; margin-top:2px;">
-              It may take 5 to 10 minutes to reflect.
+              Note: Please refresh the screen or Logout and login once again if the subscritption is not reflected <span style="color:#ffcc00; font-weight:bold;"></span>, 
             </p>
             <p id="countdown" style="font-size:14px; color:#ffcc00; margin-top:8px; font-weight:bold;">
               ${expiryDate ? 'Time left: calculating...' : ''}
@@ -207,10 +207,11 @@ statusClass: string = "active";
         payBtn.addEventListener('click', () => {
           const amount = Number(selectEl.value);
           const planName = selectEl.selectedOptions[0].getAttribute('data-name') || 'Plan';
-  
+          const roleId = this.currentUserRoleId; // logged-in user's RoleId
+        
           this.paymentService.createOrder(amount).subscribe((order: any) => {
             const options = {
-              key: 'rzp_live_RIIy4KDqcIQPqh', // Only Key ID on frontend
+              key: 'rzp_live_RIIy4KDqcIQPqh', // Razorpay Key ID (frontend only)
               amount: order.amount, // in paise
               currency: order.currency,
               name: 'Zyct',
@@ -221,22 +222,52 @@ statusClass: string = "active";
                 this.paymentService.verifyPayment({
                   RazorpayOrderId: response.razorpay_order_id,
                   RazorpayPaymentId: response.razorpay_payment_id,
-                  RazorpaySignature: response.razorpay_signature
+                  RazorpaySignature: response.razorpay_signature,
+                  RoleId: Number(roleId),       // Pass RoleId
+                  Amount: amount,               // Paid amount
+                  PlanName: planName            // <-- Pass plan name for backend
                 }).subscribe((res: any) => {
-                  Swal.fire({
-                    icon: res.success ? 'success' : 'error',
-                    title: res.success ? 'Payment Successful!' : 'Payment Verification Failed!'
-                  });
+                  if (res.success) {
+                    // ✅ Update subscription data in localStorage & BehaviorSubjects
+                    const updatedRole = res.role;
+                
+                    if (updatedRole.ValidUntil) {
+                      localStorage.setItem('validUntil', updatedRole.ValidUntil);
+                      this.authService['validUntilSubject'].next(updatedRole.ValidUntil);
+                    }
+                
+                    if (updatedRole.PaidDate) {
+                      localStorage.setItem('startDate', updatedRole.PaidDate);
+                      this.authService['PaidDateSubject'].next(updatedRole.PaidDate);
+                    }
+                
+                    localStorage.setItem('isActive', updatedRole.IsActive ? 'true' : 'false');
+                    this.authService['isActiveSubject'].next(updatedRole.IsActive);
+                
+                    Swal.fire({
+                      icon: 'success',
+                      title: 'Payment Successful! Subscription updated 🎉'
+                    });
+                    window.location.reload();
+
+                  } else {
+                    Swal.fire({
+                      icon: 'error',
+                      title: 'Payment Verification Failed!'
+                    });
+                  }
                 });
               },
-              prefill: { name: 'Customer Name', email: 'customer@example.com', contact: '9876543210' },
+              prefill: { name: this.currentUserName }, // Only name
               theme: { color: '#ffcc00' }
             };
-  
+        
             const rzp = new (window as any).Razorpay(options);
             rzp.open();
           });
         });
+        
+        
   
         // Email fallback
         const openEmail = (planName: string, amount: number) => {

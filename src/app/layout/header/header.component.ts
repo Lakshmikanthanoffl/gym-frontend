@@ -14,6 +14,7 @@ import {
 import { filter, map } from 'rxjs/operators';
 import { GymService } from '../../services/gym.service';
 import { SidebarService } from '../../services/sidebar.service';
+import { PaymentService } from '../../services/payment.service';
 
 @Component({
   selector: 'app-header',
@@ -54,9 +55,9 @@ export class HeaderComponent implements OnInit {
   upiId = 'lakshmikanthan.b.2001-1@okhdfcbank';
 
   subscriptionPlans = [
-    { name: 'Monthly', amount: 3499 },
-    { name: '3 Months', amount: 9999 },
-    { name: 'Yearly', amount: 38000 }
+    { name: 'Monthly', amount: 1 },
+    { name: '3 Months', amount: 1 },
+    { name: 'Yearly', amount: 1 }
   ];
   paymentReceived: boolean = false; // Track if payment is done
   @ViewChild('logoutItem') logoutItem!: ElementRef;
@@ -66,7 +67,9 @@ export class HeaderComponent implements OnInit {
   isMobileView: boolean = false;          // Track mobile viewport
   subscriptionExpiring: boolean = false;
   validUntil: Date | null = null; // ✅ live expiry from service
-  constructor(private router: Router, private activatedRoute: ActivatedRoute,private sidebarService: SidebarService,private authService: AuthService,private gymService: GymService) {
+  currentUserRoleId!: string | null;
+  currentUserName!: string | null;
+  constructor(private router: Router, private activatedRoute: ActivatedRoute,private sidebarService: SidebarService,private authService: AuthService,private gymService: GymService,private paymentService: PaymentService) {
     this.router.events
       .pipe(
         filter(event => event instanceof NavigationEnd),
@@ -347,6 +350,8 @@ export class HeaderComponent implements OnInit {
   
   
   
+ 
+
   async showPaymentPopup() {
     const zyct = 'Zyct';
     const gymName = localStorage.getItem('GymName') || 'Gym';
@@ -354,18 +359,7 @@ export class HeaderComponent implements OnInit {
     const expiryDate = validUntilStr ? new Date(validUntilStr) : null;
     const emailAddress = 'zyct.official@gmail.com';
   
-    // Helper: generate properly encoded UPI deep link
-    const generateUpiLink = (amount: number) =>
-      `upi://pay?pa=${encodeURIComponent('lakshmikanthan.b.2001-1@okhdfcbank')}` +
-      `&pn=${encodeURIComponent(zyct)}` +
-      `&am=${encodeURIComponent(amount)}` +
-      `&cu=INR` +
-      `&tn=${encodeURIComponent('Subscription Payment')}`;
-  
-    // Initial plan
     let selectedPlan = this.subscriptionPlans[0];
-    let upiLink = generateUpiLink(selectedPlan.amount);
-    let qrDataUrl = await this.generateUpiQr(upiLink);
   
     await Swal.fire({
       title: '<strong style="color:#ffcc00;">Renew Subscription</strong>',
@@ -376,42 +370,18 @@ export class HeaderComponent implements OnInit {
             ${this.subscriptionPlans.map(p => `<option value="${p.amount}" data-name="${p.name}">${p.name} - ₹${p.amount}</option>`).join('')}
           </select>
   
-          <!-- QR wrapper centered using flex -->
-          <div style="display: flex; justify-content: center; margin: 15px 0;">
-            <div id="qrWrapper" style="position: relative; cursor: pointer;">
-              <img id="upiQrImg" src="${qrDataUrl}" style="width:180px; height:180px; border-radius:6px; display:block;" />
-              <div id="qrOverlay" style="
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                color: #ffcc00;
-                font-weight: bold;
-                background: rgba(0,0,0,0.5);
-                opacity: 0;
-                transition: opacity 0.3s;
-                border-radius: 6px;
-                text-align: center;
-              ">
-                Tap / Scan to Pay
-              </div>
-            </div>
+          <div style="margin-top:15px; text-align:center;">
+            <button id="payBtn" style="padding:8px 15px; background:#ffcc00; color:#000; border:none; border-radius:6px; font-weight:bold; cursor:pointer;">
+              Pay Now
+            </button>
           </div>
-          <p style="font-size:12px; color:#cccccc; margin-top:5px; text-align:center;">Tap the QR for UPI payment</p>
   
-          <div id="emailNote" style="margin-top:10px; text-align:center; cursor:pointer;" title="Click here to send payment email">
+          <div id="emailNote" style="margin-top:15px; text-align:center; cursor:pointer;" title="Click here to send payment email">
             <p id="emailId" style="color:#f0f0f0; text-decoration:underline; font-weight:500; margin:0;">
               ${emailAddress.replace('@', '&#64;')}
             </p>
             <p style="font-size:12px; color:#cccccc; margin-top:5px;">
-              Note: Please pay using <span style="color:#ffcc00; font-weight:bold;">GPay</span>, <span style="color:#ffcc00; font-weight:bold;">PhonePe</span>, or <span style="color:#ffcc00; font-weight:bold;">Paytm</span> and upload the paid screenshot to this mail.
-            </p>
-            <p style="font-size:12px; color:#cccccc; margin-top:2px;">
-              It may take 5 to 10 minutes to reflect.
+              Note: Please refresh the screen or Logout and login once again if the subscritption is not reflected <span style="color:#ffcc00; font-weight:bold;"></span>, 
             </p>
             <p id="countdown" style="font-size:14px; color:#ffcc00; margin-top:8px; font-weight:bold;">
               ${expiryDate ? 'Time left: calculating...' : ''}
@@ -425,60 +395,80 @@ export class HeaderComponent implements OnInit {
       color: '#f0f0f0',
       didOpen: () => {
         const selectEl = document.getElementById('planSelect') as HTMLSelectElement;
-        const qrImgEl = document.getElementById('upiQrImg') as HTMLImageElement;
-        const qrWrapper = document.getElementById('qrWrapper') as HTMLElement;
-        const qrOverlay = document.getElementById('qrOverlay') as HTMLElement;
+        const payBtn = document.getElementById('payBtn') as HTMLButtonElement;
         const countdownEl = document.getElementById('countdown') as HTMLElement;
         const emailNote = document.getElementById('emailNote') as HTMLElement;
   
-        // Hover / tap overlay effect
-        qrWrapper.addEventListener('mouseenter', () => qrOverlay.style.opacity = '1');
-        qrWrapper.addEventListener('mouseleave', () => qrOverlay.style.opacity = '0');
-        qrWrapper.addEventListener('touchstart', () => qrOverlay.style.opacity = '1');
-        qrWrapper.addEventListener('touchend', () => qrOverlay.style.opacity = '0');
-  
-        // QR click: open UPI link on mobile with proper fallback
-        qrWrapper.addEventListener('click', () => {
-          const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-  
-          if (isMobile) {
-            let fallbackTimeout: any;
-  
-            const handleVisibilityChange = () => {
-              if (document.hidden) {
-                clearTimeout(fallbackTimeout);
-              }
+        // ✅ Pay Now button → Razorpay
+        payBtn.addEventListener('click', () => {
+          const amount = Number(selectEl.value);
+          const planName = selectEl.selectedOptions[0].getAttribute('data-name') || 'Plan';
+          const roleId = this.currentUserRoleId; // logged-in user's RoleId
+        
+          this.paymentService.createOrder(amount).subscribe((order: any) => {
+            const options = {
+              key: 'rzp_live_RIIy4KDqcIQPqh', // Razorpay Key ID (frontend only)
+              amount: order.amount, // in paise
+              currency: order.currency,
+              name: 'Zyct',
+              description: `Subscription: ${planName}`,
+              order_id: order.orderId,
+              handler: (response: any) => {
+                // Verify payment via backend
+                this.paymentService.verifyPayment({
+                  RazorpayOrderId: response.razorpay_order_id,
+                  RazorpayPaymentId: response.razorpay_payment_id,
+                  RazorpaySignature: response.razorpay_signature,
+                  RoleId: Number(roleId),       // Pass RoleId
+                  Amount: amount,               // Paid amount
+                  PlanName: planName            // <-- Pass plan name for backend
+                }).subscribe((res: any) => {
+                  if (res.success) {
+                    // ✅ Update subscription data in localStorage & BehaviorSubjects
+                    const updatedRole = res.role;
+                
+                    if (updatedRole.ValidUntil) {
+                      localStorage.setItem('validUntil', updatedRole.ValidUntil);
+                      this.authService['validUntilSubject'].next(updatedRole.ValidUntil);
+                    }
+                
+                    if (updatedRole.PaidDate) {
+                      localStorage.setItem('startDate', updatedRole.PaidDate);
+                      this.authService['PaidDateSubject'].next(updatedRole.PaidDate);
+                    }
+                
+                    localStorage.setItem('isActive', updatedRole.IsActive ? 'true' : 'false');
+                    this.authService['isActiveSubject'].next(updatedRole.IsActive);
+                
+                    Swal.fire({
+                      icon: 'success',
+                      title: 'Payment Successful! Subscription updated 🎉'
+                    });
+                    window.location.reload();
+
+                  } else {
+                    Swal.fire({
+                      icon: 'error',
+                      title: 'Payment Verification Failed!'
+                    });
+                  }
+                });
+              },
+              prefill: { name: this.currentUserName }, // Only name
+              theme: { color: '#ffcc00' }
             };
-            document.addEventListener('visibilitychange', handleVisibilityChange);
-  
-            // Open UPI app
-            window.location.href = upiLink;
-  
-            // fallback after 1.5s if still on page
-            fallbackTimeout = setTimeout(() => {
-              Swal.fire({
-                icon: 'info',
-                title: 'Could not open UPI app',
-                html: `Please scan the QR code or use this UPI link:<br><strong style="word-break:break-word;">${upiLink}</strong>`,
-              });
-              document.removeEventListener('visibilitychange', handleVisibilityChange);
-            }, 1500);
-          } else {
-            // Desktop: show QR and link
-            Swal.fire({
-              icon: 'info',
-              title: 'Scan QR to Pay',
-              html: `<p>Scan this QR code using your UPI app to complete payment.</p>
-                     <p style="word-break:break-word; color:#ffcc00;">${upiLink}</p>`,
-              showCloseButton: true
-            });
-          }
+        
+            const rzp = new (window as any).Razorpay(options);
+            rzp.open();
+          });
         });
+        
+        
   
-        // Handle email click
+        // Email fallback
         const openEmail = (planName: string, amount: number) => {
           const subject = encodeURIComponent(`Subscription Renew - ${gymName}`);
-          const body = encodeURIComponent(`Gym: ${gymName}\nPlan: ${planName}\nAmount: ₹${amount}\nPlease pay using GPay, PhonePe, or Paytm and attach the paid screenshot.`);
+          const body = encodeURIComponent(`Gym: ${gymName}\nPlan: ${planName}\nAmount: ₹${amount}\nPlease attach the paid screenshot.`);
           const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
   
           if (isMobile) {
@@ -496,14 +486,6 @@ export class HeaderComponent implements OnInit {
           const amount = Number(selectEl.value);
           const planName = selectEl.selectedOptions[0].getAttribute('data-name') || 'Plan';
           openEmail(planName, amount);
-        });
-  
-        // Update QR when plan changes
-        selectEl.addEventListener('change', async (event: any) => {
-          const amount = Number(event.target.value);
-          const planName = selectEl.selectedOptions[0].getAttribute('data-name') || 'Plan';
-          upiLink = generateUpiLink(amount);
-          qrImgEl.src = await this.generateUpiQr(upiLink);
         });
   
         // Countdown timer
