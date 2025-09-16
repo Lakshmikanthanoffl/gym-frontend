@@ -3,6 +3,8 @@ import Swal from 'sweetalert2';
 import QRCode from 'qrcode';
 import { PaymentService } from '../services/payment.service';
 import { AuthService } from '../services/auth.service';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 @Component({
   selector: 'app-subscription',
   standalone: false,
@@ -248,8 +250,12 @@ statusClass: string = "active";
                 
                       localStorage.setItem('isActive', updatedRole.IsActive ? 'true' : 'false');
                       this.authService['isActiveSubject'].next(updatedRole.IsActive);
-                
-                      window.location.reload();
+                      this.generateReceipt(updatedRole, amount, response, planName).then(() => {
+                        window.location.reload();
+                      });
+                      
+
+                     
                     });
                    
 
@@ -318,6 +324,7 @@ statusClass: string = "active";
         }
       }
     });
+    
   }
   
   
@@ -326,7 +333,77 @@ statusClass: string = "active";
   
   
   
+ 
+  generateReceipt(updatedRole: any, amount: number, response: any, planName: string): Promise<void> {
+    return new Promise((resolve) => {
+      const doc = new jsPDF();
   
+      // Helper: Format dates
+      const formatDate = (dateString: string): string => {
+        if (!dateString) return '-';
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-GB', {
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric',
+        });
+      };
+  
+      // Background
+      doc.setFillColor(240, 240, 240);
+      doc.rect(0, 0, doc.internal.pageSize.width, doc.internal.pageSize.height, 'F');
+  
+      // White receipt card
+      const margin = 15;
+      const cardWidth = doc.internal.pageSize.width - margin * 2;
+      const cardHeight = doc.internal.pageSize.height - margin * 2;
+      doc.setFillColor(255, 255, 255);
+      doc.roundedRect(margin, margin, cardWidth, cardHeight, 5, 5, 'F');
+  
+      // Load logo
+      const img = new Image();
+      img.src = 'assets/favicon.png';
+  
+      img.onload = () => {
+        doc.addImage(img, 'PNG', 25, 22, 20, 20);
+  
+        doc.setFontSize(18);
+        doc.setTextColor(40, 40, 40);
+        doc.text('Zyct - Payment Receipt', 105, 30, { align: 'center' });
+  
+        doc.setFontSize(12);
+        doc.setTextColor(100, 100, 100);
+        doc.text('Thank you for your payment!', 105, 38, { align: 'center' });
+  
+        autoTable(doc, {
+          startY: 55,
+          theme: 'grid',
+          styles: { halign: 'left', valign: 'middle' },
+          headStyles: { fillColor: [52, 152, 219], textColor: 255, fontStyle: 'bold' },
+          bodyStyles: { textColor: [50, 50, 50] },
+          head: [['Field', 'Details']],
+          body: [
+            ['Plan Name', planName],
+            ['Amount Paid', `Rs. ${amount}`],
+            ['Payment ID', response.razorpay_payment_id],
+            ['Order ID', response.razorpay_order_id],
+            ['Start Date', formatDate(updatedRole.PaidDate)],
+            ['Valid Until', formatDate(updatedRole.ValidUntil)],
+            ['Status', updatedRole.IsActive ? 'Active' : 'Inactive'],
+          ],
+        });
+  
+        doc.setFontSize(10);
+        doc.setTextColor(120, 120, 120);
+        doc.text('This is a system-generated receipt.', 105, doc.internal.pageSize.height - 25, { align: 'center' });
+        doc.text('For support, contact zyct.official@gmail.com', 105, doc.internal.pageSize.height - 18, { align: 'center' });
+  
+        // Save and then resolve
+        doc.save(`Receipt-${response.razorpay_payment_id}.pdf`);
+        resolve();
+      };
+    });
+  }
   
   
   
