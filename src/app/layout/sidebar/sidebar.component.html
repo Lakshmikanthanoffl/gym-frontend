@@ -10,7 +10,7 @@
   <div class="sidebar-top sticky-top">
     <!-- Close button (only visible on mobile) -->
     <div class="sidebar-header d-flex justify-content-between align-items-center">
-      <h5 class="m-0 d-lg-none">Zyct</h5> <!-- Fixed for mobile -->
+      <h5 class="m-0 d-lg-none">{{ userrole === 'superadmin' ? 'Zyct' : defaultGymName }}</h5> <!-- Fixed for mobile -->
       <i class="pi pi-times close-btn" (click)="toggleSidebar()"></i>
     </div>
 
@@ -24,7 +24,7 @@
 
     <!-- Big title (desktop only) -->
     <h4 class="mb-0 text-center big-title d-none d-lg-block">
-      Zyct <!-- Fixed for desktop -->
+      {{ userrole === 'superadmin' ? 'Zyct' : defaultGymName }} <!-- Fixed for desktop -->
     </h4>
   </div>
 
