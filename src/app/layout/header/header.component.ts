@@ -108,6 +108,7 @@ export class HeaderComponent implements OnInit {
       this.checkSubscriptionExpiry();
     }
   });
+  this.currentUserRoleId = localStorage.getItem('RoleId');
   this.updateMobileView();
     this.checkSubscriptionExpiry();
 
@@ -450,6 +451,8 @@ export class HeaderComponent implements OnInit {
                         window.location.reload();
                       });
                       
+
+                     
                     });
                    
 
@@ -460,6 +463,7 @@ export class HeaderComponent implements OnInit {
                     });
                   }
                 });
+                
               },
               prefill: { name: this.currentUserName }, // Only name
               theme: { color: '#ffcc00' }
@@ -517,7 +521,9 @@ export class HeaderComponent implements OnInit {
         }
       }
     });
+    
   }
+  
  // QR generation helper
 async generateUpiQr(amount: string) {
   const note = "Payment for Zyct"; // ✅ your note/message
@@ -558,7 +564,7 @@ generateReceipt(updatedRole: any, amount: number, response: any, planName: strin
 
     // Load logo
     const img = new Image();
-    img.src = 'assets/favicon.png';
+    img.src = 'assets/images/favicon.png';
 
     img.onload = () => {
       doc.addImage(img, 'PNG', 25, 22, 20, 20);

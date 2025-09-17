@@ -362,7 +362,7 @@ statusClass: string = "active";
   
       // Load logo
       const img = new Image();
-      img.src = 'assets/favicon.png';
+      img.src = 'assets/images/favicon.png';
   
       img.onload = () => {
         doc.addImage(img, 'PNG', 25, 22, 20, 20);
