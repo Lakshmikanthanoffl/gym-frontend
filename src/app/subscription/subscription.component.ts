@@ -213,7 +213,7 @@ statusClass: string = "active";
         
           this.paymentService.createOrder(amount).subscribe((order: any) => {
             const options = {
-              key: 'rzp_live_RIIy4KDqcIQPqh', // Razorpay Key ID (frontend only)
+              key: 'rzp_test_RIYosIVFWWyoSn', // Razorpay Key ID (frontend only)
               amount: order.amount, // in paise
               currency: order.currency,
               name: 'Zyct',
