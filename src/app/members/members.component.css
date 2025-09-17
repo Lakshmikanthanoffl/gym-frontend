@@ -301,3 +301,20 @@ html, body {
     margin-bottom: 0.5rem;
   }
 }
+/* Stack labels & inputs on small screens */
+@media (max-width: 576px) {
+  .field.d-flex {
+    flex-direction: column;  /* stack instead of row */
+    align-items: stretch;    /* full width */
+  }
+
+  .field.d-flex label {
+    width: 100% !important;
+    margin-bottom: 0.25rem;
+    text-align: left; /* keep label aligned */
+  }
+
+  .field.d-flex .flex-grow-1 {
+    width: 100%;
+  }
+}

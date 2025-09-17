@@ -274,3 +274,43 @@
 ::ng-deep .dark-table table {
   min-width: 800px;
 }
+
+/* ✅ Responsive form fields */
+@media (max-width: 600px) {
+  .field-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .field-row label {
+    width: 100% !important;
+    margin-bottom: 0.5rem;
+  }
+
+  .field-row .flex-grow-1,
+  .field-row input,
+  .field-row p-dropdown,
+  .field-row p-calendar,
+  .field-row p-inputNumber,
+  .field-row p-multiSelect {
+    width: 100% !important;
+  }
+
+  /* ✅ MultiSelect adjustments */
+  ::ng-deep .p-multiselect {
+    width: 100% !important;
+  }
+
+  ::ng-deep .p-multiselect .p-multiselect-label {
+    white-space: normal !important; /* allow wrapping */
+    line-height: 1.4;
+  }
+
+  ::ng-deep .p-multiselect-token {
+    display: inline-block;
+    margin: 2px;
+    max-width: 100%;
+    word-wrap: break-word;
+    white-space: normal;
+  }
+}

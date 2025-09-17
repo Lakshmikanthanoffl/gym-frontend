@@ -540,15 +540,19 @@ generateReceipt(updatedRole: any, amount: number, response: any, planName: strin
   return new Promise((resolve) => {
     const doc = new jsPDF();
 
-    // Helper: Format dates
+    // Helper: Format date
     const formatDate = (dateString: string): string => {
       if (!dateString) return '-';
       const date = new Date(dateString);
-      return date.toLocaleDateString('en-GB', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric',
-      });
+      return (
+        date.toLocaleDateString('en-GB', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+        }) +
+        ', ' +
+        date.toLocaleTimeString('en-GB')
+      );
     };
 
     // Background
@@ -562,45 +566,71 @@ generateReceipt(updatedRole: any, amount: number, response: any, planName: strin
     doc.setFillColor(255, 255, 255);
     doc.roundedRect(margin, margin, cardWidth, cardHeight, 5, 5, 'F');
 
-    // Load logo
+    // Logo + Company name
     const img = new Image();
     img.src = 'assets/images/favicon.png';
 
     img.onload = () => {
-      doc.addImage(img, 'PNG', 25, 22, 20, 20);
-
-      doc.setFontSize(18);
+      doc.addImage(img, 'PNG', 25, 20, 20, 20);
+      doc.setFontSize(16);
+      doc.setFont('helvetica', 'bold');
       doc.setTextColor(40, 40, 40);
       doc.text('Zyct - Payment Receipt', 105, 30, { align: 'center' });
 
-      doc.setFontSize(12);
-      doc.setTextColor(100, 100, 100);
-      doc.text('Thank you for your payment!', 105, 38, { align: 'center' });
+      // Green check circle
+      doc.setFillColor(46, 204, 113);
+      doc.circle(105, 50, 10, 'F');
 
-      autoTable(doc, {
-        startY: 55,
-        theme: 'grid',
-        styles: { halign: 'left', valign: 'middle' },
-        headStyles: { fillColor: [52, 152, 219], textColor: 255, fontStyle: 'bold' },
-        bodyStyles: { textColor: [50, 50, 50] },
-        head: [['Field', 'Details']],
-        body: [
-          ['Plan Name', planName],
-          ['Amount Paid', `Rs. ${amount}`],
-          ['Payment ID', response.razorpay_payment_id],
-          ['Order ID', response.razorpay_order_id],
-          ['Start Date', formatDate(updatedRole.PaidDate)],
-          ['Valid Until', formatDate(updatedRole.ValidUntil)],
-          ['Status', updatedRole.IsActive ? 'Active' : 'Inactive'],
-        ],
-      });
+      // Draw white tick
+      doc.setDrawColor(255, 255, 255);
+      doc.setLineWidth(2);
+      doc.line(101, 50, 104, 55); // left arm
+      doc.line(104, 55, 110, 46); // right arm
 
+      // Payment Success
+      doc.setTextColor(40, 40, 40);
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'normal');
+      doc.text('Payment Success!', 105, 70, { align: 'center' });
+
+      // Big amount
+      doc.setFontSize(18);
+      doc.setFont('helvetica', 'bold');
+      doc.text(`Rs. ${amount.toLocaleString()}`, 105, 80, { align: 'center' });
+
+      // Receipt details
+      const startY = 100;
+      const leftX = 35;
+      const rightX = 140;
+      let y = startY;
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(60, 60, 60);
+
+      const addRow = (label: string, value: string) => {
+        doc.setFont('helvetica', 'bold');
+        doc.text(label, leftX, y);
+        doc.setFont('helvetica', 'normal');
+        doc.text(value || '-', rightX, y);
+        y += 10;
+      };
+
+      // Only required data
+      addRow('Plan Name', planName);
+      addRow('Amount Paid', `Rs. ${amount}`);
+      addRow('Payment ID', response.razorpay_payment_id);
+      addRow('Order ID', response.razorpay_order_id);
+      addRow('Start Date', formatDate(updatedRole.PaidDate));
+      addRow('Valid Until', formatDate(updatedRole.ValidUntil));
+      addRow('Status', updatedRole.IsActive ? 'Active' : 'Inactive');
+
+      // Footer
       doc.setFontSize(10);
       doc.setTextColor(120, 120, 120);
-      doc.text('This is a system-generated receipt.', 105, doc.internal.pageSize.height - 25, { align: 'center' });
-      doc.text('For support, contact zyct.official@gmail.com', 105, doc.internal.pageSize.height - 18, { align: 'center' });
+      doc.text('Zyct © 2025. All Rights Reserved.', 105, doc.internal.pageSize.height - 25, { align: 'center' });
+      doc.text('This is a system-generated receipt. For support, contact zyct.official@gmail.com', 105, doc.internal.pageSize.height - 18, { align: 'center' });
 
-      // Save and then resolve
+      // Save and resolve
       doc.save(`Receipt-${response.razorpay_payment_id}.pdf`);
       resolve();
     };
