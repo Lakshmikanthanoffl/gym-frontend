@@ -11,7 +11,7 @@ import { GymService } from './services/gym.service';
 })
 export class AppComponent {
   title = 'gym-frontend';
-  isMaintenanceMode: boolean = false;
+  isMaintenanceMode: boolean = true;
   isLoginPage: boolean = false;   // <-- added
 
   constructor(
