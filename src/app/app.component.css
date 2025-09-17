@@ -132,3 +132,78 @@
     color: #ccc;
     line-height: 1.5;
 }
+/* ============================= */
+/* RESPONSIVE DESIGN */
+/* ============================= */
+
+/* For tablets and small laptops */
+@media (max-width: 1024px) {
+  .maintenance-screen h1 {
+    font-size: 1.8rem;
+  }
+
+  .maintenance-screen p {
+    font-size: 1rem;
+  }
+
+  .maintenance-content {
+    max-width: 90%;
+  }
+
+  .login-container {
+    padding: 2rem 1rem;
+  }
+}
+
+/* For mobile screens */
+@media (max-width: 768px) {
+  .maintenance-screen {
+    padding: 1rem;
+  }
+
+  .maintenance-screen h1 {
+    font-size: 1.6rem;
+    white-space: normal; /* allow wrapping on small screens */
+  }
+
+  .maintenance-screen p {
+    font-size: 0.95rem;
+    line-height: 1.4;
+  }
+
+  .maintenance-content {
+    max-width: 100%;
+  }
+
+  .login-container {
+    flex-direction: column;
+    padding: 1rem;
+  }
+
+  .main-content {
+    padding: 0.5rem;
+  }
+
+  .content-wrapper {
+    padding: 1rem 0.5rem;
+  }
+}
+
+/* For very small mobile devices (like 360px width) */
+@media (max-width: 480px) {
+  .maintenance-screen h1 {
+    font-size: 1.3rem;
+  }
+
+  .maintenance-screen p {
+    font-size: 0.85rem;
+  }
+
+  .login-container {
+    padding: 0.5rem;
+  }
+
+  .content-wrapper {
+    padding: 0.5rem;
+  }
+}
