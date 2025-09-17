@@ -137,13 +137,25 @@ isAdmin: boolean=false;
   };
   
   
-  
   subscriptionTypes: SubscriptionOption[] = [
+    //here we can add the all the subscriptions based on the gyms ( gyms id )
+
+    // for super admin it will show all the things and mapped correspondingly 
+
+    
     { label: 'Monthly', value: 'Monthly', period: '1 Month', price: 500, gymId: 679 },
     { label: 'Quarterly', value: 'Quarterly', period: '3 Months', price: 1500, gymId: 679 },
     { label: 'Half-Yearly', value: 'Half-Yearly', period: '6 Months', price: 3200, gymId: 679 },
     { label: 'Yearly', value: 'Yearly', period: '12 Months', price: 6000, gymId: 679 },
   
+    { label: 'Monthly', value: 'Monthly', period: '1 Month', price: 500, gymId: 6 },
+    { label: 'Quarterly', value: 'Quarterly', period: '3 Months', price: 1500, gymId: 6 },
+    { label: 'Half-Yearly', value: 'Half-Yearly', period: '6 Months', price: 3200, gymId: 6 },
+    { label: 'Yearly', value: 'Yearly', period: '12 Months', price: 6000, gymId: 6 },
+
+
+    { label: 'Monthly', value: 'Monthly', period: '1 Month', price: 500, gymId: 1106 },
+
     { label: 'Monthly', value: 'Monthly', period: '1 Month', price: 800, gymId: 1234 },
     { label: 'Quarterly', value: 'Quarterly', period: '3 Months', price: 2000, gymId: 1234 },
     { label: 'Yearly', value: 'Yearly', period: '12 Months', price: 7000, gymId: 1234 }
@@ -955,8 +967,20 @@ onGymChange(selectedGymId: number) {
   if (gym) {
     this.newMember.gymId = gym.id;
     this.newMember.gymName = gym.name;
+
+    // 🔹 Filter subscriptions for this gym
+    this.filteredSubscriptions = this.subscriptionTypes.filter(
+      (sub) => sub.gymId === gym.id
+    );
+
+    // 🔹 Reset subscription fields when gym changes
+   
+    this.newMember.period = '';
+    this.newMember.amountPaid = 0;
+   
   }
 }
+
 
 
   
