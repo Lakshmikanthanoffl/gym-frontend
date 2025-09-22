@@ -116,72 +116,151 @@
   </div>
   
 
-  <!-- Members Table -->
-  <p-table
-    [value]="filteredMembers"
-    [paginator]="true"
-    [rows]="10"
-    [rowsPerPageOptions]="[5, 10, 20]"
-    [sortField]="'id'"
-    [sortOrder]="1"
-    class="p-datatable-gridlines dark-table">
+  <div class="table-wrapper responsive-table">
 
-    <!-- Table Header -->
-    <ng-template pTemplate="header">
-      <tr>
-        <th>ID</th>
-        <th>Name</th>
-        <th>Email</th>
-        <th>Phone</th>
-        <th *ngIf="userrole === 'superadmin'">Gym ID</th>
-        <th *ngIf="userrole === 'superadmin'">Gym Name</th>
-        <th>Status</th>
-        <th *ngIf="hasPrivilege('manual Attendance-Tracking')">Attendance</th>
-        <th class="text-center">Actions</th>
-      </tr>
-    </ng-template>
-
-    <!-- Table Body -->
-    <ng-template pTemplate="body" let-member>
-      <tr>
-        <td>{{ member.id }}</td>
-        <td>{{ member.name }}</td>
-        <td>{{ member.email }}</td>
-        <td>{{ member.phone }}</td>
-
-        <td *ngIf="userrole === 'superadmin'">{{ member.gymId || '-' }}</td>
-        <td *ngIf="userrole === 'superadmin'">{{ member.gymName || '-' }}</td>
-
-        <td>
-          <span [ngClass]="getStatusClass(member.validUntil)">
-            {{ getStatus(member.validUntil) }}
-          </span>
-        </td>
-
-        <!-- Attendance Column -->
-        <td *ngIf="hasPrivilege('manual Attendance-Tracking')" class="text-center">
-          <div  class="d-flex flex-column align-items-center">
-        
-            <!-- Monthly attendance count -->
-            <div class="mb-2">
-              <span *ngIf="getMonthlyAttendance(member) > 0; else noAttendance">
-                {{ getMonthlyAttendance(member) }} / {{ getTotalDaysInMonth(selectedMonth, currentYear) }}
-              </span>
-              <ng-template #noAttendance>
-                <span class="p-tag p-tag-warning">0</span>
-              </ng-template>
+    <!-- Desktop Table -->
+    <p-table
+        *ngIf="!isMobile"
+        [value]="filteredMembers"
+        [paginator]="true"
+        [rows]="10"
+        [rowsPerPageOptions]="[5, 10, 20]"
+        [sortField]="'id'"
+        [sortOrder]="1"
+        class="p-datatable-gridlines dark-table">
+  
+      <!-- Table Header -->
+      <ng-template pTemplate="header">
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Phone</th>
+          <th *ngIf="userrole === 'superadmin'">Gym ID</th>
+          <th *ngIf="userrole === 'superadmin'">Gym Name</th>
+          <th>Status</th>
+          <th *ngIf="hasPrivilege('manual Attendance-Tracking')">Attendance</th>
+          <th class="text-center">Actions</th>
+        </tr>
+      </ng-template>
+  
+      <!-- Table Body -->
+      <ng-template pTemplate="body" let-member>
+        <tr>
+          <td>{{ member.id }}</td>
+          <td>{{ member.name }}</td>
+          <td>{{ member.email }}</td>
+          <td>{{ member.phone }}</td>
+  
+          <td *ngIf="userrole === 'superadmin'">{{ member.gymId || '-' }}</td>
+          <td *ngIf="userrole === 'superadmin'">{{ member.gymName || '-' }}</td>
+  
+          <td>
+            <span [ngClass]="getStatusClass(member.validUntil)">
+              {{ getStatus(member.validUntil) }}
+            </span>
+          </td>
+  
+          <!-- Attendance Column -->
+          <td *ngIf="hasPrivilege('manual Attendance-Tracking')" class="text-center">
+            <div class="d-flex flex-column align-items-center">
+              <div class="mb-2">
+                <span *ngIf="getMonthlyAttendance(member) > 0; else noAttendance">
+                  {{ getMonthlyAttendance(member) }} / {{ getTotalDaysInMonth(selectedMonth, currentYear) }}
+                </span>
+                <ng-template #noAttendance>
+                  <span class="p-tag p-tag-warning">0</span>
+                </ng-template>
+              </div>
+  
+              <div class="attendance-grid">
+                <ng-container *ngFor="let day of member.attendance">
+                  <span *ngIf="isInSelectedMonth(day)" class="p-tag p-tag-success">
+                    {{ day | date:'d MMM' }}
+                  </span>
+                </ng-container>
+              </div>
+  
+              <button 
+                pButton 
+                type="button" 
+                class="p-button-rounded p-button-sm mt-2"
+                [icon]="isAttendanceMarkedToday(member) ? 'pi pi-check' : 'pi pi-user-plus'"
+                (click)="markAttendance(member)" 
+                [disabled]="isAttendanceMarkedToday(member)"
+                [ngClass]="{
+                  'p-button-success': isAttendanceMarkedToday(member), 
+                  'p-button-primary': !isAttendanceMarkedToday(member)
+                }"
+                [pTooltip]="isAttendanceMarkedToday(member) ? 'Already marked today' : 'Mark attendance'"
+                tooltipPosition="top">
+              </button>
             </div>
-        
-            <!-- Show attendance dates neatly -->
+          </td>
+  
+          <!-- Actions -->
+          <td class="text-center">
+            <button *ngIf="hasPrivilege('Qr Attendance-Tracking')"
+                    pButton 
+                    type="button" 
+                    icon="pi pi-qrcode" 
+                    class="p-button-rounded p-button-text p-button-sm"
+                    (click)="openMemberQR(member)">
+            </button>
+            <button
+              pButton
+              type="button"
+              icon="pi pi-eye"
+              class="p-button-rounded p-button-text p-button-sm p-button-info me-2"
+              (click)="viewMember(member)">
+            </button>
+            <button
+              pButton
+              type="button"
+              icon="pi pi-pencil"
+              class="p-button-rounded p-button-text p-button-sm p-button-primary me-2"
+              (click)="editMember(member)">
+            </button>
+            <button
+              pButton
+              type="button"
+              icon="pi pi-trash"
+              class="p-button-rounded p-button-text p-button-sm p-button-danger"
+              (click)="confirmDelete(member)">
+            </button>
+          </td>
+        </tr>
+      </ng-template>
+  
+      <!-- Empty Message -->
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td [attr.colspan]="userrole === 'superadmin' ? 9 : 7" class="text-center">
+            No records found
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  
+    <!-- Mobile Accordion Tabs -->
+    <div class="mobile-accordion-wrapper">
+    <ng-container *ngIf="isMobile">
+      <p-accordion [multiple]="true">
+        <p-accordionTab *ngFor="let member of filteredMembers" [header]="member.name">
+          <div><strong>ID:</strong> {{ member.id }}</div>
+          <div><strong>Email:</strong> {{ member.email }}</div>
+          <div><strong>Phone:</strong> {{ member.phone }}</div>
+          <div *ngIf="userrole === 'superadmin'"><strong>Gym ID:</strong> {{ member.gymId || '-' }}</div>
+          <div *ngIf="userrole === 'superadmin'"><strong>Gym Name:</strong> {{ member.gymName || '-' }}</div>
+          <div><strong>Status:</strong> <span [ngClass]="getStatusClass(member.validUntil)">{{ getStatus(member.validUntil) }}</span></div>
+  
+          <div *ngIf="hasPrivilege('manual Attendance-Tracking')">
+            <div><strong>Attendance:</strong> {{ getMonthlyAttendance(member) }} / {{ getTotalDaysInMonth(selectedMonth, currentYear) }}</div>
             <div class="attendance-grid">
               <ng-container *ngFor="let day of member.attendance">
-                <span *ngIf="isInSelectedMonth(day)" class="p-tag p-tag-success">
-                  {{ day | date:'d MMM' }}
-                </span>
+                <span *ngIf="isInSelectedMonth(day)" class="p-tag p-tag-success">{{ day | date:'d MMM' }}</span>
               </ng-container>
             </div>
-        
-            <!-- Mark attendance button -->
             <button 
               pButton 
               type="button" 
@@ -196,54 +275,44 @@
               [pTooltip]="isAttendanceMarkedToday(member) ? 'Already marked today' : 'Mark attendance'"
               tooltipPosition="top">
             </button>
-        
           </div>
-        </td>
-        
-
-        <!-- Actions -->
-        <td class="text-center">
-          <button *ngIf="hasPrivilege('Qr Attendance-Tracking')"
-    pButton 
-    type="button" 
-    icon="pi pi-qrcode" 
-    class="p-button-rounded p-button-text p-button-sm"
-    (click)="openMemberQR(member)">
-  </button>
-          <button
-            pButton
-            type="button"
-            icon="pi pi-eye"
-            class="p-button-rounded p-button-text p-button-sm p-button-info me-2"
-            (click)="viewMember(member)">
-          </button>
-          <button
-            pButton
-            type="button"
-            icon="pi pi-pencil"
-            class="p-button-rounded p-button-text p-button-sm p-button-primary me-2"
-            (click)="editMember(member)">
-          </button>
-          <button
-            pButton
-            type="button"
-            icon="pi pi-trash"
-            class="p-button-rounded p-button-text p-button-sm p-button-danger"
-            (click)="confirmDelete(member)">
-          </button>
-        </td>
-      </tr>
-    </ng-template>
-
-    <!-- Empty Message -->
-    <ng-template pTemplate="emptymessage">
-      <tr>
-        <td [attr.colspan]="userrole === 'superadmin' ? 9 : 7" class="text-center">
-          No records found
-        </td>
-      </tr>
-    </ng-template>
-  </p-table>
+  
+          <div class="mt-2">
+            <button *ngIf="hasPrivilege('Qr Attendance-Tracking')"
+                    pButton 
+                    type="button" 
+                    icon="pi pi-qrcode" 
+                    class="p-button-rounded p-button-text p-button-sm"
+                    (click)="openMemberQR(member)">
+            </button>
+            <button
+              pButton
+              type="button"
+              icon="pi pi-eye"
+              class="p-button-rounded p-button-text p-button-sm p-button-info me-2"
+              (click)="viewMember(member)">
+            </button>
+            <button
+              pButton
+              type="button"
+              icon="pi pi-pencil"
+              class="p-button-rounded p-button-text p-button-sm p-button-primary me-2"
+              (click)="editMember(member)">
+            </button>
+            <button
+              pButton
+              type="button"
+              icon="pi pi-trash"
+              class="p-button-rounded p-button-text p-button-sm p-button-danger"
+              (click)="confirmDelete(member)">
+            </button>
+          </div>
+        </p-accordionTab>
+      </p-accordion>
+    </ng-container>
+    </div>
+  </div>
+  
 </div>
 
 <!-- QR code dialog -->

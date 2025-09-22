@@ -35,6 +35,7 @@ export class MembersComponent implements OnInit{
   qrDialogVisible = false;
   scannerOpen = false;
   passwordRequired = false;
+  @ViewChild('tableWrapper') tableWrapper!: ElementRef;
   @ViewChild('scanner')   scanner: ZXingScannerComponent | undefined; 
   @ViewChild('qrcodeCanvas', { static: false }) qrcodeCanvas: ElementRef | undefined;
     // ✅ Block refresh / navigation when scanner is open
@@ -181,7 +182,7 @@ private contextMenuHandler!: (event: MouseEvent) => void;
 private popStateHandler!: (event: PopStateEvent) => void;
 scannerActive: boolean = false;
   ngOnInit() {
-    
+    this.checkScreenSize();
     this.isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
     this.userrole = localStorage.getItem("role")
     this.isAdmin = this.userrole === 'admin';
@@ -193,10 +194,19 @@ scannerActive: boolean = false;
     this.loadSubscriptions();
     
   }
+  
   hasPrivilege(menu: string): boolean {
     // superadmin bypass → always see all menus
     if (this.authService.getRole() === 'superadmin') return true;
     return this.privileges.includes(menu);
+  }
+  @HostListener('window:resize', ['$event'])
+  onResize(event: any) {
+    this.checkScreenSize();
+  }
+
+  checkScreenSize() {
+    this.isMobile = window.innerWidth <= 768; // breakpoint for mobile
   }
   ngOnDestroy(): void {
     this.enableRefresh();

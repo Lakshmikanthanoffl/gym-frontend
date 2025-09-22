@@ -314,3 +314,106 @@
     white-space: normal;
   }
 }
+.table-container {
+  width: 100%;            /* full width of parent */
+  overflow-x: auto;       /* horizontal scroll if table is wider */
+  max-width: 100%;        /* prevent overflow outside parent */
+}
+
+/* Optional: make table scrollable vertically too if needed */
+.dark-table {
+  min-width: 800px;       /* optional: ensures table doesn’t shrink too much */
+}
+
+/* =============================
+   Desktop / Mobile Toggle
+============================= */
+.desktop-table-wrapper {
+  display: block;
+  overflow-x: auto;  /* horizontal scroll if table too wide */
+}
+
+.mobile-accordion-wrapper {
+  display: none;
+}
+
+/* Mobile / Tablet */
+@media (max-width: 991px) {
+  .desktop-table-wrapper {
+    display: none;  /* hide table on mobile */
+  }
+
+  .mobile-accordion-wrapper {
+    display: block; /* show accordion on mobile */
+  }
+}
+
+/* Table dark theme */
+.dark-table {
+  width: 100%;
+  min-width: 800px;
+}
+/* ================================
+   Accordion Wrapper & Tabs (Theme Matching)
+================================= */
+::ng-deep .p-accordion {
+  background-color: var(--bg-primary) !important;  /* container background */
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+}
+
+/* Accordion tab header */
+::ng-deep .p-accordion .p-accordion-header {
+  background-color: var(--bg-secondary) !important;  /* match table/dialog bg */
+  border-bottom: 1px solid var(--border-color);
+  padding: 0 !important; /* allow inner link/button to fill header */
+}
+
+/* Header link/button inside header (removes white bg & underline) */
+::ng-deep .p-accordion .p-accordion-header a,
+::ng-deep .p-accordion .p-accordion-header button {
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+  text-decoration: none !important;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  font-weight: 500;
+  border-radius: 8px 8px 0 0;  /* rounded top corners for each header */
+}
+
+/* Hover / active state */
+::ng-deep .p-accordion .p-accordion-header.p-highlight a,
+::ng-deep .p-accordion .p-accordion-header:hover a {
+  background-color: var( --bg-secondary) !important;   /* highlight color */
+  color: var(--text-primary) !important;        /* text contrast on accent */
+}
+
+/* Accordion content area */
+::ng-deep .p-accordion .p-accordion-content {
+  background-color: var(--bg-primary) !important;   /* content bg */
+  color: var(--text-primary) !important;
+  padding: 0.75rem 1rem;
+  border-top: none;
+  border-radius: 0 0 8px 8px; /* rounded bottom corners */
+}
+
+/* Links inside content */
+::ng-deep .p-accordion .p-accordion-content a {
+  color: var(--accent) !important;
+  text-decoration: none !important;
+}
+
+/* Accordion rows inside content */
+.accordion-row {
+  padding: 0.5rem 0;
+  color: var(--text-primary);
+}
+
+
+
+.accordion-actions button:hover {
+  background-color: var(--button-hover);
+}
