@@ -111,9 +111,9 @@
 }
 
 ::ng-deep .p-paginator .p-highlight {
-  background-color: var(--accent) !important;
-  color: var(--button-text) !important;
-  border-color: var(--accent) !important;
+  background-color: var(--bg-primary) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--bg-primary) !important;
 }
 
 ::ng-deep .dark-table .p-paginator {
