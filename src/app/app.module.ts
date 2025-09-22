@@ -40,6 +40,7 @@ import { CalendarModule } from 'primeng/calendar';
 import { RecaptchaModule } from 'ng-recaptcha';
 import { TabViewModule } from 'primeng/tabview';
 import { InputNumberModule } from 'primeng/inputnumber';
+import { AccordionModule } from 'primeng/accordion';  // <-- Add this
 import { InputSwitchModule } from 'primeng/inputswitch';
 import { MultiSelectModule } from 'primeng/multiselect'; // ✅ add this
 // Auth components
@@ -94,6 +95,7 @@ import { BusinessModelComponent } from './pages/business-model/business-model.co
     MonthFilterPipe,  // <-- add pipe here
     FormsModule,
     ReactiveFormsModule,
+    AccordionModule,
     MultiSelectModule,  // ✅ here
     HttpClientModule,
     ZXingScannerModule,  // ✅ add here'

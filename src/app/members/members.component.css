@@ -318,3 +318,77 @@ html, body {
     width: 100%;
   }
 }
+
+/* Hide table on mobile */
+@media (max-width: 768px) {
+  ::ng-deep .p-datatable {
+    display: none !important;
+  }
+}
+
+/* Hide accordion on desktop */
+@media (min-width: 769px) {
+  ::ng-deep .p-accordion {
+    display: none !important;
+  }
+}
+
+/* Accordion wrapper */
+::ng-deep .p-accordion {
+  background-color: var(--bg-primary) !important;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+}
+
+/* Accordion tab header */
+::ng-deep .p-accordion .p-accordion-header {
+  background-color: var(--bg-tertiary) !important;
+  border-bottom: 1px solid var(--border-color);
+}
+
+/* Accordion header link/button inside header (this removes white bg & blue underline) */
+::ng-deep .p-accordion .p-accordion-header a,
+::ng-deep .p-accordion .p-accordion-header button {
+  background-color: var(--bg-tertiary) !important;
+  color: var(--text-primary) !important;
+  text-decoration: none !important;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+ 
+  padding: 0.75rem 1rem;
+}
+
+/* Hover / active state */
+::ng-deep .p-accordion .p-accordion-header.p-highlight a,
+::ng-deep .p-accordion .p-accordion-header:hover a {
+  background-color: var(--bg-addon) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Accordion content area */
+::ng-deep .p-accordion .p-accordion-content {
+  background-color: var(--bg-primary) !important;
+  color: var(--text-secondary) !important;
+  padding: 0.75rem 1rem;
+}
+
+/* Links inside content */
+::ng-deep .p-accordion .p-accordion-content a {
+  color: var(--text-primary) !important;
+  text-decoration: none !important;
+}
+
+/* Attendance grid inside accordion */
+.attendance-grid {
+  display: grid;
+  grid-template-columns: repeat(3, auto);
+  gap: 6px;
+  justify-content: start;
+}
+
+.attendance-grid .p-tag {
+  font-size: 0.75rem;
+  padding: 2px 6px;
+  border-radius: 8px;
+}
