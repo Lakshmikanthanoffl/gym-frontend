@@ -159,7 +159,11 @@ isAdmin: boolean=false;
 
     { label: 'Monthly', value: 'Monthly', period: '1 Month', price: 800, gymId: 1234 },
     { label: 'Quarterly', value: 'Quarterly', period: '3 Months', price: 2000, gymId: 1234 },
-    { label: 'Yearly', value: 'Yearly', period: '12 Months', price: 7000, gymId: 1234 }
+    { label: 'Yearly', value: 'Yearly', period: '12 Months', price: 7000, gymId: 1234 },
+
+    { label: 'Monthly', value: 'Monthly', period: '1 Month', price: 700, gymId: 89 },
+    { label: 'Quarterly', value: 'Quarterly', period: '3 Months', price: 2000, gymId: 89 },
+    { label: 'Yearly', value: 'Yearly', period: '12 Months', price: 7000, gymId: 89 }
   ];
   
   
@@ -1241,7 +1245,7 @@ isUnassignedGym(member: any): boolean {
 
 
   showAddDialog() {
-    const defaultOption = this.subscriptionTypes.find(opt => opt.value === 'Monthly')!;
+    const defaultOption = this.filteredSubscriptions.find(opt => opt.value === this.filteredSubscriptions[0].label)!;
     const now = new Date();
   
     let gymId: number;
