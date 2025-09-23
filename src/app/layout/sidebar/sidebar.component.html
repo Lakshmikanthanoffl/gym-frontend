@@ -32,12 +32,12 @@
   <div class="sidebar-content">
 
     <!-- Dashboard -->
-    <a [class.disabled]="!hasPrivilege('Dashboard')" 
-       (click)="!hasPrivilege('Dashboard') ? showVipPopup('Dashboard') : closeSidebarOnMobile()"
+    <a [class.disabled]="!hasPrivilege('dashboard')" 
+       (click)="!hasPrivilege('dashboard') ? showVipPopup('dashboard') : closeSidebarOnMobile()"
        routerLink="/dashboard"
        routerLinkActive="active">
       <i class="pi pi-home"></i> <span> Dashboard</span>
-      <span *ngIf="!hasPrivilege('Dashboard')" class="vip-badge">VIP</span>
+      <span *ngIf="!hasPrivilege('dashboard')" class="vip-badge">VIP</span>
     </a>
 
     <!-- Members -->
