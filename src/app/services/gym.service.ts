@@ -8,7 +8,8 @@ export class GymService {
   private gyms = [
     { id: 1234, name: 'Vetrigym' },
     { id: 5678, name: 'Fitness Hub' },
-    { id: 9101, name: 'Power Gym' }
+    { id: 9101, name: 'Power Gym' },
+    { id: 356, name: 'Sharu Gym' }
   ];
 
   private currentGymSubject = new BehaviorSubject<string>('Zyct'); // default title
