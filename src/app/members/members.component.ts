@@ -154,6 +154,11 @@ isAdmin: boolean=false;
     { label: 'Half-Yearly', value: 'Half-Yearly', period: '6 Months', price: 3200, gymId: 6 },
     { label: 'Yearly', value: 'Yearly', period: '12 Months', price: 6000, gymId: 6 },
 
+    { label: 'Monthly', value: 'Monthly', period: '1 Month', price: 500, gymId: 356 },
+    { label: 'Quarterly', value: 'Quarterly', period: '3 Months', price: 1500, gymId: 356 },
+    { label: 'Half-Yearly', value: 'Half-Yearly', period: '6 Months', price: 3200, gymId: 356 },
+    { label: 'Yearly', value: 'Yearly', period: '12 Months', price: 6000, gymId: 356 },
+
 
     { label: 'Monthly', value: 'Monthly', period: '1 Month', price: 500, gymId: 1106 },
 
