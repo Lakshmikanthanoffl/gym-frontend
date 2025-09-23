@@ -28,7 +28,9 @@ export class DashboardComponent implements OnInit {
   // Hardcoded UPI IDs and display names for each gym
   gymUpiMap: { [gymId: number]: { upi?: string; phone?: string; name: string } } = {
     1234: { upi: 'vetrikanthan.b.2006@okhdfcbank', phone: '9361701413', name: 'vetrigym' },
-    679: { upi: 'lakshmikanthan.b.2001-1@okhdfcbank', phone: '9025275948', name: 'fitgyms' }
+    679: { upi: 'lakshmikanthan.b.2001-1@okhdfcbank', phone: '9025275948', name: 'fitgyms' },
+    356: { upi: 'sharmilas2019@okaxis', phone: '7358767510', name: 'sharu gym' },
+    
   };
 
   defaultGymId: number | null = null;
