@@ -248,7 +248,11 @@
       <p-accordion [multiple]="true">
         <p-accordionTab *ngFor="let member of filteredMembers" [header]="member.name">
           <div><strong>ID:</strong> {{ member.id }}</div>
-          <div><strong>Email:</strong> {{ member.email }}</div>
+          <div class="field">
+            <strong class="field-label">Email:</strong>
+            <span class="field-value">{{ member.email }}</span>
+          </div>
+          
           <div><strong>Phone:</strong> {{ member.phone }}</div>
           <div *ngIf="userrole === 'superadmin'"><strong>Gym ID:</strong> {{ member.gymId || '-' }}</div>
           <div *ngIf="userrole === 'superadmin'"><strong>Gym Name:</strong> {{ member.gymName || '-' }}</div>
@@ -446,15 +450,16 @@
     <div class="field mb-2 d-flex align-items-center">
       <label for="subscriptionType" class="form-label w-40">Subscription Type</label>
       <p-dropdown 
-        id="subscriptionType"
-        [options]="filteredSubscriptions"
-        [(ngModel)]="newMember.subscriptionType"
-        optionLabel="label"
-        placeholder="Select Subscription"
-        name="subscriptionType"
-        class="flex-grow-1"
-        (onChange)="onSubscriptionTypeChange($event.value)"
-      ></p-dropdown>
+  id="subscriptionType"
+  [options]="filteredSubscriptions"
+  [(ngModel)]="newMember.subscriptionType"
+  optionLabel="label"
+  placeholder="Select Subscription"
+  name="subscriptionType"
+  class="flex-grow-1"
+  (onChange)="onSubscriptionTypeChange($event.value)"
+></p-dropdown>
+
     </div>
 
     <!-- Period -->

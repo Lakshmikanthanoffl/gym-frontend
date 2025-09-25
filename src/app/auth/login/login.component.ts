@@ -3,7 +3,9 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service'; // Adjust path if needed
 import Swal from 'sweetalert2';
 import confetti from 'canvas-confetti';
-
+import { PaymentService } from '../../services/payment.service';
+import jsPDF from 'jspdf';
+import { MemberService } from '../../services/member.service';
 @Component({
   selector: 'app-login',
   standalone: false,
@@ -16,7 +18,106 @@ export class LoginComponent implements OnInit {
   showPassword = false;
   showContactUs = false; // ✅ Flag to show Contact Us link
 
-  constructor(private router: Router, private authService: AuthService) {}
+  subscriptionPlans = [
+    {
+      name: 'Basic',
+      description: '🚀 Perfect for individuals starting out!',
+      monthly: 7999, // Monthly rate
+      quarterly: Math.round(5000 * 3 * 0.9), // 10% discount for 3 months
+      yearly: Math.round(5000 * 12 * 0.8),  // 20% discount for 12 months
+      highlight: false,
+      features: [
+        '✔ Access to Members Management',
+        '✔ Easy Data Export',
+        '✔ Manage Plans effortlessly',
+        '✔ Hassle-free Subscription Control'
+      ]
+    },
+    {
+      name: 'Best Choice',
+      description: '🎓 Best choice for growing gyms!',
+      monthly: 10000, // Monthly rate
+      quarterly: Math.round(10000 * 3 * 0.9), // 10% discount for 3 months
+      yearly: Math.round(10000 * 12 * 0.8),   // 20% discount for 12 months
+      highlight: true,
+      features: [
+        '✔ Smart Dashboard Overview',
+        '✔ Full Members Management',
+        '✔ Quick Data Export & Customized plans',
+        '✔ Manual Attendance Tracking for flexibility',
+        '✔ QR Attendance Tracking for speed & accuracy',
+        '✔ Integrated Payments proof storage',
+        '✔ Full Subscription Control'
+      ]
+    },
+    {
+      name: 'Premium',
+      description: '👑 All-in-one power for professional gyms!',
+      monthly: 13000, // Monthly rate
+      quarterly: Math.round(15000 * 3 * 0.9), // 10% discount for 3 months
+      yearly: Math.round(15000 * 12 * 0.8),   // 20% discount for 12 months
+      highlight: false,
+      features: [
+        '✔ Smart Dashboard Overview',
+        '✔ Complete Members Management',
+        '✔ Integrated Payments proof storage',
+        '✔ Easy Data Export & Customized plans',
+        '✔ Manual Attendance Tracking for flexibility',
+        '✔ QR Attendance Tracking for speed & accuracy',
+        '✔ Flexible Manual Attendance Tracking',
+        '✔ Ultimate Control & Flexibility',
+        '✔ Priority Support & Customized Branding'
+      ]
+    }
+  ];
+  
+  
+
+  // Define all available menus
+availableMenus = [
+  { label: 'Dashboard', value: 'dashboard' },
+  { label: 'Members', value: 'members' },
+  { label: 'Plans', value: 'plans' },
+  { label: 'Payments', value: 'payments' },
+  { label: 'Subscription', value: 'subscription' },
+  { label: 'Admin Onboard', value: 'admin-onboard' },
+  { label: 'Export Data', value: 'export' },
+  { label: 'Qr Attendance Tracking', value: 'Qr Attendance-Tracking' },
+  { label: 'Manual Attendance Tracking', value: 'manual Attendance-Tracking' }
+];
+
+// Map menus by subscription plan
+planAccessPoints = {
+  Basic: [
+    'Members',
+    'Export Data',
+    'Plans',
+    'Subscription'
+  ],
+  Advanced: [
+    'Dashboard',
+    'Members',
+    'Export Data',
+    'Manual Attendance Tracking',
+    'Plans',
+    'Subscription',
+  ],
+  Premium: [
+    'Dashboard',
+    'Members',
+    'Plans',
+    'Payments',
+    'Subscription',
+    'Export Data',
+    'Qr Attendance Tracking',
+    'Manual Attendance Tracking'
+  ]
+};
+filteredMenus: { label: string; value: string }[] = []; // ✅ add this
+  
+  roleid: any;
+  usernameemail: any;
+  constructor(private router: Router, private authService: AuthService,private paymentService: PaymentService,private memberService: MemberService) {}
 
   ngOnInit() {
     if (this.authService.isLoggedIn()) {
@@ -35,7 +136,24 @@ export class LoginComponent implements OnInit {
       this.router.navigate([firstRoute]);
     }
   }
+  getUserDetailByEmail() {
+    this.memberService.getRolesByEmail(this.UserEmail).subscribe(roles => {
+      if (roles && roles.length > 0) {
+        this.roleid = roles[0].RoleId; // ⚡ Make sure to use correct property name from backend
+        this.usernameemail = roles[0].UserName
+        console.log("id",this.roleid ,"usernameemail", this.usernameemail)
+      } else {
+        this.roleid = null; // or handle "not found"
+        this.usernameemail = null;
+      }
+    }, error => {
+      console.error('Error fetching role by email:', error);
+      this.roleid = null;
+    });
+    this.renewSubscription();
+  }
   
+
 
   login() {
     const loginData = {
@@ -286,9 +404,17 @@ this.router.navigate([firstRoute]);
           text: err.error.message,
           background: '#1a1a1a',
           color: '#eaeaea',
-          confirmButtonColor: '#ff9900'
+          confirmButtonColor: '#ff9900',
+          confirmButtonText: '<span style="color:#000;font-weight:bold;">Renew Now</span>',
+          
+        }).then((result) => {
+          if (result.isConfirmed) {
+            // ✅ Open renewSubscription modal
+            this.getUserDetailByEmail();
+          }
         });
-      } else {
+      }
+       else {
         Swal.fire({
           icon: 'error',
           title: 'Unauthorized',
@@ -308,6 +434,339 @@ this.router.navigate([firstRoute]);
         confirmButtonColor: '#ff9900'
       });
     }
+  }
+  async renewSubscription() {
+    const zyct = 'Zyct';
+    const gymName = localStorage.getItem('GymName') || 'Gym';
+    const validUntilStr = localStorage.getItem('validUntil');
+    const expiryDate = validUntilStr ? new Date(validUntilStr) : null;
+    const emailAddress = 'zyct.official@gmail.com';
+  
+    let selectedPlan = this.subscriptionPlans[0];
+  
+    await Swal.fire({
+      title: '<strong style="color:#ffcc00;">Renew Subscription</strong>',
+  html: `
+ 
+
+<!-- Pricing Cards -->
+<div style="
+display: flex;
+justify-content: center;
+gap: 20px;
+flex-wrap: wrap;
+margin: 0 auto;
+max-width: 950px;  /* ensures background fits cards only */
+  ">
+  ${this.subscriptionPlans.map(p => `
+  <div class="plan-card"
+       data-name="${p.name}"
+       data-monthly="${p.monthly}"
+       data-quarterly="${p.quarterly}"
+       data-yearly="${p.yearly}"
+       style="
+         flex:1 1 220px; 
+         max-width:300px; 
+         padding:25px; 
+         border-radius:15px; 
+         background: ${p.highlight ? 'linear-gradient(145deg, #2a2a2a, #3a3a3a)' : '#1f1f1f'}; 
+         border:2px solid ${p.highlight ? '#ffcc00' : '#333'}; 
+         cursor:pointer; 
+         box-shadow:0 8px 18px rgba(0,0,0,0.6);
+         text-align:center; 
+         transition: transform 0.3s, box-shadow 0.3s;
+         position: relative;
+       "
+       onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 12px 22px rgba(0,0,0,0.8)';"
+       onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 8px 18px rgba(0,0,0,0.6)';"
+  >
+    <div class="badge-wrapper">
+      ${p.highlight ? `<div style="position:absolute; top:15px; right:15px; background:#ffcc00; color:#1a1a1a; padding:5px 10px; font-size:12px; font-weight:bold; border-radius:6px;">POPULAR</div>` : ''}
+      <div style="margin-top:30px;"> 
+        <div style="font-weight:bold; font-size:20px; margin-bottom:12px; color:${p.highlight ? '#ffcc00' : '#fff'}">${p.name}</div>
+        <div style="margin-bottom:12px; font-size:14px; color:#ccc;">${p.description || ''}</div>
+        <ul style="margin:0; padding:0; list-style:none; font-size:13px; text-align:left;">
+          ${p.features.map(f => `
+            <li style="
+              margin:5px 0; 
+              color:${p.highlight ? '#fff' : '#bbb'}; 
+              padding-left:16px; 
+              text-indent:-16px;
+            ">• ${f}</li>
+          `).join('')}
+        </ul>
+      </div>
+    </div>
+  </div>
+`).join('')}
+
+  
+</div>
+
+<!-- Duration Selection -->
+<label for="planSelect" style="display:block; margin-top:25px; margin-bottom:8px; font-weight:bold; color:#ccc;">Select Duration:</label>
+<select id="planSelect" style="padding:10px; width:100%; max-width:300px; border-radius:8px; border:none; background:#2c2c2c; color:#fff;">
+<option value="" disabled selected>Select a plan first</option>
+</select>
+
+<!-- Pay Button -->
+<div style="margin-top:20px;">
+<button id="payBtn" style="padding:12px 25px; background:#ffcc00; color:#1a1a1a; border:none; border-radius:8px; font-weight:bold; cursor:pointer; transition: transform 0.3s;"
+  onmouseover="this.style.transform='scale(1.05)';"
+  onmouseout="this.style.transform='scale(1)';">
+  Pay Now
+</button>
+</div>
+
+      
+
+  `,
+  showCloseButton: true,
+  showConfirmButton: false,
+  background: '#1f1f1f',
+  color: '#f0f0f0',
+  width: 'auto',   // 🔑 fits content (3 cards width)
+      didOpen: () => {
+        const planCards = Swal.getPopup()?.querySelectorAll('.plan-card') || [];
+        const selectEl = document.getElementById('planSelect') as HTMLSelectElement;
+        const payBtn = document.getElementById('payBtn') as HTMLButtonElement;
+        const countdownEl = document.getElementById('countdown') as HTMLElement;
+        const emailNote = document.getElementById('emailNote') as HTMLElement;
+    
+        // Handle card click
+       // Handle card click
+planCards.forEach(card => {
+  card.addEventListener('click', () => {
+    const name = card.getAttribute('data-name');
+    const monthly = Number(card.getAttribute('data-monthly'));
+    const quarterly = Number(card.getAttribute('data-quarterly'));
+    const yearly = Number(card.getAttribute('data-yearly'));
+
+    if (!name) return; // safety check
+
+    // Highlight selected card
+    planCards.forEach(c => (c as HTMLElement).style.borderColor = '#333');
+    (card as HTMLElement).style.borderColor = '#ffcc00';
+
+    // Populate dropdown with rates and discount info
+    selectEl.innerHTML = `
+      <option value="${monthly}" data-type="monthly" data-name="${name}">₹${monthly.toLocaleString()} / Month</option>
+      <option value="${quarterly}" data-type="quarterly" data-name="${name}">₹${quarterly.toLocaleString()} / 3 Months (10% off)</option>
+      <option value="${yearly}" data-type="yearly" data-name="${name}">₹${yearly.toLocaleString()} / Year (20% off)</option>
+    `;
+
+    // Update filtered menus based on selected plan
+    const allowedMenus = this.planAccessPoints[name as keyof typeof this.planAccessPoints] || [];
+    this.filteredMenus = this.availableMenus.filter(menu => allowedMenus.includes(menu.label));
+
+    console.log(`Menus for ${name}:`, this.filteredMenus); // Optional: bind to UI
+  });
+});
+
+    
+        // ✅ Pay Now → Razorpay
+        payBtn.addEventListener('click', () => {
+          const amount = Number(selectEl.value);
+          const planName = selectEl.selectedOptions[0]?.getAttribute('data-name') || 'Plan';
+          const durationType = selectEl.selectedOptions[0].getAttribute('data-type') || 'monthly';
+          const durationText = durationType === 'monthly' ? 'Month' :
+                               durationType === 'quarterly' ? '3 Months' :
+                               'Year';
+          const roleId = this.roleid;
+    
+          if (!amount) {
+            Swal.showValidationMessage('Please select a plan duration.');
+            return;
+          }
+    
+          this.paymentService.createOrder(amount).subscribe((order: any) => {
+            const options = {
+              key: 'rzp_test_RIYosIVFWWyoSn',
+              amount: order.amount,
+              currency: order.currency,
+              name: 'Zyct',
+              description: `Subscription: ${planName}`,
+              order_id: order.orderId,
+              handler: (response: any) => {
+                this.paymentService.verifyPayment({
+                  RazorpayOrderId: response.razorpay_order_id,
+                  RazorpayPaymentId: response.razorpay_payment_id,
+                  RazorpaySignature: response.razorpay_signature,
+                  RoleId: Number(roleId),
+                  Amount: amount,
+                  PlanName: durationText,
+                  Privileges: this.filteredMenus.map(menu => menu.value) // <-- send only the 'value' to backend
+                }).subscribe((res: any) => {
+                  if (res.success) {
+                    const updatedRole = res.role;
+                    Swal.fire({
+                      icon: 'success',
+                      title: 'Payment Successful! Subscription updated 🎉',
+                      confirmButtonText: 'OK'
+                    }).then(() => {
+                      if (updatedRole.ValidUntil) {
+                        localStorage.setItem('validUntil', updatedRole.ValidUntil);
+                        this.authService['validUntilSubject'].next(updatedRole.ValidUntil);
+                      }
+                      if (updatedRole.PaidDate) {
+                        localStorage.setItem('startDate', updatedRole.PaidDate);
+                        this.authService['PaidDateSubject'].next(updatedRole.PaidDate);
+                      }
+                      localStorage.setItem('isActive', updatedRole.IsActive ? 'true' : 'false');
+                      this.authService['isActiveSubject'].next(updatedRole.IsActive);
+                      this.generateReceipt(updatedRole, amount, response, planName);
+                    });
+                  } else {
+                    Swal.fire({ icon: 'error', title: 'Payment Verification Failed!' });
+                  }
+                });
+              },
+              prefill: { name: this.usernameemail },
+              theme: { color: '#ffcc00' }
+            };
+            const rzp = new (window as any).Razorpay(options);
+            rzp.open();
+          });
+        });
+    
+        // ✅ Email fallback
+        const openEmail = (planName: string, amount: number) => {
+          const subject = encodeURIComponent(`Subscription Renew - ${gymName}`);
+          const body = encodeURIComponent(`Gym: ${gymName}\nPlan: ${planName}\nAmount: ₹${amount}\nPlease attach the paid screenshot.`);
+          const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+          if (isMobile) {
+            window.location.href = `mailto:${emailAddress}?subject=${subject}&body=${body}`;
+          } else {
+            window.open(`https://mail.google.com/mail/?view=cm&fs=1&to=${emailAddress}&su=${subject}&body=${body}`, '_blank');
+          }
+        };
+        emailNote.addEventListener('click', () => {
+          const amount = Number(selectEl.value);
+          const planName = selectEl.selectedOptions[0]?.getAttribute('data-name') || 'Plan';
+          openEmail(planName, amount);
+        });
+    
+        // ✅ Countdown timer
+        if (expiryDate) {
+          const interval = setInterval(() => {
+            const now = new Date().getTime();
+            const distance = expiryDate.getTime() - now;
+            if (distance <= 0) {
+              countdownEl.innerHTML = '<strong>Subscription expired!</strong>';
+              clearInterval(interval);
+              return;
+            }
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+            countdownEl.innerHTML = `<strong>Time left:</strong> ${days}d ${hours}h ${minutes}m ${seconds}s`;
+          }, 1000);
+        }
+      }
+    });
+    
+    
+  }
+  generateReceipt(updatedRole: any, amount: number, response: any, planName: string): Promise<void> {
+    return new Promise((resolve) => {
+      const doc = new jsPDF();
+  
+      // Helper: Format date
+      const formatDate = (dateString: string): string => {
+        if (!dateString) return '-';
+        const date = new Date(dateString);
+        return (
+          date.toLocaleDateString('en-GB', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+          }) +
+          ', ' +
+          date.toLocaleTimeString('en-GB')
+        );
+      };
+  
+      // Background
+      doc.setFillColor(240, 240, 240);
+      doc.rect(0, 0, doc.internal.pageSize.width, doc.internal.pageSize.height, 'F');
+  
+      // White receipt card
+      const margin = 15;
+      const cardWidth = doc.internal.pageSize.width - margin * 2;
+      const cardHeight = doc.internal.pageSize.height - margin * 2;
+      doc.setFillColor(255, 255, 255);
+      doc.roundedRect(margin, margin, cardWidth, cardHeight, 5, 5, 'F');
+  
+      // Logo + Company name
+      const img = new Image();
+      img.src = 'assets/images/favicon.png';
+  
+      img.onload = () => {
+        doc.addImage(img, 'PNG', 25, 20, 20, 20);
+        doc.setFontSize(16);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(40, 40, 40);
+        doc.text('Zyct - Payment Receipt', 105, 30, { align: 'center' });
+  
+        // Green check circle
+        doc.setFillColor(46, 204, 113);
+        doc.circle(105, 50, 10, 'F');
+  
+        // Draw white tick
+        doc.setDrawColor(255, 255, 255);
+        doc.setLineWidth(2);
+        doc.line(101, 50, 104, 55); // left arm
+        doc.line(104, 55, 110, 46); // right arm
+  
+        // Payment Success
+        doc.setTextColor(40, 40, 40);
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'normal');
+        doc.text('Payment Success!', 105, 70, { align: 'center' });
+  
+        // Big amount
+        doc.setFontSize(18);
+        doc.setFont('helvetica', 'bold');
+        doc.text(`Rs. ${amount.toLocaleString()}`, 105, 80, { align: 'center' });
+  
+        // Receipt details
+        const startY = 100;
+        const leftX = 35;
+        const rightX = 140;
+        let y = startY;
+        doc.setFontSize(11);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(60, 60, 60);
+  
+        const addRow = (label: string, value: string) => {
+          doc.setFont('helvetica', 'bold');
+          doc.text(label, leftX, y);
+          doc.setFont('helvetica', 'normal');
+          doc.text(value || '-', rightX, y);
+          y += 10;
+        };
+  
+        // Only required data
+        addRow('Plan Name', planName);
+        addRow('Amount Paid', `Rs. ${amount}`);
+        addRow('Payment ID', response.razorpay_payment_id);
+        addRow('Order ID', response.razorpay_order_id);
+        addRow('Start Date', formatDate(updatedRole.PaidDate));
+        addRow('Valid Until', formatDate(updatedRole.ValidUntil));
+        addRow('Status', updatedRole.IsActive ? 'Active' : 'Inactive');
+  
+        // Footer
+        doc.setFontSize(10);
+        doc.setTextColor(120, 120, 120);
+        doc.text('Zyct © 2025. All Rights Reserved.', 105, doc.internal.pageSize.height - 25, { align: 'center' });
+        doc.text('This is a system-generated receipt. For support, contact zyct.official@gmail.com', 105, doc.internal.pageSize.height - 18, { align: 'center' });
+  
+        // Save and resolve
+        doc.save(`Receipt-${response.razorpay_payment_id}.pdf`);
+        resolve();
+      };
+    });
   }
   togglePasswordVisibility() {
     this.showPassword = !this.showPassword;

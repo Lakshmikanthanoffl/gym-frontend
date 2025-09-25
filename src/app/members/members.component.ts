@@ -38,6 +38,7 @@ export class MembersComponent implements OnInit{
   @ViewChild('tableWrapper') tableWrapper!: ElementRef;
   @ViewChild('scanner')   scanner: ZXingScannerComponent | undefined; 
   @ViewChild('qrcodeCanvas', { static: false }) qrcodeCanvas: ElementRef | undefined;
+  userPrivileges!: string[];
     // ✅ Block refresh / navigation when scanner is open
     handleBeforeUnload(event: any): string | void {
       if (this.isScannerOpen) {
@@ -64,7 +65,10 @@ export class MembersComponent implements OnInit{
   selectedMonth: number = new Date().getMonth(); // default current month
   currentYear: number = new Date().getFullYear();
   constructor(private memberService: MemberService,private authService: AuthService) {
-    
+     // Subscribe to privileges so we always have the latest
+     this.authService.privileges$.subscribe(privs => {
+      this.userPrivileges = privs;
+    });
 
   }
   otpSent: boolean = false;
@@ -529,100 +533,111 @@ downloadMemberQr() {
 }
 
   
-  exportExcel() {
-    // Define columns
-    const columns = [
-      { header: 'ID', field: 'id' },
-      { header: 'Name', field: 'name' },
-      { header: 'Email', field: 'email' },
-      { header: 'Mobile No', field: 'phone' },
-      ...(this.userrole === 'superadmin'
-        ? [
-            { header: 'Gym ID', field: 'gymId' },
-            { header: 'Gym Name', field: 'gymName' }
-          ]
-        : []),
-      { header: 'Subscription Type', field: 'subscriptionType' },
-      { header: 'Period', field: 'period' },
-      { header: 'Amount Paid', field: 'amountPaid' },
-      { header: 'Paid Date', field: 'paidDate' },
-      { header: 'Valid Until', field: 'validUntil' },
-      { header: 'Status', field: 'status' },
-      { header: 'Attendance', field: 'attendance' } // 👈 new column
-    ];
+exportExcel() {
+  // Define base columns
+  const columns = [
+    { header: 'ID', field: 'id' },
+    { header: 'Name', field: 'name' },
+    { header: 'Email', field: 'email' },
+    { header: 'Mobile No', field: 'phone' },
+    ...(this.userrole === 'superadmin'
+      ? [
+          { header: 'Gym ID', field: 'gymId' },
+          { header: 'Gym Name', field: 'gymName' }
+        ]
+      : []),
+    { header: 'Subscription Type', field: 'subscriptionType' },
+    { header: 'Period', field: 'period' },
+    { header: 'Amount Paid', field: 'amountPaid' },
+    { header: 'Paid Date', field: 'paidDate' },
+    { header: 'Valid Until', field: 'validUntil' },
+    { header: 'Status', field: 'status' }
+  ];
+
+  // ✅ Conditionally add Attendance column if privilege exists
+  const allowedPrivileges = [
+    'Qr Attendance-Tracking',
+    'manual Attendance-Tracking'
+  ];
   
-    // Format data
-    const data = this.filteredMembers.map(m => {
-      const row: any = {};
-      columns.forEach(col => {
-        let value = m[col.field];
+  if (this.userPrivileges?.some((p: string) => allowedPrivileges.includes(p))) {
+    columns.push({ header: 'Attendance', field: 'attendance' });
+  }
   
-        if (col.field === 'amountPaid') {
-          value = `₹${m.amountPaid}`;
-        }
-        if (col.field === 'paidDate' || col.field === 'validUntil') {
-          value = m[col.field] ? new Date(m[col.field]).toLocaleDateString() : '';
-        }
-        if (col.field === 'status') {
-          value = this.getStatus(m.validUntil);
-        }
-        if (col.field === 'subscriptionType') {
-          value = m.subscriptionType?.label || '';
-        }
-        if (col.field === 'attendance') {
-          value = m.attendance && m.attendance.length > 0
-            ? m.attendance.map((d: string) => new Date(d).toLocaleDateString()).join(', ')
-            : 'No records';
-        }
-  
-        row[col.header] = value;
-      });
-      return row;
+
+  // Format data
+  const data = this.filteredMembers.map(m => {
+    const row: any = {};
+    columns.forEach(col => {
+      let value = m[col.field];
+
+      if (col.field === 'amountPaid') {
+        value = `₹${m.amountPaid}`;
+      }
+      if (col.field === 'paidDate' || col.field === 'validUntil') {
+        value = m[col.field] ? new Date(m[col.field]).toLocaleDateString() : '';
+      }
+      if (col.field === 'status') {
+        value = this.getStatus(m.validUntil);
+      }
+      if (col.field === 'subscriptionType') {
+        value = m.subscriptionType?.label || '';
+      }
+      if (col.field === 'attendance') {
+        value = m.attendance && m.attendance.length > 0
+          ? m.attendance.map((d: string) => new Date(d).toLocaleDateString()).join(', ')
+          : 'No records';
+      }
+
+      row[col.header] = value;
     });
-  
-    // Create worksheet
-    const ws: XLSXStyle.WorkSheet = XLSXStyle.utils.json_to_sheet(data, {
-      header: columns.map(c => c.header),
-      skipHeader: false
-    });
-  
-    // Set column widths (Attendance column wider)
-    ws['!cols'] = columns.map(col => ({
-      wch: col.header === 'Attendance' ? 40 : 20
-    }));
-  
-    // Apply header styles with wrap
-    columns.forEach((col, index) => {
-      const cellRef = XLSX.utils.encode_cell({ r: 0, c: index });
+    return row;
+  });
+
+  // Create worksheet
+  const ws: XLSXStyle.WorkSheet = XLSXStyle.utils.json_to_sheet(data, {
+    header: columns.map(c => c.header),
+    skipHeader: false
+  });
+
+  // Set column widths
+  ws['!cols'] = columns.map(col => ({
+    wch: col.header === 'Attendance' ? 40 : 20
+  }));
+
+  // Apply header styles with wrap
+  columns.forEach((col, index) => {
+    const cellRef = XLSX.utils.encode_cell({ r: 0, c: index });
+    if (ws[cellRef]) {
+      ws[cellRef].s = {
+        fill: { fgColor: { rgb: "282828" } },
+        font: { color: { rgb: "FFFFFF" }, bold: true, sz: 12 },
+        alignment: { horizontal: "center", vertical: "center", wrapText: true }
+      };
+    }
+  });
+
+  // Apply row styles with wrap
+  data.forEach((row, rowIndex) => {
+    columns.forEach((col, colIndex) => {
+      const cellRef = XLSX.utils.encode_cell({ r: rowIndex + 1, c: colIndex });
       if (ws[cellRef]) {
         ws[cellRef].s = {
-          fill: { fgColor: { rgb: "282828" } },
-          font: { color: { rgb: "FFFFFF" }, bold: true, sz: 12 },
-          alignment: { horizontal: "center", vertical: "center", wrapText: true }
+          alignment: { horizontal: "center", vertical: "center", wrapText: true },
+          font: { color: { rgb: "000000" }, sz: 10 }
         };
       }
     });
-  
-    // Apply row styles with wrap
-    data.forEach((row, rowIndex) => {
-      columns.forEach((col, colIndex) => {
-        const cellRef = XLSX.utils.encode_cell({ r: rowIndex + 1, c: colIndex });
-        if (ws[cellRef]) {
-          ws[cellRef].s = {
-            alignment: { horizontal: "center", vertical: "center", wrapText: true },
-            font: { color: { rgb: "000000" }, sz: 10 }
-          };
-        }
-      });
-    });
-  
-    // Create workbook
-    const wb: XLSXStyle.WorkBook = XLSXStyle.utils.book_new();
-    XLSXStyle.utils.book_append_sheet(wb, ws, "Members");
-  
-    // Save file
-    XLSXStyle.writeFile(wb, "members.xlsx");
-  }
+  });
+
+  // Create workbook
+  const wb: XLSXStyle.WorkBook = XLSXStyle.utils.book_new();
+  XLSXStyle.utils.book_append_sheet(wb, ws, "Members");
+
+  // Save file
+  XLSXStyle.writeFile(wb, "members.xlsx");
+}
+
   
   showToastInsideScanner(message: string, type: 'success' | 'error' | 'info') {
     Swal.fire({
@@ -758,14 +773,15 @@ closeCamera() {
   
   
   exportPdf() {
-    const doc = new jsPDF({
-      orientation: 'landscape', // 👈 more width
-      unit: 'pt',
-      format: 'A4'
-    });
+    const allowedPrivileges = [
+      'Qr Attendance-Tracking',
+      'manual Attendance-Tracking'
+    ];
+  
+    const includeAttendance = this.userPrivileges?.some(p => allowedPrivileges.includes(p));
   
     // Table headers
-    const headers = [[
+    const headers = [
       'ID',
       'Name',
       'Email',
@@ -774,54 +790,95 @@ closeCamera() {
       'Amount Paid',
       'Paid Date',
       'Valid Until',
-      'Subscription Type',
-      'Attendance'
-    ]];
+      'Subscription Type'
+    ];
+  
+    if (includeAttendance) {
+      headers.push('Attendance');
+    }
+  
+    const wrapText = (text: string, maxChars: number) => {
+      if (!text) return '';
+      const words = text.split(' ');
+      const lines: string[] = [];
+      let currentLine = '';
+  
+      words.forEach(word => {
+        if ((currentLine + ' ' + word).trim().length <= maxChars) {
+          currentLine = (currentLine + ' ' + word).trim();
+        } else {
+          if (currentLine) lines.push(currentLine);
+          currentLine = word;
+        }
+      });
+  
+      if (currentLine) lines.push(currentLine);
+      return lines.join('\n');
+    };
   
     // Table rows
-    const data = this.filteredMembers.map(m => [
-      m.id,
-      m.name,
-      m.email,
-      m.phone,
-      m.period,
-      m.amountPaid,
-      new Date(m.paidDate).toLocaleDateString(),
-      new Date(m.validUntil).toLocaleDateString(),
-      m.subscriptionType?.label || '',
-      (m.attendance && m.attendance.length > 0) 
-        ? m.attendance.join(', ') 
-        : 'No records'
-    ]);
+    const data = this.filteredMembers.map(m => {
+      const row = [
+        m.id,
+        wrapText(m.name, 20),
+        wrapText(m.email, 25),
+        wrapText(m.phone, 15),
+        m.period,
+        m.amountPaid,
+        new Date(m.paidDate).toLocaleDateString(),
+        new Date(m.validUntil).toLocaleDateString(),
+        wrapText(m.subscriptionType?.label || '', 15)
+      ];
+  
+      if (includeAttendance) {
+        const attendanceText = m.attendance && m.attendance.length > 0
+          ? m.attendance.map((d: string) => new Date(d).toLocaleDateString()).join(', ')
+          : 'No records';
+        row.push(wrapText(attendanceText, 30));
+      }
+  
+      return row;
+    });
+  
+    const doc = new jsPDF({
+      orientation: includeAttendance ? 'landscape' : 'portrait',
+      unit: 'pt',
+      format: 'A4'
+    });
+  
+    // ✅ Add Name/Gym title at top-left
+    doc.setFontSize(16);
+    doc.setTextColor(0, 0, 0);
+    doc.text('Zyct', 40, 30); // X=40, Y=30
+  
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageMargin = 40;
+    const usablePageWidth = pageWidth - pageMargin * 2;
+    const colWidth = usablePageWidth / headers.length;
   
     autoTable(doc, {
-      head: headers,
+      head: [headers],
       body: data,
       theme: 'grid',
-      startY: 30,
-      tableWidth: 'wrap',   // 👈 ensures wrapping
+      startY: 50, // leave space for header
+      tableWidth: 'auto',
+      margin: { left: pageMargin, right: pageMargin },
       styles: {
         fontSize: 8,
-        overflow: 'linebreak',
-        valign: 'middle'
+        cellWidth: 'wrap',
+        valign: 'middle',
+        halign: 'center'
       },
       headStyles: {
         fillColor: [40, 40, 40],
         textColor: [255, 255, 255],
-        fontSize: 9
+        fontSize: 9,
+        halign: 'center'
       },
-      columnStyles: {
-        0: { cellWidth: 40 },  // ID
-        1: { cellWidth: 80 },  // Name
-        2: { cellWidth: 120 }, // Email
-        3: { cellWidth: 80 },  // Phone
-        4: { cellWidth: 50 },  // Period
-        5: { cellWidth: 70 },  // Amount Paid
-        6: { cellWidth: 70 },  // Paid Date
-        7: { cellWidth: 70 },  // Valid Until
-        8: { cellWidth: 90 },  // Subscription Type
-        9: { cellWidth: 120 }  // Attendance
-      }
+      columnStyles: headers.reduce((acc, _, idx) => {
+        acc[idx] = { cellWidth: colWidth };
+        return acc;
+      }, {} as any)
     });
   
     doc.save('Members.pdf');
@@ -831,50 +888,66 @@ closeCamera() {
   
   
   
+  
+  
+  
   viewMember(member: any) {
     this.selectedMember = member;
     this.editDialogVisible = true;
   }
-  editMember(member: any) {
-    this.isEditMode = true;
-    this.selectedMemberId = member.id;
-  
-    // Determine gym info based on role
-    let gymId: number;
-    let gymName: string;
-  
-    if (this.userrole === 'superadmin') {
-      // Take from the member object itself
-      gymId = member.gymId || 0;
-      gymName = member.gymName || '';
-    } else {
-      // Use default gym info for admin
-      gymId = this.defaultGymId;
-      gymName = this.defaultGymName ?? '';
-    }
-  
-    // Deep clone member to avoid live editing and preserve form state
+editMember(member: any) {
+  this.isEditMode = true;
+  this.selectedMemberId = member.id;
+
+  let gymId: number;
+  let gymName: string;
+
+  if (this.userrole === 'superadmin') {
+    gymId = member.gymId || 0;
+    gymName = member.gymName || '';
+
+    // inside editMember()
+const filteredSubscriptions = this.subscriptionTypes.filter(sub => sub.gymId === gymId);
+
+// find the matched subscription by price or period
+const matchedSubscription = filteredSubscriptions.find(sub => sub.price === member.amountPaid)
+    || filteredSubscriptions.find(sub => sub.period === member.period)
+    || null;
+
+// Assign to newMember
+this.newMember = {
+  ...member,
+  subscriptionType: matchedSubscription, // ✅ must be from filteredSubscriptions
+  gymId,
+  gymName
+};
+
+// Pass to template
+this.filteredSubscriptions = filteredSubscriptions; // bind this to [options] in template
+
+  } else {
+    // Non-superadmin: use default gym
+    gymId = this.defaultGymId;
+    gymName = this.defaultGymName ?? '';
+    const gymSubscriptions = this.subscriptionTypes.filter(sub => sub.gymId === gymId);
+
+    const matchedSubscription = gymSubscriptions.find(sub => sub.price === member.amountPaid)
+      || gymSubscriptions.find(sub => sub.period === member.period)
+      || null;
+
     this.newMember = {
-      id: member.id,
-      name: member.name,
-      email: member.email,
-      phone: member.phone,
-      subscriptionType: {
-        label: member.subscriptionType?.label || '',
-        value: member.subscriptionType?.value || '',
-        period: member.subscriptionType?.period || '',
-        price: member.subscriptionType?.price || 0,
-      },
-      period: member.period,
-      amountPaid: member.amountPaid,
-      paidDate: member.paidDate,
-      validUntil: member.validUntil,
-      gymId,    // ✅ gym info based on role
-      gymName   // ✅ gym info based on role
+      ...member,
+      subscriptionType: matchedSubscription || member.subscriptionType,
+      gymId,
+      gymName,
+      gymSubscriptions
     };
-  
-    this.addDialogVisible = true;
   }
+
+  this.addDialogVisible = true;
+}
+
+  
   
   
   transformMemberForInsert(member: Member): any {

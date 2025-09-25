@@ -41,7 +41,7 @@ export class AdminOnboardComponent implements OnInit {
     { label: 'Export Data', value: 'export' }, // ✅ new export option
     { label: 'Qr Attendance Tracking', value: 'Qr Attendance-Tracking' },
     { label: 'Manual Attendance Tracking', value: 'manual Attendance-Tracking' } // ✅ new export option // ✅ new export option
-    // ❌ not adding "Contact Us" since you don’t want it
+   
   ];
   
   selectedSubscription: string = 'monthly';  // default

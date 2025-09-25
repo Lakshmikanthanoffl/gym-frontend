@@ -358,6 +358,26 @@ html, body {
  
   padding: 0.75rem 1rem;
 }
+.word-wrap {
+  word-wrap: break-word;   /* legacy support */
+  overflow-wrap: break-word; /* modern browsers */
+  word-break: break-all;   /* breaks long words if needed */
+}
+.field {
+  display: flex;
+  align-items: flex-start;   /* align top */
+  margin-bottom: 0.5rem;
+}
+
+.field-label {
+  margin-right: 0.25rem;    /* small gap next to label */
+  flex-shrink: 0;           /* prevent shrinking */
+}
+
+.field-value {
+  flex: 1;                  /* take remaining space */
+  word-break: break-word;    /* wrap long email */
+}
 
 /* Hover / active state */
 ::ng-deep .p-accordion .p-accordion-header.p-highlight a,

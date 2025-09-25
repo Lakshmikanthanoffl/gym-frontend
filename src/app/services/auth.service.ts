@@ -41,6 +41,9 @@ export class AuthService {
   // ✅ new subject for IsActive
   private isActiveSubject = new BehaviorSubject<boolean>(localStorage.getItem('isActive') === 'true');
   isActive$ = this.isActiveSubject.asObservable();
+  // ✅ new subject for privileges
+  private privilegesSubject = new BehaviorSubject<string[]>(this.getPrivileges());
+  privileges$ = this.privilegesSubject.asObservable();
 
   private apiUrl = 'https://gymmanagementapi.onrender.com/api/Role/login';
 
@@ -148,7 +151,11 @@ export class AuthService {
   getRole(): string | null {
     return localStorage.getItem('role');
   }
-
+// ✅ Update method to set privileges dynamically
+setPrivileges(privileges: string[]) {
+  localStorage.setItem('privileges', JSON.stringify(privileges));
+  this.privilegesSubject.next(privileges);
+}
   // Get username
   getUsername(): string | null {
     return localStorage.getItem('username');
