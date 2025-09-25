@@ -24,10 +24,101 @@ statusClass: string = "active";
   upiId = 'lakshmikanthan.b.2001-1@okhdfcbank';
 
   subscriptionPlans = [
-    { name: 'Monthly', amount: 1 },
-    { name: '3 Months', amount: 1 },
-    { name: 'Yearly', amount: 1 }
+    {
+      name: 'Basic',
+      description: '🚀 Perfect for individuals starting out!',
+      monthly: 7999, // Monthly rate
+      quarterly: Math.round(5000 * 3 * 0.9), // 10% discount for 3 months
+      yearly: Math.round(5000 * 12 * 0.8),  // 20% discount for 12 months
+      highlight: false,
+      features: [
+        '✔ Access to Members Management',
+        '✔ Easy Data Export',
+        '✔ Manage Plans effortlessly',
+        '✔ Hassle-free Subscription Control'
+      ]
+    },
+    {
+      name: 'Best Choice',
+      description: '🎓 Best choice for growing gyms!',
+      monthly: 10000, // Monthly rate
+      quarterly: Math.round(10000 * 3 * 0.9), // 10% discount for 3 months
+      yearly: Math.round(10000 * 12 * 0.8),   // 20% discount for 12 months
+      highlight: true,
+      features: [
+        '✔ Smart Dashboard Overview',
+        '✔ Full Members Management',
+        '✔ Quick Data Export & Customized plans',
+        '✔ Manual Attendance Tracking for flexibility',
+        '✔ QR Attendance Tracking for speed & accuracy',
+        '✔ Integrated Payments proof storage',
+        '✔ Full Subscription Control'
+      ]
+    },
+    {
+      name: 'Premium',
+      description: '👑 All-in-one power for professional gyms!',
+      monthly: 13000, // Monthly rate
+      quarterly: Math.round(15000 * 3 * 0.9), // 10% discount for 3 months
+      yearly: Math.round(15000 * 12 * 0.8),   // 20% discount for 12 months
+      highlight: false,
+      features: [
+        '✔ Smart Dashboard Overview',
+        '✔ Complete Members Management',
+        '✔ Integrated Payments proof storage',
+        '✔ Easy Data Export & Customized plans',
+        '✔ Manual Attendance Tracking for flexibility',
+        '✔ QR Attendance Tracking for speed & accuracy',
+        '✔ Flexible Manual Attendance Tracking',
+        '✔ Ultimate Control & Flexibility',
+        '✔ Priority Support & Customized Branding'
+      ]
+    }
   ];
+  
+  
+
+  // Define all available menus
+availableMenus = [
+  { label: 'Dashboard', value: 'dashboard' },
+  { label: 'Members', value: 'members' },
+  { label: 'Plans', value: 'plans' },
+  { label: 'Payments', value: 'payments' },
+  { label: 'Subscription', value: 'subscription' },
+  { label: 'Admin Onboard', value: 'admin-onboard' },
+  { label: 'Export Data', value: 'export' },
+  { label: 'Qr Attendance Tracking', value: 'Qr Attendance-Tracking' },
+  { label: 'Manual Attendance Tracking', value: 'manual Attendance-Tracking' }
+];
+
+// Map menus by subscription plan
+planAccessPoints = {
+  Basic: [
+    'Members',
+    'Export Data',
+    'Plans',
+    'Subscription'
+  ],
+  Advanced: [
+    'Dashboard',
+    'Members',
+    'Export Data',
+    'Manual Attendance Tracking',
+    'Plans',
+    'Subscription',
+  ],
+  Premium: [
+    'Dashboard',
+    'Members',
+    'Plans',
+    'Payments',
+    'Subscription',
+    'Export Data',
+    'Qr Attendance Tracking',
+    'Manual Attendance Tracking'
+  ]
+};
+filteredMenus: { label: string; value: string }[] = []; // ✅ add this
   isBlinking!: boolean;
   currentUserRoleId!: string | null;
   currentUserName!: string | null;
@@ -164,166 +255,239 @@ statusClass: string = "active";
     const validUntilStr = localStorage.getItem('validUntil');
     const expiryDate = validUntilStr ? new Date(validUntilStr) : null;
     const emailAddress = 'zyct.official@gmail.com';
-  
+    const roleId = this.currentUserRoleId; // logged-in user's RoleId
     let selectedPlan = this.subscriptionPlans[0];
   
     await Swal.fire({
       title: '<strong style="color:#ffcc00;">Renew Subscription</strong>',
-      html: `
-        <div style="color:#f0f0f0; font-family:'Segoe UI', Tahoma, sans-serif; text-align:left;">
-          <label for="planSelect">Select Plan:</label>
-          <select id="planSelect" style="margin-top:5px; padding:5px; width:100%; border-radius:6px;">
-            ${this.subscriptionPlans.map(p => `<option value="${p.amount}" data-name="${p.name}">${p.name} - ₹${p.amount}</option>`).join('')}
-          </select>
+  html: `
+ 
+
+<!-- Pricing Cards -->
+<div style="
+display: flex;
+justify-content: center;
+gap: 20px;
+flex-wrap: wrap;
+margin: 0 auto;
+max-width: 950px;  /* ensures background fits cards only */
+  ">
+  ${this.subscriptionPlans.map(p => `
+  <div class="plan-card"
+       data-name="${p.name}"
+       data-monthly="${p.monthly}"
+       data-quarterly="${p.quarterly}"
+       data-yearly="${p.yearly}"
+       style="
+         flex:1 1 220px; 
+         max-width:300px; 
+         padding:25px; 
+         border-radius:15px; 
+         background: ${p.highlight ? 'linear-gradient(145deg, #2a2a2a, #3a3a3a)' : '#1f1f1f'}; 
+         border:2px solid ${p.highlight ? '#ffcc00' : '#333'}; 
+         cursor:pointer; 
+         box-shadow:0 8px 18px rgba(0,0,0,0.6);
+         text-align:center; 
+         transition: transform 0.3s, box-shadow 0.3s;
+         position: relative;
+       "
+       onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 12px 22px rgba(0,0,0,0.8)';"
+       onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 8px 18px rgba(0,0,0,0.6)';"
+  >
+    <div class="badge-wrapper">
+      ${p.highlight ? `<div style="position:absolute; top:15px; right:15px; background:#ffcc00; color:#1a1a1a; padding:5px 10px; font-size:12px; font-weight:bold; border-radius:6px;">POPULAR</div>` : ''}
+      <div style="margin-top:30px;"> 
+        <div style="font-weight:bold; font-size:20px; margin-bottom:12px; color:${p.highlight ? '#ffcc00' : '#fff'}">${p.name}</div>
+        <div style="margin-bottom:12px; font-size:14px; color:#ccc;">${p.description || ''}</div>
+        <ul style="margin:0; padding:0; list-style:none; font-size:13px; text-align:left;">
+          ${p.features.map(f => `
+            <li style="
+              margin:5px 0; 
+              color:${p.highlight ? '#fff' : '#bbb'}; 
+              padding-left:16px; 
+              text-indent:-16px;
+            ">• ${f}</li>
+          `).join('')}
+        </ul>
+      </div>
+    </div>
+  </div>
+`).join('')}
+
   
-          <div style="margin-top:15px; text-align:center;">
-            <button id="payBtn" style="padding:8px 15px; background:#ffcc00; color:#000; border:none; border-radius:6px; font-weight:bold; cursor:pointer;">
-              Pay Now
-            </button>
-          </div>
-  
-          <div id="emailNote" style="margin-top:15px; text-align:center; cursor:pointer;" title="Click here to send payment email">
-            <p id="emailId" style="color:#f0f0f0; text-decoration:underline; font-weight:500; margin:0;">
-              ${emailAddress.replace('@', '&#64;')}
-            </p>
-            <p style="font-size:12px; color:#cccccc; margin-top:5px;">
-              Note: Please refresh the screen or Logout and login once again if the subscritption is not reflected <span style="color:#ffcc00; font-weight:bold;"></span>, 
-            </p>
-            <p id="countdown" style="font-size:14px; color:#ffcc00; margin-top:8px; font-weight:bold;">
-              ${expiryDate ? 'Time left: calculating...' : ''}
-            </p>
-          </div>
-        </div>
-      `,
-      showCloseButton: true,
-      showConfirmButton: false,
-      background: '#1f1f1f',
-      color: '#f0f0f0',
+</div>
+
+<!-- Duration Selection -->
+<label for="planSelect" style="display:block; margin-top:25px; margin-bottom:8px; font-weight:bold; color:#ccc;">Select Duration:</label>
+<select id="planSelect" style="padding:10px; width:100%; max-width:300px; border-radius:8px; border:none; background:#2c2c2c; color:#fff;">
+<option value="" disabled selected>Select a plan first</option>
+</select>
+
+<!-- Pay Button -->
+<div style="margin-top:20px;">
+<button id="payBtn" style="padding:12px 25px; background:#ffcc00; color:#1a1a1a; border:none; border-radius:8px; font-weight:bold; cursor:pointer; transition: transform 0.3s;"
+  onmouseover="this.style.transform='scale(1.05)';"
+  onmouseout="this.style.transform='scale(1)';">
+  Pay Now
+</button>
+</div>
+
+
+<p id="countdown" style="font-size:14px; color:#ffcc00; margin-top:8px; font-weight:bold;">
+  ${expiryDate ? 'Time left: calculating...' : ''}
+</p>
+
+</div>   
+
+  `,
+  showCloseButton: true,
+  showConfirmButton: false,
+  background: '#1f1f1f',
+  color: '#f0f0f0',
+  width: 'auto',   // 🔑 fits content (3 cards width)
       didOpen: () => {
+        const planCards = Swal.getPopup()?.querySelectorAll('.plan-card') || [];
         const selectEl = document.getElementById('planSelect') as HTMLSelectElement;
         const payBtn = document.getElementById('payBtn') as HTMLButtonElement;
         const countdownEl = document.getElementById('countdown') as HTMLElement;
         const emailNote = document.getElementById('emailNote') as HTMLElement;
-  
-        // ✅ Pay Now button → Razorpay
+    
+        // Handle card click
+planCards.forEach(card => {
+  card.addEventListener('click', () => {
+    const name = card.getAttribute('data-name');
+    const monthly = Number(card.getAttribute('data-monthly'));
+    const quarterly = Number(card.getAttribute('data-quarterly'));
+    const yearly = Number(card.getAttribute('data-yearly'));
+
+    if (!name) return; // safety check
+
+    // Highlight selected card
+    planCards.forEach(c => (c as HTMLElement).style.borderColor = '#333');
+    (card as HTMLElement).style.borderColor = '#ffcc00';
+
+    // Populate dropdown with rates and discount info
+    selectEl.innerHTML = `
+      <option value="${monthly}" data-type="monthly" data-name="${name}">₹${monthly.toLocaleString()} / Month</option>
+      <option value="${quarterly}" data-type="quarterly" data-name="${name}">₹${quarterly.toLocaleString()} / 3 Months (10% off)</option>
+      <option value="${yearly}" data-type="yearly" data-name="${name}">₹${yearly.toLocaleString()} / Year (20% off)</option>
+    `;
+
+    // Update filtered menus based on selected plan
+    const allowedMenus = this.planAccessPoints[name as keyof typeof this.planAccessPoints] || [];
+    this.filteredMenus = this.availableMenus.filter(menu => allowedMenus.includes(menu.label));
+
+    console.log(`Menus for ${name}:`, this.filteredMenus); // Optional: bind to UI
+  });
+});
+
+    
+        // ✅ Pay Now → Razorpay
         payBtn.addEventListener('click', () => {
           const amount = Number(selectEl.value);
-          const planName = selectEl.selectedOptions[0].getAttribute('data-name') || 'Plan';
-          const roleId = this.currentUserRoleId; // logged-in user's RoleId
-        
+          const planName = selectEl.selectedOptions[0]?.getAttribute('data-name') || 'Plan';
+          const durationType = selectEl.selectedOptions[0].getAttribute('data-type') || 'monthly';
+          const durationText = durationType === 'monthly' ? 'Month' :
+                               durationType === 'quarterly' ? '3 Months' :
+                               'Year';
+         
+    
+          if (!amount) {
+            Swal.showValidationMessage('Please select a plan duration.');
+            return;
+          }
+    
           this.paymentService.createOrder(amount).subscribe((order: any) => {
             const options = {
-              key: 'rzp_live_RIIy4KDqcIQPqh', // Razorpay Key ID (frontend only)
-              amount: order.amount, // in paise
+              key: 'rzp_test_RIYosIVFWWyoSn',
+              amount: order.amount,
               currency: order.currency,
               name: 'Zyct',
               description: `Subscription: ${planName}`,
               order_id: order.orderId,
               handler: (response: any) => {
-                // Verify payment via backend
                 this.paymentService.verifyPayment({
                   RazorpayOrderId: response.razorpay_order_id,
                   RazorpayPaymentId: response.razorpay_payment_id,
                   RazorpaySignature: response.razorpay_signature,
                   RoleId: Number(roleId),
                   Amount: amount,
-                  PlanName: planName
+                  PlanName: durationText,
+                  Privileges: this.filteredMenus.map(menu => menu.value) // <-- send only the 'value' to backend
                 }).subscribe((res: any) => {
                   if (res.success) {
                     const updatedRole = res.role;
-                
                     Swal.fire({
                       icon: 'success',
                       title: 'Payment Successful! Subscription updated 🎉',
                       confirmButtonText: 'OK'
                     }).then(() => {
-                      // ✅ Update subscription data in localStorage & BehaviorSubjects
                       if (updatedRole.ValidUntil) {
                         localStorage.setItem('validUntil', updatedRole.ValidUntil);
                         this.authService['validUntilSubject'].next(updatedRole.ValidUntil);
                       }
-                
                       if (updatedRole.PaidDate) {
                         localStorage.setItem('startDate', updatedRole.PaidDate);
                         this.authService['PaidDateSubject'].next(updatedRole.PaidDate);
                       }
-                
                       localStorage.setItem('isActive', updatedRole.IsActive ? 'true' : 'false');
                       this.authService['isActiveSubject'].next(updatedRole.IsActive);
                       this.generateReceipt(updatedRole, amount, response, planName).then(() => {
                         window.location.reload();
                       });
-                      
 
-                     
+                     // ✅ New: update privileges dynamically
+                      if (updatedRole.Privileges) {
+                        this.authService.setPrivileges(updatedRole.Privileges);
+                      }
+
                     });
-                   
-
                   } else {
-                    Swal.fire({
-                      icon: 'error',
-                      title: 'Payment Verification Failed!'
-                    });
+                    Swal.fire({ icon: 'error', title: 'Payment Verification Failed!' });
                   }
                 });
-                
               },
-              prefill: { name: this.currentUserName }, // Only name
+              prefill: { name: this.currentUserName },
               theme: { color: '#ffcc00' }
             };
-        
             const rzp = new (window as any).Razorpay(options);
             rzp.open();
           });
         });
-        
-        
-  
-        // Email fallback
+    
+        // ✅ Email fallback
         const openEmail = (planName: string, amount: number) => {
           const subject = encodeURIComponent(`Subscription Renew - ${gymName}`);
           const body = encodeURIComponent(`Gym: ${gymName}\nPlan: ${planName}\nAmount: ₹${amount}\nPlease attach the paid screenshot.`);
           const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-  
           if (isMobile) {
-            const gmailAppUrl = `googlegmail://co?to=${emailAddress}&subject=${subject}&body=${body}`;
-            const mailtoUrl = `mailto:${emailAddress}?subject=${subject}&body=${body}`;
-            window.location.href = gmailAppUrl;
-            setTimeout(() => window.location.href = mailtoUrl, 500);
+            window.location.href = `mailto:${emailAddress}?subject=${subject}&body=${body}`;
           } else {
-            const gmailWebUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${emailAddress}&su=${subject}&body=${body}`;
-            window.open(gmailWebUrl, '_blank');
+            window.open(`https://mail.google.com/mail/?view=cm&fs=1&to=${emailAddress}&su=${subject}&body=${body}`, '_blank');
           }
         };
-  
-        emailNote.addEventListener('click', () => {
-          const amount = Number(selectEl.value);
-          const planName = selectEl.selectedOptions[0].getAttribute('data-name') || 'Plan';
-          openEmail(planName, amount);
-        });
-  
-        // Countdown timer
+      
+    
+        // ✅ Countdown timer
         if (expiryDate) {
           const interval = setInterval(() => {
             const now = new Date().getTime();
             const distance = expiryDate.getTime() - now;
-  
             if (distance <= 0) {
               countdownEl.innerHTML = '<strong>Subscription expired!</strong>';
               clearInterval(interval);
               return;
             }
-  
             const days = Math.floor(distance / (1000 * 60 * 60 * 24));
             const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
             const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
             const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-  
             countdownEl.innerHTML = `<strong>Time left:</strong> ${days}d ${hours}h ${minutes}m ${seconds}s`;
           }, 1000);
         }
       }
     });
+    
     
   }
   

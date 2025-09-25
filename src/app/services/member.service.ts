@@ -115,6 +115,11 @@ export class MemberService {
     return this.http.delete<void>(`${this.roleApiUrl}/${roleId}`);
   }
 
+  // Get role(s) by email
+getRolesByEmail(email: string): Observable<any[]> {
+  return this.http.get<any[]>(`${this.roleApiUrl}/email/${encodeURIComponent(email)}`);
+}
+
   // =========================
   // Gym Info
   // =========================

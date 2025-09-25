@@ -16,7 +16,7 @@ export class PaymentService {
   }
 
   // Verify Razorpay payment
-  verifyPayment(data: { RazorpayOrderId: string, RazorpayPaymentId: string, RazorpaySignature: string,RoleId: number;Amount: number;PlanName:string }): Observable<any> {
+  verifyPayment(data: { RazorpayOrderId: string, RazorpayPaymentId: string, RazorpaySignature: string,RoleId: number;Amount: number;PlanName:string, Privileges?: string[] }): Observable<any> {
     return this.http.post<any>(`${this.baseUrl}/verify-payment`, data);
   }
 }
