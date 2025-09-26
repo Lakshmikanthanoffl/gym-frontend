@@ -67,58 +67,61 @@ export class HeaderComponent implements OnInit {
   validUntil: Date | null = null; // ✅ live expiry from service
   currentUserRoleId!: string | null;
   currentUserName!: string | null;
+
   subscriptionPlans = [
     {
       name: 'Basic',
-      description: '🚀 Perfect for individuals starting out!',
-      monthly: 7999, // Monthly rate
-      quarterly: Math.round(5000 * 3 * 0.9), // 10% discount for 3 months
-      yearly: Math.round(5000 * 12 * 0.8),  // 20% discount for 12 months
+      description: '🚀 Ideal for small gyms and beginners starting their journey.',
+      monthly: 7999,
+      quarterly: Math.round(7999 * 3 * 0.9), // 10% discount
+      yearly: Math.round(7999 * 12 * 0.8),   // 20% discount
       highlight: false,
       features: [
-        '✔ Access to Members Management',
-        '✔ Easy Data Export',
-        '✔ Manage Plans effortlessly',
-        '✔ Hassle-free Subscription Control'
+        '✔ Manage members with ease',
+        '✔ Quick data export',
+        '✔ Create and manage plans effortlessly',
+        '✔ Hassle-free subscription control'
       ]
     },
     {
-      name: 'Best Choice',
-      description: '🎓 Best choice for growing gyms!',
-      monthly: 10000, // Monthly rate
-      quarterly: Math.round(10000 * 3 * 0.9), // 10% discount for 3 months
-      yearly: Math.round(10000 * 12 * 0.8),   // 20% discount for 12 months
-      highlight: true,
+      name: 'Advanced',
+      description: '🌟 Perfect for growing gyms – unlock full potential!',
+      monthly: 10000,
+      quarterly: Math.round(10000 * 3 * 0.9), // 10% discount
+      yearly: Math.round(10000 * 12 * 0.8),   // 20% discount
+      highlight: true, // will show as the recommended plan
       features: [
-        '✔ Smart Dashboard Overview',
-        '✔ Full Members Management',
-        '✔ Quick Data Export & Customized plans',
-        '✔ Manual Attendance Tracking for flexibility',
-        '✔ QR Attendance Tracking for speed & accuracy',
-        '✔ Integrated Payments proof storage',
-        '✔ Full Subscription Control'
+        '✔ Smart and customizable dashboard for insights',
+        '✔ Full members management with ease',
+        '✔ Create personalized plans for each member',
+        '✔ Export reports instantly',
+        '✔ Manual attendance tracking for flexibility',
+        '✔ QR code attendance tracking for speed & accuracy',
+        '✔ Complete subscription control',
+        '✔ Priority notifications & reminders'
       ]
     },
     {
       name: 'Premium',
-      description: '👑 All-in-one power for professional gyms!',
-      monthly: 13000, // Monthly rate
-      quarterly: Math.round(15000 * 3 * 0.9), // 10% discount for 3 months
-      yearly: Math.round(15000 * 12 * 0.8),   // 20% discount for 12 months
+      description: '👑 All-in-one solution for professional gyms',
+      monthly: 13000,
+      quarterly: Math.round(13000 * 3 * 0.9), // 10% discount
+      yearly: Math.round(13000 * 12 * 0.8),   // 20% discount
       highlight: false,
       features: [
-        '✔ Smart Dashboard Overview',
-        '✔ Complete Members Management',
-        '✔ Integrated Payments proof storage',
-        '✔ Easy Data Export & Customized plans',
-        '✔ Manual Attendance Tracking for flexibility',
-        '✔ QR Attendance Tracking for speed & accuracy',
-        '✔ Flexible Manual Attendance Tracking',
-        '✔ Ultimate Control & Flexibility',
-        '✔ Priority Support & Customized Branding'
+        '✔ Advanced dashboard with analytics & insights',
+        '✔ Complete members management',
+        '✔ Integrated payment proof storage',
+        '✔ Easy data export & customized plans',
+        '✔ Flexible manual attendance tracking',
+        '✔ QR code attendance for speed & accuracy',
+        '✔ Total control & operational flexibility',
+        '✔ Priority support via Whatsapp',
+        '✔ Payment Reminder sms / calls To Members'
       ]
     }
   ];
+  
   
   
 
@@ -148,6 +151,7 @@ planAccessPoints = {
     'Members',
     'Export Data',
     'Manual Attendance Tracking',
+    'Qr Attendance Tracking',
     'Plans',
     'Subscription',
   ],
@@ -548,8 +552,7 @@ max-width: 950px;  /* ensures background fits cards only */
         const countdownEl = document.getElementById('countdown') as HTMLElement;
         const emailNote = document.getElementById('emailNote') as HTMLElement;
     
-        // Handle card click
-        // Handle card click
+// Handle card click
 planCards.forEach(card => {
   card.addEventListener('click', () => {
     const name = card.getAttribute('data-name');
@@ -557,26 +560,38 @@ planCards.forEach(card => {
     const quarterly = Number(card.getAttribute('data-quarterly'));
     const yearly = Number(card.getAttribute('data-yearly'));
 
-    if (!name) return; // safety check
+    if (!name) return;
 
-    // Highlight selected card
+    // Reset borders
     planCards.forEach(c => (c as HTMLElement).style.borderColor = '#333');
     (card as HTMLElement).style.borderColor = '#ffcc00';
 
-    // Populate dropdown with rates and discount info
+    // Populate dropdown
     selectEl.innerHTML = `
       <option value="${monthly}" data-type="monthly" data-name="${name}">₹${monthly.toLocaleString()} / Month</option>
       <option value="${quarterly}" data-type="quarterly" data-name="${name}">₹${quarterly.toLocaleString()} / 3 Months (10% off)</option>
       <option value="${yearly}" data-type="yearly" data-name="${name}">₹${yearly.toLocaleString()} / Year (20% off)</option>
     `;
 
-    // Update filtered menus based on selected plan
+    // ✅ Default to monthly (₹10000)
+    selectEl.value = monthly.toString();
+
+    // Update privileges
     const allowedMenus = this.planAccessPoints[name as keyof typeof this.planAccessPoints] || [];
     this.filteredMenus = this.availableMenus.filter(menu => allowedMenus.includes(menu.label));
-
-    console.log(`Menus for ${name}:`, this.filteredMenus); // Optional: bind to UI
   });
 });
+
+// ✅ Auto-select the highlight:true plan (Best Choice - 10000 monthly)
+const highlightedPlan = this.subscriptionPlans.find(p => p.highlight);
+if (highlightedPlan) {
+  const highlightedCard = Array.from(planCards).find(
+    c => c.getAttribute('data-name') === highlightedPlan.name
+  );
+  if (highlightedCard) {
+    (highlightedCard as HTMLElement).click(); // simulate user click
+  }
+}
 
     
         // ✅ Pay Now → Razorpay
@@ -629,7 +644,7 @@ planCards.forEach(card => {
                       }
                       localStorage.setItem('isActive', updatedRole.IsActive ? 'true' : 'false');
                       this.authService['isActiveSubject'].next(updatedRole.IsActive);
-                      this.generateReceipt(updatedRole, amount, response, planName).then(() => {
+                      this.generateReceipt(updatedRole, amount, response, planName,durationText).then(() => {
                         window.location.reload();
                       });
 
@@ -869,7 +884,7 @@ async generateUpiQr(amount: string) {
     return '';
   }
 }
-generateReceipt(updatedRole: any, amount: number, response: any, planName: string): Promise<void> {
+generateReceipt(updatedRole: any, amount: number, response: any, planName: string,  planType: string): Promise<void> {
   return new Promise((resolve) => {
     const doc = new jsPDF();
 
@@ -949,7 +964,7 @@ generateReceipt(updatedRole: any, amount: number, response: any, planName: strin
       };
 
       // Only required data
-      addRow('Plan Name', planName);
+      addRow('Plan Name', `${planName} - ${planType}`);
       addRow('Amount Paid', `Rs. ${amount}`);
       addRow('Payment ID', response.razorpay_payment_id);
       addRow('Order ID', response.razorpay_order_id);
