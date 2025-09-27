@@ -15,7 +15,13 @@ export interface Role {
   amountPaid?: number;
   isActive?: boolean;
   privileges: string[]; // ✅ array of menu keys
+  planName?: PlanName;         // ✅ NEW field
+  subscriptionPeriod?: string; // ✅ Monthly / Quarterly / Yearly
+  planDisplay?: string; // ✅ Add planDisplay here
+
 }
+type PlanName = 'Basic' | 'Advanced' | 'Premium';
+
 
 @Component({
   selector: 'app-admin-onboard',
@@ -25,13 +31,9 @@ export interface Role {
 })
 export class AdminOnboardComponent implements OnInit {
   constructor(private memberService: MemberService) {}
-  subscriptionOptions = [
-    { label: 'Monthly', value: 'monthly' },
-    { label: '3 Months', value: '3months' },
-    { label: '6 Months', value: '6months' },
-    { label: 'Yearly', value: 'yearly' }
-  ];
-  availableMenus = [
+  selectedPlan: any = null;
+  selectedSubscription: string = 'monthly';  
+   availableMenus = [
     { label: 'Dashboard', value: 'dashboard' },
     { label: 'Members', value: 'members' },
     { label: 'Plans', value: 'plans' },
@@ -44,7 +46,60 @@ export class AdminOnboardComponent implements OnInit {
    
   ];
   
-  selectedSubscription: string = 'monthly';  // default
+  planAccessPoints: Record<PlanName, string[]> = {
+    Basic: [
+      'members',
+      'export',
+      'plans',
+      'subscription'
+    ],
+    Advanced: [
+      'dashboard',
+      'members',
+      'export',
+      'manual Attendance-Tracking',
+      'Qr Attendance-Tracking',
+      'plans',
+      'subscription'
+    ],
+    Premium: [
+      'dashboard',
+      'members',
+      'plans',
+      'payments',
+      'subscription',
+      'export',
+      'Qr Attendance-Tracking',
+      'manual Attendance-Tracking'
+    ]
+  };
+  
+  // ✅ Available Plans
+  subscriptionPlans = [
+    {
+      name: 'Basic',
+      description: '🚀 Ideal for small gyms and beginners starting their journey.',
+      monthly: 7999,
+      quarterly: Math.round(7999 * 3 * 0.9),
+      yearly: Math.round(7999 * 12 * 0.8)
+    },
+    {
+      name: 'Advanced',
+      description: '🌟 Perfect for growing gyms – unlock full potential!',
+      monthly: 10000,
+      quarterly: Math.round(10000 * 3 * 0.9),
+      yearly: Math.round(10000 * 12 * 0.8)
+    },
+    {
+      name: 'Premium',
+      description: '👑 All-in-one solution for professional gyms',
+      monthly: 13000,
+      quarterly: Math.round(13000 * 3 * 0.9),
+      yearly: Math.round(13000 * 12 * 0.8)
+    }
+  ];
+
+  
   rolesList: Role[] = [];
   filteredRolesList: Role[] = [];
   showDialog: boolean = false;
@@ -69,7 +124,9 @@ export class AdminOnboardComponent implements OnInit {
     validUntil: null,
     amountPaid: 0,
     isActive: true,
-    privileges: [] // stores selected menus
+    privileges: [],
+    planName: 'Basic',            // ✅ default plan
+    subscriptionPeriod: 'monthly' // ✅ default subscription
   };
 
   availableGyms: { id: number; name: string }[] = [];
@@ -81,50 +138,98 @@ export class AdminOnboardComponent implements OnInit {
   ];
 
   ngOnInit() {
+    window.addEventListener('keydown', this.handleAltShortcuts.bind(this));
     this.loadRoles(); 
   this.setDefaultDates();  // set default Paid Date & Valid Until
   }
+  ngOnDestroy() {
+    window.removeEventListener('keydown', this.handleAltShortcuts.bind(this));
+  }
+
+  handleAltShortcuts(event: KeyboardEvent) {
+    if (!event.altKey) return; // only handle Alt + key
+  
+    switch (event.key.toLowerCase()) {
+      case 'p': // Premium
+        this.searchTerm = 'premium';
+        break;
+      case 'a': // Advanced
+        this.searchTerm = 'advanced';
+        break;
+      case 'b': // Basic
+        this.searchTerm = 'basic';
+        break;
+      case 'x': // Clear filter
+        this.searchTerm = '';
+        break;
+      default:
+        return; // do nothing for other keys
+    }
+  
+    this.filterRoles(); // trigger filtering
+  }
+  
+  
   // Set default dates based on subscription
   setDefaultDates() {
     const today = new Date();
     this.admin.paidDate = today;
-    this.calculateValidUntil(this.selectedSubscription);
+    this.calculateValidUntil(this.admin.subscriptionPeriod!);
   }
 
-  // Triggered when subscription changes
-  onSubscriptionChange(value: string) {
-    this.selectedSubscription = value;
-    this.calculateValidUntil(value);
+    // ✅ Subscription change
+  onSubscriptionChange(period: string) {
+    this.admin.subscriptionPeriod = period;
+    this.updateAmount();
+    this.calculateValidUntil(period);
   }
+  // ✅ Plan change → reset subscription to Monthly + auto privileges
+onPlanChange(planName: string) {
+  this.admin.planName = planName as PlanName;   // ✅ type-safe cast
 
-  // Calculate Valid Until date based on subscription
-  calculateValidUntil(period: string) {
-    if (!this.admin.paidDate) this.admin.paidDate = new Date();
-    const paid = new Date(this.admin.paidDate); // clone
-    const validUntil = new Date(paid);
+  this.admin.subscriptionPeriod = 'monthly'; 
 
-    switch (period) {
-      case 'monthly':
-        validUntil.setMonth(validUntil.getMonth() + 1);
-        break;
-      case '3months':
-        validUntil.setMonth(validUntil.getMonth() + 3);
-        break;
-      case '6months':
-        validUntil.setMonth(validUntil.getMonth() + 6);
-        break;
-      case 'yearly':
-        validUntil.setFullYear(validUntil.getFullYear() + 1);
-        break;
+  this.updateAmount();
+  this.calculateValidUntil('monthly');
+
+  // ✅ Auto-select privileges based on plan
+  if (this.admin.planName && this.planAccessPoints[this.admin.planName as PlanName]) {
+    this.admin.privileges = [...this.planAccessPoints[this.admin.planName as PlanName]];
+  }
+  else {
+    this.admin.privileges = [];
+  }
+}
+
+  // ✅ Update amount
+  updateAmount() {
+    const plan = this.subscriptionPlans.find(p => p.name === this.admin.planName);
+    if (!plan) return;
+
+    switch (this.admin.subscriptionPeriod) {
+      case 'monthly': this.admin.amountPaid = plan.monthly; break;
+      case 'quarterly': this.admin.amountPaid = plan.quarterly; break;
+      case 'yearly': this.admin.amountPaid = plan.yearly; break;
     }
-
-    this.admin.validUntil = validUntil;
   }
+  
+  
+ // ✅ Calculate Valid Until
+ calculateValidUntil(period: string) {
+  if (!this.admin.paidDate) this.admin.paidDate = new Date();
+  const paid = new Date(this.admin.paidDate);
+  const validUntil = new Date(paid);
 
-  // Triggered when Paid Date changes manually
+  switch (period) {
+    case 'monthly': validUntil.setMonth(validUntil.getMonth() + 1); break;
+    case 'quarterly': validUntil.setMonth(validUntil.getMonth() + 3); break;
+    case 'yearly': validUntil.setFullYear(validUntil.getFullYear() + 1); break;
+  }
+  this.admin.validUntil = validUntil;
+}
   onPaidDateChange(newDate: Date) {
     this.admin.paidDate = newDate;
-    this.calculateValidUntil(this.selectedSubscription);
+    this.calculateValidUntil(this.admin.subscriptionPeriod!);
   }
   openAddAdminDialog() {
     this.isEditMode = false;
@@ -142,6 +247,27 @@ export class AdminOnboardComponent implements OnInit {
     // Determine if gym is from dropdown or manual entry
     this.manualGymEntry = !this.availableGyms.some(g => g.id === role.gymId);
   
+    // Determine plan and subscription based on amountPaid
+    let planName: PlanName = 'Basic';
+    let subscriptionPeriod: 'monthly' | 'quarterly' | 'yearly' = 'monthly';
+  
+    for (const plan of this.subscriptionPlans) {
+      if (role.amountPaid === plan.monthly) {
+        planName = plan.name as PlanName;
+        subscriptionPeriod = 'monthly';
+        break;
+      } else if (role.amountPaid === plan.quarterly) {
+        planName = plan.name as PlanName;
+        subscriptionPeriod = 'quarterly';
+        break;
+      } else if (role.amountPaid === plan.yearly) {
+        planName = plan.name as PlanName;
+        subscriptionPeriod = 'yearly';
+        break;
+      }
+    }
+  
+    // Populate admin object
     this.admin = {
       roleId: role.roleId,
       roleName: role.roleName,
@@ -154,14 +280,16 @@ export class AdminOnboardComponent implements OnInit {
       validUntil: role.validUntil ? new Date(role.validUntil) : null,
       amountPaid: role.amountPaid ?? 0,
       isActive: role.isActive ?? true,
-      privileges: role.privileges ?? [] // ✅ keep DB privileges when editing
+      planName: planName,
+      subscriptionPeriod: subscriptionPeriod,
+      privileges: role.privileges?.length
+        ? [...role.privileges]   // ✅ use privileges from role
+        : [...this.planAccessPoints[planName]] // fallback to plan
     };
   
-    // Make sure the subscription dropdown shows correct period
-    
-    
     this.showDialog = true;
   }
+  
   
 
   onGymChange(selectedGymId: number) {
@@ -262,22 +390,31 @@ export class AdminOnboardComponent implements OnInit {
     }
   }
 
-  private resetAdmin() {
-    this.admin = {
-      roleId: 0,
-      roleName: 'admin',
-      userName: '',
-      userEmail: '',
-      password: '',
-      gymId: null,
-      gymName: '',
-      paidDate: null,
-      validUntil: null,
-      amountPaid: 0,
-      isActive: true,
-      privileges: [] // stores selected menus
-    };
-  }
+// ✅ Reset admin with defaults + auto privileges
+private resetAdmin() {
+  this.admin = {
+    roleId: 0,
+    roleName: 'admin',
+    userName: '',
+    userEmail: '',
+    password: '',
+    gymId: null,
+    gymName: '',
+    paidDate: null,
+    validUntil: null,
+    amountPaid: 0,
+    isActive: true,
+    privileges: [],      // will be set below
+    planName: 'Basic',   // ✅ default plan
+    subscriptionPeriod: 'monthly'
+  };
+
+  this.setDefaultDates();
+  this.updateAmount();
+
+  // ✅ Default privileges for Basic plan
+  this.admin.privileges = [...this.planAccessPoints['Basic']];
+}
 
   private handleError(err: any, fallbackMessage: string) {
     let messages: string[] = [];
@@ -311,27 +448,54 @@ export class AdminOnboardComponent implements OnInit {
       next: (data: any[]) => {
         this.processGyms(data);
   
-        this.rolesList = data.map(r => ({
-          roleId: r.RoleId,
-          roleName: r.RoleName,
-          userName: r.UserName,
-          userEmail: r.UserEmail,
-          password: r.Password,
-          gymId: r.GymId,
-          gymName: r.GymName,
-          paidDate: r.PaidDate ? new Date(r.PaidDate) : null,
-          validUntil: r.ValidUntil ? new Date(r.ValidUntil) : null,
-          amountPaid: r.AmountPaid ?? 0,
-          isActive: r.IsActive ?? true,
-          privileges: r.Privileges ?? [] // ✅ keep DB privileges if available
-        }))
-        // ✅ sort by RoleId ascending
-        .sort((a, b) => a.roleId - b.roleId);
-  
+        this.rolesList = data.map(r => {
+          const role: Role = {
+            roleId: r.RoleId,
+            roleName: r.RoleName,
+            userName: r.UserName,
+            userEmail: r.UserEmail,
+            password: r.Password,
+            gymId: r.GymId,
+            gymName: r.GymName,
+            paidDate: r.PaidDate ? new Date(r.PaidDate) : null,
+            validUntil: r.ValidUntil ? new Date(r.ValidUntil) : null,
+            amountPaid: r.AmountPaid ?? 0,
+            isActive: r.IsActive ?? true,
+            privileges: r.Privileges ?? [],
+            planDisplay: this.getPlanDisplay(r.AmountPaid ?? 0) // ✅ set it here
+          };
+        
+          return role;
+        }).sort((a, b) => a.roleId - b.roleId);
+        
         this.filteredRolesList = [...this.rolesList];
       },
       error: err => console.error('Failed to fetch roles', err)
     });
+  }
+  
+  getPlanClass(plan?: string): string {
+    if (!plan) return '';
+    if (plan.startsWith('Premium')) return 'plan-premium';
+    if (plan.startsWith('Advanced')) return 'plan-advanced';
+    if (plan.startsWith('Basic')) return 'plan-basic';
+    return '';
+  }
+  
+  
+  
+  getPlanDisplay(amount: number): string {
+    const plan = this.subscriptionPlans.find(p => 
+      p.monthly === amount || p.quarterly === amount || p.yearly === amount
+    );
+  
+    if (!plan) return 'Unknown';
+  
+    if (plan.monthly === amount) return `${plan.name} - Monthly`;
+    if (plan.quarterly === amount) return `${plan.name} - Quarterly`;
+    if (plan.yearly === amount) return `${plan.name} - Yearly`;
+  
+    return 'Unknown';
   }
   
   getStatus(validUntil: Date): string {
@@ -377,12 +541,15 @@ export class AdminOnboardComponent implements OnInit {
       this.filteredRolesList = [...this.rolesList];
       return;
     }
+  
     this.filteredRolesList = this.rolesList.filter(role =>
       role.roleName?.toLowerCase().includes(term) ||
       role.userName?.toLowerCase().includes(term) ||
       role.userEmail?.toLowerCase().includes(term) ||
       (role.gymId !== null ? role.gymId.toString().includes(term) : false) ||
-      role.gymName?.toLowerCase().includes(term)
+      role.gymName?.toLowerCase().includes(term) ||
+      role.planDisplay?.toLowerCase().includes(term) // ✅ search by plan
     );
   }
+  
 }

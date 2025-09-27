@@ -97,6 +97,73 @@
 .mt-3 {
   margin-top: 1rem;
 }
+/* Premium: Golden pulse */
+@keyframes premiumPulse {
+  0% { box-shadow: 0 0 8px rgba(255, 215, 0, 0.6); transform: scale(1); }
+  50% { box-shadow: 0 0 16px rgba(255, 215, 0, 0.9); transform: scale(1.05); }
+  100% { box-shadow: 0 0 8px rgba(255, 215, 0, 0.6); transform: scale(1); }
+}
+
+/* Advanced: Subtle pulse */
+@keyframes advancedPulse {
+  0% { box-shadow: 0 0 4px rgba(33, 150, 243, 0.4); transform: scale(1); }
+  50% { box-shadow: 0 0 8px rgba(33, 150, 243, 0.6); transform: scale(1.02); }
+  100% { box-shadow: 0 0 4px rgba(33, 150, 243, 0.4); transform: scale(1); }
+}
+
+.plan-premium {
+  color: #fff;
+  background: linear-gradient(45deg, #FFD700, #FFA500);
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-weight: bold;
+  text-transform: uppercase;
+  animation: premiumPulse 2s infinite;
+  display: inline-block;
+  transition: transform 0.3s;
+}
+
+.plan-advanced {
+  color: #fff;
+  background: linear-gradient(45deg, #2196f3, #21cbf3);
+  padding: 4px 12px;
+  border-radius: 14px;
+  font-weight: 600;
+  animation: advancedPulse 2.5s infinite;
+  display: inline-block;
+  transition: transform 0.3s;
+}
+
+.plan-basic {
+  color: #fff;
+  background: linear-gradient(45deg, #4b4d4e, #344346);
+  padding: 4px 12px;
+  display: inline-block;
+  border-radius: 14px;
+  font-weight: normal;
+}
+.shortcut-toast {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: rgba(0,0,0,0.85);
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  z-index: 9999;
+  opacity: 0;
+  animation: fadeInOut 1.5s forwards;
+}
+
+@keyframes fadeInOut {
+  0% { opacity: 0; transform: translateY(-10px); }
+  10% { opacity: 1; transform: translateY(0); }
+  90% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-10px); }
+}
+
 
 /* ================================
    ✅ DataTable
