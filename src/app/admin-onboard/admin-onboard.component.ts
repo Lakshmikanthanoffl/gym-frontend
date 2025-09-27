@@ -1,7 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { MemberService } from '../services/member.service'; 
 import Swal from 'sweetalert2';
-
+// For styling support
+import * as XLSXStyle from 'xlsx-js-style';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+// For normal read/write operations
+import * as XLSX from 'xlsx';
 export interface Role {
   roleId: number;
   roleName: string;
@@ -128,7 +133,22 @@ export class AdminOnboardComponent implements OnInit {
     planName: 'Basic',            // ✅ default plan
     subscriptionPeriod: 'monthly' // ✅ default subscription
   };
-
+  exportItems = [
+    {
+      label: 'Export as Excel',
+      icon: 'assets/icons/excel.png', // custom PNG icon
+      command: () => {
+        this.exportExcelAdmin();
+      }
+    },
+    {
+      label: 'Export as PDF',
+      icon: 'assets/icons/pdf.png', // custom PNG icon
+      command: () => {
+        this.exportPdfAdmin();
+      }
+    }
+  ];
   availableGyms: { id: number; name: string }[] = [];
 
   rolesDropdown = [
@@ -551,5 +571,172 @@ private resetAdmin() {
       role.planDisplay?.toLowerCase().includes(term) // ✅ search by plan
     );
   }
+  exportExcelAdmin() {
+    const columns = [
+      { header: 'Role ID', field: 'roleId' },
+      { header: 'Role Name', field: 'roleName' },
+      { header: 'Username', field: 'userName' },
+      { header: 'Email', field: 'userEmail' },
+      { header: 'Gym ID', field: 'gymId' },
+      { header: 'Gym Name', field: 'gymName' },
+      { header: 'Valid Until', field: 'validUntil' },
+      { header: 'Plan', field: 'planDisplay' },
+      { header: 'Status', field: 'status' }
+    ];
+  
+    // Format data rows
+    const data = this.filteredRolesList.map(r => {
+      const row: any = {};
+      columns.forEach(col => {
+        let value = r[col.field as keyof typeof r];
+  
+        // Type-safe date conversion
+        if (col.field === 'validUntil') {
+          if (value && (typeof value === 'string' || typeof value === 'number' || value instanceof Date)) {
+            const d = new Date(value);
+            value = `${('0' + d.getDate()).slice(-2)}/${('0' + (d.getMonth() + 1)).slice(-2)}/${d.getFullYear()}`;
+          } else {
+            value = '';
+          }
+        }
+  
+        if (col.field === 'status') {
+          value = r.validUntil ? this.getStatus(r.validUntil) : 'Unknown';
+        }
+  
+        row[col.header] = value;
+      });
+      return row;
+    });
+  
+    const ws: XLSXStyle.WorkSheet = XLSXStyle.utils.json_to_sheet([], { skipHeader: true });
+  
+    // Row 1: Title
+    XLSXStyle.utils.sheet_add_aoa(ws, [['Zyct - Admin Role']], { origin: 'A1' });
+    ws['A1'].s = {
+      font: { bold: true, sz: 16, color: { rgb: '000000' } },
+      alignment: { horizontal: 'left', vertical: 'center' }
+    };
+  
+    // Row 2: Timestamp
+    const timestamp = new Date();
+    const formattedTimestamp = `${('0' + timestamp.getDate()).slice(-2)}/${('0' + (timestamp.getMonth() + 1)).slice(-2)}/${timestamp.getFullYear()} ${('0' + timestamp.getHours()).slice(-2)}:${('0' + timestamp.getMinutes()).slice(-2)}`;
+    XLSXStyle.utils.sheet_add_aoa(ws, [[`Generated on: ${formattedTimestamp}`]], { origin: 'A2' });
+    ws['A2'].s = {
+      font: { bold: false, sz: 12, color: { rgb: '444444' } },
+      alignment: { horizontal: 'left', vertical: 'center' }
+    };
+  
+    // Row 3: Headers
+    XLSXStyle.utils.sheet_add_aoa(ws, [columns.map(c => c.header)], { origin: 'A3' });
+    columns.forEach((col, index) => {
+      const cellRef = XLSX.utils.encode_cell({ r: 2, c: index }); // 0-based, so row 3 = index 2
+      if (ws[cellRef]) {
+        ws[cellRef].s = {
+          fill: { fgColor: { rgb: '282828' } },
+          font: { color: { rgb: 'FFFFFF' }, bold: true, sz: 12 },
+          alignment: { horizontal: 'center', vertical: 'center', wrapText: true }
+        };
+      }
+    });
+  
+    // Row 4+: Data
+    XLSXStyle.utils.sheet_add_json(ws, data, { skipHeader: true, origin: 3 });
+  
+    // Column widths
+    ws['!cols'] = columns.map(col => ({ wch: col.header.length + 5 }));
+  
+    // Row styles for data
+    data.forEach((_, rowIndex) => {
+      columns.forEach((_, colIndex) => {
+        const cellRef = XLSX.utils.encode_cell({ r: rowIndex + 3, c: colIndex }); // rowIndex + 3 because data starts at row 4
+        if (ws[cellRef]) {
+          ws[cellRef].s = {
+            alignment: { horizontal: 'center', vertical: 'center', wrapText: true },
+            font: { color: { rgb: '000000' }, sz: 10 }
+          };
+        }
+      });
+    });
+  
+    // Create workbook and save
+    const wb: XLSXStyle.WorkBook = XLSXStyle.utils.book_new();
+    XLSXStyle.utils.book_append_sheet(wb, ws, 'AdminRoles');
+    XLSXStyle.writeFile(wb, `Zyct - AdminRoles_${formattedTimestamp.replace(/[:/ ]/g, '-')}.xlsx`);
+  }
+  
+  
+  
+  exportPdfAdmin() {
+    const headers = [
+      'Role ID', 'Role Name', 'Username', 'Email', 'Gym ID', 'Gym Name',
+      'Valid Until', 'Plan', 'Status'
+    ];
+  
+    const data = this.filteredRolesList.map(r => [
+      r.roleId,
+      r.roleName,
+      r.userName,
+      r.userEmail,
+      r.gymId,
+      r.gymName,
+      r.validUntil
+        ? (typeof r.validUntil === 'string' || typeof r.validUntil === 'number' || r.validUntil instanceof Date
+            ? (() => { 
+                const d = new Date(r.validUntil);
+                return `${('0'+d.getDate()).slice(-2)}/${('0'+(d.getMonth()+1)).slice(-2)}/${d.getFullYear()}`;
+              })()
+            : '')
+        : '',
+      r.planDisplay || '',
+      r.validUntil ? this.getStatus(r.validUntil) : 'Unknown'
+    ]);
+  
+    const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'A4' });
+  
+    // Add logo before title
+    const img = new Image();
+    img.src = 'assets/images/favicon.png'; // relative path from src/assets
+    img.onload = () => {
+      doc.addImage(img, 'PNG', 40, 20, 30, 30); // X=40, Y=20, width=30, height=30
+  
+      // Title next to logo
+      doc.setFontSize(16);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(0, 0, 0);
+      doc.text('Zyct - Admin Roles', 80, 40); // shift right to leave space for logo
+  
+      // Timestamp
+      const timestamp = new Date();
+      const formattedTimestamp = `${('0'+timestamp.getDate()).slice(-2)}/${('0'+(timestamp.getMonth()+1)).slice(-2)}/${timestamp.getFullYear()} ${('0'+timestamp.getHours()).slice(-2)}:${('0'+timestamp.getMinutes()).slice(-2)}`;
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(80, 80, 80);
+      doc.text(`Generated on: ${formattedTimestamp}`, 80, 55);
+  
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageMargin = 40;
+      const usablePageWidth = pageWidth - pageMargin * 2;
+      const colWidth = usablePageWidth / headers.length;
+  
+      // Table
+      autoTable(doc, {
+        head: [headers],
+        body: data,
+        theme: 'grid',
+        startY: 70, // leave space for logo + title + timestamp
+        tableWidth: 'auto',
+        margin: { left: pageMargin, right: pageMargin },
+        styles: { fontSize: 8, cellWidth: 'wrap', valign: 'middle', halign: 'center' },
+        headStyles: { fillColor: [40, 40, 40], textColor: [255, 255, 255], fontSize: 9, halign: 'center' },
+        columnStyles: headers.reduce((acc, _, idx) => { acc[idx] = { cellWidth: colWidth }; return acc; }, {} as any)
+      });
+  
+      doc.save(`Zyct - AdminRoles_${formattedTimestamp.replace(/[:/ ]/g, '-')}.pdf`);
+    };
+  }
+  
+  
+  
   
 }

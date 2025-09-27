@@ -14,8 +14,8 @@ export class PlansComponent implements OnInit {
     { gymId: '679', gymName: 'fitgyms', name: 'Quarterly', price: 1500, duration: '3 Months', currency: '₹', features: [ { text: "Access to Gym Equipment", available: true }, { text: "3 Personal Training Sessions", available: true }, { text: "Group Classes (Yoga/Zumba)", available: true } ] },
   
     // New fitgyms plans
-    { gymId: '679', gymName: 'fitgyms', name: 'Monthly', price: 650, duration: '1 Month', currency: '₹', features: [ { text: "Access to Gym Equipment", available: true }, { text: "2 Personal Training Sessions", available: true } ] },
-    { gymId: '679', gymName: 'fitgyms', name: 'Quarterly', price: 1700, duration: '3 Months', currency: '₹', features: [ { text: "Access to Gym Equipment", available: true }, { text: "4 Personal Training Sessions", available: true } ] },
+    { gymId: '1234', gymName: 'Vetrigym', name: 'Monthly', price: 650, duration: '1 Month', currency: '₹', features: [ { text: "Access to Gym Equipment", available: true }, { text: "2 Personal Training Sessions", available: true } ] },
+    { gymId: '1234', gymName: 'Vetrigym', name: 'Quarterly', price: 1700, duration: '3 Months', currency: '₹', features: [ { text: "Access to Gym Equipment", available: true }, { text: "4 Personal Training Sessions", available: true } ] },
 
      // New fitgyms plans
      { gymId: '356', gymName: 'sharu gym', name: 'Monthly', price: 650, duration: '1 Month', currency: '₹', features: [ { text: "Access to Gym Equipment", available: true }, { text: "2 Personal Training Sessions", available: true } ] },
