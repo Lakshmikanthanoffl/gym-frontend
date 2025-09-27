@@ -1,31 +1,54 @@
 <div class="table-wrapper">
   <!-- Page Header -->
-  <div class="page-header d-flex align-items-center justify-content-between mb-3">
-    <!-- Search input -->
-    <div class="p-inputgroup search-bar" style="flex: 0 0 400px;">
-      <span class="p-inputgroup-addon">
-        <i class="pi pi-search"></i>
-      </span>
-      <input
-        type="text"
-        pInputText
-        placeholder="Search by role, username, email or gym"
-        [(ngModel)]="searchTerm"
-        (ngModelChange)="filterRoles()"
-        class="w-full"
-      />
-    </div>
-
-    <!-- Add Admin button -->
-    <button pButton 
-            type="button" 
-            label="Add Admin" 
-            icon="pi pi-plus" 
-            class="p-button-rounded p-button-success p-button-outlined px-4 py-2 shadow-sm"
-            style="border-radius: 30px; font-weight: 500;"
-            (click)="openAddAdminDialog()">
-    </button>
+<div class="page-header d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+  
+  <!-- Search input -->
+  <div class="p-inputgroup search-bar" style="flex: 1 1 300px; max-width: 400px;">
+    <span class="p-inputgroup-addon">
+      <i class="pi pi-search"></i>
+    </span>
+    <input
+      type="text"
+      pInputText
+      placeholder="Search by role, username, email, gym, or plan"
+      [(ngModel)]="searchTerm"
+      (ngModelChange)="filterRoles()"
+      class="w-full"
+    />
   </div>
+
+  <!-- Buttons -->
+  <div class="d-flex align-items-center gap-2 flex-wrap">
+    <!-- Add Admin Button -->
+    <button 
+      pButton
+      type="button"
+      label="Add Admin"
+      icon="pi pi-plus"
+      class="p-button-success p-button-rounded p-button-outlined px-4 py-2 shadow-sm"
+      style="border-radius: 30px; font-weight: 500;"
+      (click)="openAddAdminDialog()">
+    </button>
+
+    <!-- Export Button -->
+    <button 
+      pButton
+      type="button"
+      label="Export"
+      icon="pi pi-download"
+      class="p-button-info p-button-rounded p-button px-4 py-2 shadow-sm"
+      style="border-radius: 30px; font-weight: 500;"
+      (click)="menu.toggle($event)">
+    </button>
+    <p-menu 
+      #menu
+      [popup]="true"
+      [model]="exportItems"
+      styleClass="dark-menu">
+    </p-menu>
+  </div>
+
+</div>
 
   <!-- Reusable Dialog -->
   <p-dialog 
