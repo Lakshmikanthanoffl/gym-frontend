@@ -98,7 +98,8 @@ export class HeaderComponent implements OnInit {
         '✔ Manual attendance tracking for flexibility',
         '✔ QR code attendance tracking for speed & accuracy',
         '✔ Complete subscription control',
-        '✔ Priority notifications & reminders'
+        '✔ Priority notifications & reminders',
+        '✔ Payment Reminder sms , calls To Members'
       ]
     },
     {
@@ -117,7 +118,7 @@ export class HeaderComponent implements OnInit {
         '✔ QR code attendance for speed & accuracy',
         '✔ Total control & operational flexibility',
         '✔ Priority support via Whatsapp',
-        '✔ Payment Reminder sms / calls To Members'
+        '✔ Payment Reminder sms , calls and emails To Members'
       ]
     }
   ];
