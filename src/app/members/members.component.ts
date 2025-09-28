@@ -398,14 +398,25 @@ stopSiren(): void {
   }
 }
   
-   // Start the camera only when needed
-   startCamera(): void {
-    this.videoConstraints = {
-      facingMode: this.isMobile
-        ? (this.isFrontCamera ? 'user' : 'environment')
-        : undefined
-    };
-  }
+// can use for the both side cam in mobile 
+
+  //  // Start the camera only when needed    
+  //  startCamera(): void {
+  //   this.videoConstraints = {
+  //     facingMode: this.isMobile
+  //       ? (this.isFrontCamera ? 'user' : 'environment')
+  //       : undefined
+  //   };
+  // }
+
+
+  // Start the camera — always use back camera
+startCamera(): void {
+  this.videoConstraints = {
+    facingMode: 'environment' // back camera only
+  };
+}
+
    // 📌 Close Scanner with Password
    confirmCloseScanner(): void {
     Swal.fire({
