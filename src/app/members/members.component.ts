@@ -34,6 +34,8 @@ export interface SubscriptionOption {
 export class MembersComponent implements OnInit{
   qrDialogVisible = false;
   scannerOpen = false;
+  onFullscreenChangeBound: (() => void) | null = null;
+
   passwordRequired = false;
   @ViewChild('tableWrapper') tableWrapper!: ElementRef;
   @ViewChild('scanner')   scanner: ZXingScannerComponent | undefined; 
@@ -64,6 +66,8 @@ export class MembersComponent implements OnInit{
   gymname!: string | null;
   selectedMonth: number = new Date().getMonth(); // default current month
   currentYear: number = new Date().getFullYear();
+  refreshHandlerBound!: (event: BeforeUnloadEvent) => void;
+
   constructor(private memberService: MemberService,private authService: AuthService) {
      // Subscribe to privileges so we always have the latest
      this.authService.privileges$.subscribe(privs => {
@@ -140,7 +144,8 @@ isAdmin: boolean=false;
     gymId: undefined,         // ✅ initialize
     gymName: undefined        // ✅ initialize
   };
-  
+  sirenAudio: HTMLAudioElement | null = null; // class-level variable
+  scannerClosed = false; // track if scanner was closed already
   
   subscriptionTypes: SubscriptionOption[] = [
     //here we can add the all the subscriptions based on the gyms ( gyms id )
@@ -301,25 +306,98 @@ scannerActive: boolean = false;
   }
   openQrScanner(): void {
     this.scannerOpen = true;
-
-  const elem = document.documentElement as any;
-  if (elem.requestFullscreen) {
-    elem.requestFullscreen();
-  } else if (elem.webkitRequestFullscreen) { // Safari
-    elem.webkitRequestFullscreen();
-  } else if (elem.msRequestFullscreen) { // IE11
-    elem.msRequestFullscreen();
-  }
-  window.addEventListener('touchstart', this.disablePull, { passive: false });
-  window.addEventListener('touchmove', this.disablePull, { passive: false });
-    this.scannerOpen = true;
-    document.body.style.overscrollBehavior = 'none'; // disables pull-to-refresh
+    this.scannerClosed = false;
+  
+    const elem = document.documentElement as any;
+    if (elem.requestFullscreen) {
+      elem.requestFullscreen();
+    } else if (elem.webkitRequestFullscreen) {
+      elem.webkitRequestFullscreen();
+    } else if (elem.msRequestFullscreen) {
+      elem.msRequestFullscreen();
+    }
+  
+    
+    // Disable pull-to-refresh
+    window.addEventListener('touchstart', this.disablePull, { passive: false });
+    window.addEventListener('touchmove', this.disablePull, { passive: false });
+    document.body.style.overscrollBehavior = 'none';
+  
     this.disableRefresh();
+    this.preventRefresh();
+  
     this.scannerActive = true;
-  this.preventRefresh();
     this.qrScannerDialogVisible = true;
     this.startCamera();
+  
+    // Watch ESC key
+    window.addEventListener("keydown", this.onKeyDown.bind(this));
+  
+    // ✅ Always remove first to avoid duplicates
+    if (this.onFullscreenChangeBound) {
+      document.removeEventListener("fullscreenchange", this.onFullscreenChangeBound);
+    }
+  
+    this.onFullscreenChangeBound = this.onFullscreenChange.bind(this);
+    document.addEventListener("fullscreenchange", this.onFullscreenChangeBound);
+
+
+        // --- refresh handling
+        if (this.refreshHandlerBound) {
+          window.removeEventListener("beforeunload", this.refreshHandlerBound);
+        }
+        this.refreshHandlerBound = this.onBeforeUnload.bind(this);
+        window.addEventListener("beforeunload", this.refreshHandlerBound);
+    
   }
+  
+  // 🚨 Play Siren
+  private playSiren(): void {
+    if (!this.sirenAudio) {
+      this.sirenAudio = new Audio("assets/sounds/siren_x.mp3");
+      this.sirenAudio.loop = true;
+      this.sirenAudio.play().catch(err => console.warn("Audio play blocked:", err));
+    }
+  }
+  onKeyDown(event: KeyboardEvent): void {
+    if (event.key === "Escape") {
+      // If scanner should also close, call confirmCloseScanner()
+      // But don’t play sound here — fullscreenchange will handle it
+    }
+  }
+  
+  // 📌 Fullscreen Exit
+  onFullscreenChange(): void {
+    if (!document.fullscreenElement && !this.scannerClosed) {
+      this.playSiren();
+      this.confirmCloseScanner();
+    }
+  }
+  // 📌 Refresh/Unload Attempt
+  onBeforeUnload(event: BeforeUnloadEvent): void {
+    if (!this.scannerClosed) {
+      this.playSiren();
+      event.preventDefault();
+      event.returnValue = ''; // required for Chrome
+      // ⚠️ Will show browser native confirm dialog
+      // If user cancels, page won’t reload → siren keeps playing
+      // so we trigger SweetAlert password popup shortly after
+      setTimeout(() => {
+        if (!this.scannerClosed) {
+          this.confirmCloseScanner();
+        }
+      }, 500);
+    }
+  }
+  // Function to stop siren
+stopSiren(): void {
+  if (this.sirenAudio) {
+    this.sirenAudio.pause();
+    this.sirenAudio.currentTime = 0; // reset to start
+    this.sirenAudio = null;
+  }
+}
+  
    // Start the camera only when needed
    startCamera(): void {
     this.videoConstraints = {
@@ -328,7 +406,8 @@ scannerActive: boolean = false;
         : undefined
     };
   }
-  confirmCloseScanner(): void {
+   // 📌 Close Scanner with Password
+   confirmCloseScanner(): void {
     Swal.fire({
       title: 'Close Scanner?',
       text: 'Enter password to close the QR scanner',
@@ -339,42 +418,48 @@ scannerActive: boolean = false;
         autocapitalize: 'off',
         autocomplete: 'new-password'
       },
-      background: '#1e1e1e', // dark background
-      color: '#fff',         // white text
+      background: '#1e1e1e',
+      color: '#fff',
       showCancelButton: true,
       confirmButtonText: 'Confirm',
       cancelButtonText: 'Cancel',
       confirmButtonColor: '#3085d6',
       cancelButtonColor: '#d33',
       inputValidator: (value) => {
-        if (!value) {
-          return 'Password is required!';
-        }
+        if (!value) return 'Password is required!';
         return null;
       }
     }).then((result) => {
       if (result.isConfirmed) {
         const enteredPassword = result.value;
-        const correctPassword = 'admin2@A'; // 🔒 set your own password here or fetch dynamically
-  
+        const correctPassword = 'admin2@A'; // 🔒 your password
+
         if (enteredPassword === correctPassword) {
+          // ✅ Close scanner & cleanup
+          this.stopSiren();
           this.qrScannerDialogVisible = false;
           this.scannerActive = false;
           this.scannerOpen = false;
+          this.scannerClosed = true;
 
-  if (document.exitFullscreen) {
-    document.exitFullscreen();
-  } else if ((document as any).webkitExitFullscreen) {
-    (document as any).webkitExitFullscreen();
-  } else if ((document as any).msExitFullscreen) {
-    (document as any).msExitFullscreen();
-  }
-  window.removeEventListener('touchstart', this.disablePull);
-  window.removeEventListener('touchmove', this.disablePull);
-  this.allowRefresh();
-  document.body.style.overscrollBehavior = 'auto'; // restore
-          this.enableRefresh();
+          if (document.exitFullscreen) {
+            document.exitFullscreen();
+          } else if ((document as any).webkitExitFullscreen) {
+            (document as any).webkitExitFullscreen();
+          } else if ((document as any).msExitFullscreen) {
+            (document as any).msExitFullscreen();
+          }
+
+          // cleanup listeners
+          if (this.onFullscreenChangeBound) {
+            document.removeEventListener("fullscreenchange", this.onFullscreenChangeBound);
+          }
+          if (this.refreshHandlerBound) {
+            window.removeEventListener("beforeunload", this.refreshHandlerBound);
+          }
+
           this.closeCamera();
+
           Swal.fire({
             icon: 'success',
             title: 'Scanner Closed',
@@ -396,7 +481,6 @@ scannerActive: boolean = false;
       }
     });
   }
-  
   disablePull(event: TouchEvent) {
     if (this.scannerOpen && event.touches.length === 1 && event.touches[0].clientY < 50) {
       event.preventDefault(); // Prevent pull-to-refresh
