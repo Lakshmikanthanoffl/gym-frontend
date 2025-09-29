@@ -4,11 +4,13 @@ import { MemberService, Payment } from '../services/member.service';
 import { AuthService } from '../services/auth.service';
 import { finalize } from 'rxjs/operators';
 import Swal from 'sweetalert2';
-interface SubscriptionOption {
+import { Member } from '../models/member.model';
+export interface SubscriptionOption {
   label: string;
   value: string;
   period: string;
   price: number;
+  gymId?: number;
 }
 @Component({
   selector: 'app-payments',
@@ -19,6 +21,9 @@ interface SubscriptionOption {
 export class PaymentsComponent implements OnInit {
   paymentRecords: Payment[] = [];
   loading: boolean = false;
+  // For autocomplete search
+filteredMemberSuggestions: any[] = [];
+
   globalFilter: string = '';
   availableGyms: { id: number; name: string }[] = [];
   userrole: string | null = null;
@@ -26,13 +31,41 @@ export class PaymentsComponent implements OnInit {
   gymName!: string;
   selectedPaymentId: number | null = null;
   isEditMode: boolean = false; // <-- new 
-
+  members: Member[] = [];
+  filteredMembers: Member[] = [];
   subscriptionTypes: SubscriptionOption[] = [
-    { label: 'Monthly', value: 'Monthly', period: '1 Month', price: 600 },
-    { label: 'Quarterly', value: 'Quarterly', period: '3 Months', price: 1500 },
-    { label: 'Half-Yearly', value: 'Half-Yearly', period: '6 Months', price: 3200 },
-    { label: 'Yearly', value: 'Yearly', period: '12 Months', price: 6000 }
+    //here we can add the all the subscriptions based on the gyms ( gyms id )
+
+    // for super admin it will show all the things and mapped correspondingly 
+
+    
+    { label: 'Monthly', value: 'Monthly', period: '1 Month', price: 500, gymId: 679 },
+    { label: 'Quarterly', value: 'Quarterly', period: '3 Months', price: 1500, gymId: 679 },
+    { label: 'Half-Yearly', value: 'Half-Yearly', period: '6 Months', price: 3200, gymId: 679 },
+    { label: 'Yearly', value: 'Yearly', period: '12 Months', price: 6000, gymId: 679 },
+  
+    { label: 'Monthly', value: 'Monthly', period: '1 Month', price: 500, gymId: 6 },
+    { label: 'Quarterly', value: 'Quarterly', period: '3 Months', price: 1500, gymId: 6 },
+    { label: 'Half-Yearly', value: 'Half-Yearly', period: '6 Months', price: 3200, gymId: 6 },
+    { label: 'Yearly', value: 'Yearly', period: '12 Months', price: 6000, gymId: 6 },
+
+    { label: 'Monthly', value: 'Monthly', period: '1 Month', price: 500, gymId: 356 },
+    { label: 'Quarterly', value: 'Quarterly', period: '3 Months', price: 1500, gymId: 356 },
+    { label: 'Half-Yearly', value: 'Half-Yearly', period: '6 Months', price: 3200, gymId: 356 },
+    { label: 'Yearly', value: 'Yearly', period: '12 Months', price: 6000, gymId: 356 },
+
+
+    { label: 'Monthly', value: 'Monthly', period: '1 Month', price: 500, gymId: 1106 },
+
+    { label: 'Monthly', value: 'Monthly', period: '1 Month', price: 800, gymId: 1234 },
+    { label: 'Quarterly', value: 'Quarterly', period: '3 Months', price: 2000, gymId: 1234 },
+    { label: 'Yearly', value: 'Yearly', period: '12 Months', price: 7000, gymId: 1234 },
+
+    { label: 'Monthly', value: 'Monthly', period: '1 Month', price: 700, gymId: 89 },
+    { label: 'Quarterly', value: 'Quarterly', period: '3 Months', price: 2000, gymId: 89 },
+    { label: 'Yearly', value: 'Yearly', period: '12 Months', price: 7000, gymId: 89 }
   ];
+  
   // Add Payment popup
   showAddDialog = false;
   paymentForm!: FormGroup;
@@ -42,11 +75,11 @@ export class PaymentsComponent implements OnInit {
   deleteDialogVisible = false;
   paymentToDelete: Payment | null = null;
   deleteConfirmationText: string = '';
-
+  filteredSubscriptionTypes: SubscriptionOption[] = [];
   constructor(
     private paymentService: MemberService,
     private authService: AuthService,
-    private fb: FormBuilder
+    private fb: FormBuilder,private memberService: MemberService
   ) {}
 
   ngOnInit(): void {
@@ -66,7 +99,84 @@ export class PaymentsComponent implements OnInit {
 
     this.loadPayments();
     this.getgymname();
+    this.loadSubscriptions(this.gymId , this.userrole == "superadmin");
+    this.fetchMembersFromAPI();
   }
+// Called when typing in the input
+searchMembers(event: any) {
+  const query = event.query.toLowerCase();
+  this.filteredMemberSuggestions = this.filteredMembers.filter(member =>
+    member.name.toLowerCase().includes(query)
+  );
+}
+  fetchMembersFromAPI() {
+    const userRole = this.userrole; // e.g., 'superadmin' or 'admin'
+    const gymId =  this.gymId ;       // set this if admin
+    const gymName = this.gymName;   // set this if admin
+  
+    if (userRole === 'superadmin') {
+      // Superadmin: fetch all members
+      this.memberService.getAllMembers().subscribe({
+        next: (data) => this.processMembers(data),
+        error: (err) => console.error('Failed to fetch members:', err),
+      });
+    } else if (userRole === 'admin') {
+      // Admin: fetch members by gym
+      this.memberService.getMembersByGym(gymId, gymName).subscribe({
+        next: (data) => this.processMembers(data),
+        error: (err) => console.error('Failed to fetch members:', err),
+      });
+    }
+  }
+
+  private processMembers(data: any[]) {
+    this.members = data.map((m: any) => ({
+      id: m.Id,
+      name: m.Name,
+      email: m.Email,
+      phone: m.Phone,
+      subscriptionType: {
+        label: m.SubscriptionType?.Label || '',
+        value: m.SubscriptionType?.Value || '',
+        period: m.SubscriptionType?.Period || '',
+        price: m.SubscriptionType?.Price || 0,
+      },
+      period: m.Period,
+      amountPaid: m.AmountPaid,
+      paidDate: new Date(m.PaidDate),
+      validUntil: new Date(m.ValidUntil),
+      gymId: m.GymId,
+      gymName: m.GymName || '',
+      attendance: m.Attendance || []   // ✅ Keep attendance from backend
+    }));
+  
+  
+  
+    this.filteredMembers = [...this.members];
+  
+    // Prepare unique gyms for the dropdown
+    const gymMap = new Map<number, string>();
+    this.members.forEach(m => {
+      if (m.gymId && m.gymName) {
+        gymMap.set(m.gymId, m.gymName);
+      }
+    });
+  
+    
+  }
+// Load subscriptions based on gym
+loadSubscriptions(gymId: number, isSuperAdmin: boolean = false) {
+  if (isSuperAdmin) {
+    this.filteredSubscriptionTypes = [...this.subscriptionTypes];
+  } else {
+    this.filteredSubscriptionTypes = this.subscriptionTypes.filter(s => s.gymId === gymId);
+  }
+
+  // Select first plan by default if exists
+  if (this.filteredSubscriptionTypes.length > 0) {
+    this.onPlanChange(this.filteredSubscriptionTypes[0].value);
+  }
+}
 
   loadPayments(): void {
     this.loading = true;
@@ -100,15 +210,18 @@ export class PaymentsComponent implements OnInit {
       screenshot: p.Screenshot
     };
   }
-  onPlanChange(selectedValue: string) {
-    const subscription = this.subscriptionTypes.find(s => s.value === selectedValue);
-    if (subscription) {
-      this.paymentForm.patchValue({ 
-        plan: subscription.value,   // stores the plan name
-        price: subscription.price   // automatically updates the price
-      });
-    }
+// Triggered on plan selection
+onPlanChange(selectedValue: string) {
+  const subscription = this.filteredSubscriptionTypes.find(s => s.value === selectedValue);
+  if (subscription) {
+    this.paymentForm.patchValue({
+      plan: subscription.value,
+      price: subscription.price,
+      period: subscription.period // optional
+    });
   }
+}
+
   openEditPaymentDialog(payment: Payment) {
     this.showAddDialog = true;
     this.isEditMode = true; // Edit mode
@@ -190,7 +303,16 @@ export class PaymentsComponent implements OnInit {
   }
   savePayment() {
     const formData = new FormData();
-    formData.append('userName', this.paymentForm.get('userName')?.value ?? '');
+  
+    const selectedMember = this.paymentForm.get('userName')?.value;
+    if (selectedMember) {
+      // If using object from autocomplete
+      formData.append('userName', selectedMember.name ?? ''); // send name
+      formData.append('userId', selectedMember.id?.toString() ?? ''); // optional: send id
+    } else {
+      formData.append('userName', '');
+    }
+  
     formData.append('plan', this.paymentForm.get('plan')?.value ?? '');
     formData.append('price', this.paymentForm.get('price')?.value ?? 0);
   
@@ -199,9 +321,9 @@ export class PaymentsComponent implements OnInit {
       formData.append('paymentDate', new Date(rawDate).toISOString());
     }
   
-     // ✅ Bind from component variables (set in onGymChange)
-      formData.append('gymId', this.gymId.toString());
-      formData.append('gymName', this.gymName);
+    formData.append('gymId', this.gymId.toString());
+    formData.append('gymName', this.gymName);
+  
     if (this.selectedFile) {
       formData.append('screenshotFile', this.selectedFile);
     }
@@ -228,9 +350,7 @@ export class PaymentsComponent implements OnInit {
       },
       error: (err) => {
         let messages: string[] = [];
-      
         if (err.error?.errors) {
-          // Flatten all error messages from backend
           messages = Object.values(err.error.errors)
             .flat()
             .map(e => String(e));
@@ -239,32 +359,20 @@ export class PaymentsComponent implements OnInit {
         } else {
           messages = ['An unexpected error occurred.'];
         }
-      
-        // 🔹 Show in SweetAlert (works if z-index fix applied)
+  
         Swal.fire({
           icon: 'error',
           title: 'Validation Error',
-          html: messages.join('<br>'), // show all errors line by line
+          html: messages.join('<br>'),
           background: '#1e1e1e',
           color: '#f5f5f5',
           confirmButtonColor: '#d63031',
-          customClass: {
-            popup: 'swal2-popup-front'
-          }
+          customClass: { popup: 'swal2-popup-front' }
         });
-      
-        // OR 🔹 Show in PrimeNG Toast (better UX with dialogs)
-        // messages.forEach(msg => {
-        //   this.messageService.add({
-        //     severity: 'error',
-        //     summary: 'Validation Error',
-        //     detail: msg
-        //   });
-        // });
       }
-      
     });
   }
+  
   
   
 

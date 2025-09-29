@@ -24,7 +24,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MonthFilterPipe } from '../month-filter.pipe'; // correct path
 import { ZXingScannerModule } from '@zxing/ngx-scanner';  // ✅ import this
-
+import { AutoCompleteModule } from 'primeng/autocomplete';
 // PrimeNG modules
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
@@ -95,6 +95,7 @@ import { BusinessModelComponent } from './pages/business-model/business-model.co
     MonthFilterPipe,  // <-- add pipe here
     FormsModule,
     ReactiveFormsModule,
+    AutoCompleteModule, 
     AccordionModule,
     MultiSelectModule,  // ✅ here
     HttpClientModule,
