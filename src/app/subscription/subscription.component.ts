@@ -435,9 +435,23 @@ if (highlightedPlan) {
                     const updatedRole = res.role;
                     Swal.fire({
                       icon: 'success',
-                      title: 'Payment Successful! Subscription updated 🎉',
-                      confirmButtonText: 'OK'
-                    }).then(() => {
+                      title: 'Payment Successful!',
+                      text: 'Your subscription has been updated successfully.',
+                      showConfirmButton: true,
+                      confirmButtonText: 'OK',
+                      confirmButtonColor: '#3085d6', // professional blue
+                      iconColor: '#28a745',          // green success icon
+                      background: '#f7f7f7',         // light gray background
+                      timer: 5000,                    // auto close after 5 seconds (optional)
+                      timerProgressBar: true,
+                      showClass: {
+                        popup: 'animate__animated animate__fadeInDown' // requires animate.css
+                      },
+                      hideClass: {
+                        popup: 'animate__animated animate__fadeOutUp'
+                      }
+                    })
+                  .then(() => {
                       if (updatedRole.ValidUntil) {
                         localStorage.setItem('validUntil', updatedRole.ValidUntil);
                         this.authService['validUntilSubject'].next(updatedRole.ValidUntil);
