@@ -82,16 +82,24 @@
     <div class="p-fluid">
   
       <div class="p-field">
-        <label>User Name</label>
-        <input pInputText formControlName="userName" />
+        <label>Member Name</label>
+        <p-autoComplete
+          formControlName="userName"
+          [suggestions]="filteredMemberSuggestions"
+          (completeMethod)="searchMembers($event)"
+          field="name"
+          [dropdown]="true"
+          placeholder="Select or type member"
+        ></p-autoComplete>
       </div>
+      
   
       <!-- Plan (Subscription Type Dropdown) -->
       <div class="p-field">
         <label for="plan" class="form-label w-40">Plan</label>
         <p-dropdown 
           id="plan"
-          [options]="subscriptionTypes"
+          [options]="filteredSubscriptionTypes"
           formControlName="plan"
           optionLabel="label"
           optionValue="value"
