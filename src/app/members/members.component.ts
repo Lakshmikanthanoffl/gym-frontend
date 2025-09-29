@@ -397,25 +397,17 @@ stopSiren(): void {
     this.sirenAudio = null;
   }
 }
-  
-// can use for the both side cam in mobile 
-
-  //  // Start the camera only when needed    
-  //  startCamera(): void {
-  //   this.videoConstraints = {
-  //     facingMode: this.isMobile
-  //       ? (this.isFrontCamera ? 'user' : 'environment')
-  //       : undefined
-  //   };
-  // }
 
 
-  // Start the camera — always use back camera
-startCamera(): void {
-  this.videoConstraints = {
-    facingMode: 'environment' // back camera only
-  };
-}
+   // Start the camera only when needed    
+   startCamera(): void {
+    this.videoConstraints = {
+      facingMode: this.isMobile
+        ? (this.isFrontCamera ? 'user' : 'environment')
+        : undefined
+    };
+  }
+
 
    // 📌 Close Scanner with Password
    confirmCloseScanner(): void {
@@ -646,16 +638,15 @@ exportExcel() {
     { header: 'Amount Paid', field: 'amountPaid' },
     { header: 'Paid Date', field: 'paidDate' },
     { header: 'Valid Until', field: 'validUntil' },
-    { header: 'Status', field: 'status' }
+    { header: 'Status', field: 'status' } // ✅ Status column
   ];
 
-  // Conditionally add Attendance column if privilege exists
-  const allowedPrivileges = [
-    'Qr Attendance-Tracking',
-    'manual Attendance-Tracking'
-  ];
-  
-  if (this.userPrivileges?.some((p: string) => allowedPrivileges.includes(p))) {
+  // Conditionally add Attendance column if superadmin or allowed privilege
+  const allowedPrivileges = ['Qr Attendance-Tracking', 'manual Attendance-Tracking'];
+  if (
+    this.userrole === 'superadmin' ||
+    this.userPrivileges?.some((p: string) => allowedPrivileges.includes(p))
+  ) {
     columns.push({ header: 'Attendance', field: 'attendance' });
   }
 
@@ -666,7 +657,7 @@ exportExcel() {
     return `${('0' + d.getDate()).slice(-2)}/${('0' + (d.getMonth() + 1)).slice(-2)}/${d.getFullYear()}`;
   };
 
-  // Format data
+  // Map data for Excel
   const data = this.filteredMembers.map(m => {
     const row: any = {};
     columns.forEach(col => {
@@ -674,7 +665,7 @@ exportExcel() {
 
       if (col.field === 'amountPaid') value = `₹${m.amountPaid}`;
       if (col.field === 'paidDate' || col.field === 'validUntil') value = formatDate(m[col.field]);
-      if (col.field === 'status') value = this.getStatus(m.validUntil);
+      if (col.field === 'status') value = this.getStatus(m.validUntil); // ✅ Status
       if (col.field === 'subscriptionType') value = m.subscriptionType?.label || '';
       if (col.field === 'attendance') {
         value = m.attendance && m.attendance.length > 0
@@ -690,7 +681,7 @@ exportExcel() {
   // Create worksheet
   const ws: XLSXStyle.WorkSheet = XLSXStyle.utils.json_to_sheet([]);
 
-  // Row 1: Zyct
+  // Row 1: Zyct title
   XLSXStyle.utils.sheet_add_aoa(ws, [['Zyct']], { origin: 'A1' });
   ws['A1'].s = { font: { bold: true, sz: 16 } };
 
@@ -698,20 +689,22 @@ exportExcel() {
   const timestamp = new Date();
   const formattedTimestamp = `${('0'+timestamp.getDate()).slice(-2)}/${('0'+(timestamp.getMonth()+1)).slice(-2)}/${timestamp.getFullYear()} ${('0'+timestamp.getHours()).slice(-2)}:${('0'+timestamp.getMinutes()).slice(-2)}`;
   XLSXStyle.utils.sheet_add_aoa(ws, [[`Generated on: ${formattedTimestamp}`]], { origin: 'A2' });
-
-  // Merge A2 and B2
   ws['!merges'] = ws['!merges'] || [];
-  ws['!merges'].push({ s: { r: 1, c: 0 }, e: { r: 1, c: 1 } }); // rowIndex 1 = second row, col 0-1
+  ws['!merges'].push({ s: { r: 1, c: 0 }, e: { r: 1, c: 1 } });
 
-  // Row 3: Headers
+  // Row 3: Headers + data
   XLSXStyle.utils.sheet_add_json(ws, data, {
     header: columns.map(c => c.header),
     skipHeader: false,
-    origin: 2 // start from row 3
+    origin: 2
   });
 
-  // Column widths
-  ws['!cols'] = columns.map(col => (col.header === 'Attendance' ? { wch: 40 } : { wch: 20 }));
+  // Column widths (Attendance wider)
+  ws['!cols'] = columns.map(col => {
+    if (col.header === 'Attendance') return { wch: 40 };
+    if (col.header === 'Status') return { wch: 15 };
+    return { wch: 20 };
+  });
 
   // Style headers (row 3)
   columns.forEach((col, index) => {
@@ -728,7 +721,7 @@ exportExcel() {
   // Style data rows (row 4+)
   data.forEach((row, rowIndex) => {
     columns.forEach((col, colIndex) => {
-      const cellRef = XLSX.utils.encode_cell({ r: rowIndex + 3, c: colIndex }); // rowIndex 3 = row 4
+      const cellRef = XLSX.utils.encode_cell({ r: rowIndex + 3, c: colIndex });
       if (ws[cellRef]) {
         ws[cellRef].s = {
           alignment: { horizontal: "center", vertical: "center", wrapText: true },
@@ -742,9 +735,8 @@ exportExcel() {
   const wb: XLSXStyle.WorkBook = XLSXStyle.utils.book_new();
   XLSXStyle.utils.book_append_sheet(wb, ws, "Members");
 
-  // Save file with timestamp
+  // Save file
   XLSXStyle.writeFile(wb, `(zyct) ${this.defaultGymName} Members_${formattedTimestamp.replace(/[:/ ]/g, '-')}.xlsx`);
-
 }
 
 
@@ -885,7 +877,11 @@ closeCamera() {
   
   exportPdf() {
     const allowedPrivileges = ['Qr Attendance-Tracking', 'manual Attendance-Tracking'];
-    const includeAttendance = this.userPrivileges?.some(p => allowedPrivileges.includes(p));
+  
+    // Attendance included if superadmin OR privileges exist
+    const includeAttendance =
+      this.userrole === 'superadmin' ||
+      this.userPrivileges?.some(p => allowedPrivileges.includes(p));
   
     // Table headers
     const headers = [
@@ -895,7 +891,6 @@ closeCamera() {
       'Phone'
     ];
   
-    // Only for superadmin
     if (this.userrole === 'superadmin') {
       headers.push('Gym ID', 'Gym Name');
     }
@@ -905,13 +900,15 @@ closeCamera() {
       'Amount Paid',
       'Paid Date',
       'Valid Until',
-      'Subscription Type'
+      'Subscription Type',
+      'Status'
     );
   
     if (includeAttendance) {
       headers.push('Attendance');
     }
   
+    // Utility to wrap text
     const wrapText = (text: string, maxChars: number) => {
       if (!text) return '';
       const words = text.split(' ');
@@ -931,14 +928,14 @@ closeCamera() {
       return lines.join('\n');
     };
   
-    // Format date as dd/MM/yyyy
+    // Format date
     const formatDate = (date: any) => {
       if (!date) return '';
       const d = new Date(date);
       return `${('0' + d.getDate()).slice(-2)}/${('0' + (d.getMonth() + 1)).slice(-2)}/${d.getFullYear()}`;
     };
   
-    // Table rows
+    // Prepare table rows
     const data = this.filteredMembers.map(m => {
       const row: any[] = [
         m.id,
@@ -956,7 +953,8 @@ closeCamera() {
         m.amountPaid,
         formatDate(m.paidDate),
         formatDate(m.validUntil),
-        wrapText(m.subscriptionType?.label || '', 15)
+        wrapText(m.subscriptionType?.label || '', 15),
+        this.getStatus(m.validUntil)
       );
   
       if (includeAttendance) {
@@ -975,54 +973,50 @@ closeCamera() {
       format: 'A4'
     });
   
-  // Add Name/Gym title at top-left (bold, larger font)
-doc.setFontSize(16);
-doc.setFont('helvetica', 'bold'); // bold font
-doc.setTextColor(0, 0, 0);
-doc.text('Zyct', 40, 30);
-
-// Add timestamp below title (slightly smaller, semi-bold)
-const timestamp = new Date();
-const formattedTimestamp = `${('0'+timestamp.getDate()).slice(-2)}/${('0'+(timestamp.getMonth()+1)).slice(-2)}/${timestamp.getFullYear()} ${('0'+timestamp.getHours()).slice(-2)}:${('0'+timestamp.getMinutes()).slice(-2)}`;
-doc.setFontSize(10);
-doc.setFont('helvetica', 'normal'); // you can also try 'bold' for heavier weight
-doc.setTextColor(80, 80, 80);
-doc.text(`Generated on: ${formattedTimestamp}`, 40, 50);
-
+    // ✅ Add logo before title
+    const img = new Image();
+    img.src = 'assets/images/favicon.png'; // relative path from src/assets
+    img.onload = () => {
+      doc.addImage(img, 'PNG', 40, 20, 30, 30); // X=40, Y=20, width=30, height=30
   
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const pageMargin = 40;
-    const usablePageWidth = pageWidth - pageMargin * 2;
-    const colWidth = usablePageWidth / headers.length;
+      // Title next to logo
+      doc.setFontSize(16);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(0, 0, 0);
+      doc.text(`Zyct - ( ${this.defaultGymName} Members )`, 80, 40); // shift right for logo
   
-    autoTable(doc, {
-      head: [headers],
-      body: data,
-      theme: 'grid',
-      startY: 70, // leave space for title + timestamp
-      tableWidth: 'auto',
-      margin: { left: pageMargin, right: pageMargin },
-      styles: {
-        fontSize: 8,
-        cellWidth: 'wrap',
-        valign: 'middle',
-        halign: 'center'
-      },
-      headStyles: {
-        fillColor: [40, 40, 40],
-        textColor: [255, 255, 255],
-        fontSize: 9,
-        halign: 'center'
-      },
-      columnStyles: headers.reduce((acc, _, idx) => {
-        acc[idx] = { cellWidth: colWidth };
-        return acc;
-      }, {} as any)
-    });
+      // Timestamp below title
+      const timestamp = new Date();
+      const formattedTimestamp = `${('0'+timestamp.getDate()).slice(-2)}/${('0'+(timestamp.getMonth()+1)).slice(-2)}/${timestamp.getFullYear()} ${('0'+timestamp.getHours()).slice(-2)}:${('0'+timestamp.getMinutes()).slice(-2)}`;
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(80, 80, 80);
+      doc.text(`Generated on: ${formattedTimestamp}`, 80, 55);
   
-    doc.save(`(zyct) - ${this.defaultGymName} Members_${formattedTimestamp.replace(/[:/ ]/g, '-')}.pdf`);
-
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageMargin = 40;
+      const usablePageWidth = pageWidth - pageMargin * 2;
+      const colWidth = usablePageWidth / headers.length;
+  
+      // Table
+      autoTable(doc, {
+        head: [headers],
+        body: data,
+        theme: 'grid',
+        startY: 70, // leave space for logo + title + timestamp
+        tableWidth: 'auto',
+        margin: { left: pageMargin, right: pageMargin },
+        styles: { fontSize: 8, cellWidth: 'wrap', valign: 'middle', halign: 'center' },
+        headStyles: { fillColor: [40, 40, 40], textColor: [255, 255, 255], fontSize: 9, halign: 'center' },
+        columnStyles: headers.reduce((acc, _, idx) => { acc[idx] = { cellWidth: colWidth }; return acc; }, {} as any)
+      });
+  
+      doc.save(`(zyct) - ${this.defaultGymName} Members_${formattedTimestamp.replace(/[:/ ]/g, '-')}.pdf`);
+    };
   }
+  
+  
+  
   
   
   
