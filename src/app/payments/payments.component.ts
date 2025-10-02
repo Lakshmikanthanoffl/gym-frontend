@@ -223,22 +223,26 @@ onPlanChange(selectedValue: string) {
 }
 
   openEditPaymentDialog(payment: Payment) {
-    this.showAddDialog = true;
-    this.isEditMode = true; // Edit mode
-    this.selectedPaymentId = payment.PaymentId;
-    this.selectedFile = null; // reset file
-    // Pre-fill the form
-    this.paymentForm.patchValue({
-      userName: payment.userName,
-      plan: payment.plan,
-      price: payment.price,
-      paymentDate: new Date(payment.paymentDate),
-      gymId: payment.gymId,
-      gymName: payment.gymName
-    });
-  
-    this.selectedFile = null; // reset file
-  }
+  this.showAddDialog = true;
+  this.isEditMode = true;
+  this.selectedPaymentId = payment.PaymentId;
+
+  // Reset file
+  this.selectedFile = null;
+
+  // Find the member object from your members list (if needed)
+  const memberObj = this.members.find(m => m.id === payment.id);
+
+  this.paymentForm.patchValue({
+    userName: memberObj || { id: 0, name: payment.userName }, // store full object
+    plan: payment.plan,
+    price: payment.price,
+    paymentDate: new Date(payment.paymentDate),
+    gymId: payment.gymId,
+    gymName: payment.gymName
+  });
+}
+
   
   get filteredPayments(): Payment[] {
     const search = (this.globalFilter ?? '').toLowerCase();
