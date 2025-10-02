@@ -70,7 +70,7 @@ filteredMemberSuggestions: any[] = [];
   showAddDialog = false;
   paymentForm!: FormGroup;
   selectedFile: File | null = null;
-
+  selectedMember: any = null;
   // Delete popup
   deleteDialogVisible = false;
   paymentToDelete: Payment | null = null;
@@ -271,7 +271,27 @@ onPlanChange(selectedValue: string) {
     this.selectedFile = null;
   }
   
-
+  onMemberSelect(event: any) {
+    const member = event.value;
+    if (!member) return;
+  
+    this.paymentForm.patchValue({
+      userName: member,  // <-- store full object here
+      plan: member.subscriptionType?.value || '',
+      price: member.subscriptionType?.price || 0,
+      paymentDate: member.paidDate ? new Date(member.paidDate) : new Date(),
+      gymId: member.gymId,
+      gymName: member.gymName
+    });
+  
+    if (this.userrole === 'superadmin') {
+      this.onGymChange(member.gymId);
+    }
+  
+    this.selectedMember = member;
+  }
+  
+  
   onFileChange(event: any) {
     if (event.target.files && event.target.files.length > 0) {
       this.selectedFile = event.target.files[0];

@@ -87,6 +87,7 @@
           formControlName="userName"
           [suggestions]="filteredMemberSuggestions"
           (completeMethod)="searchMembers($event)"
+          (onSelect)="onMemberSelect($event)"
           field="name"
           [dropdown]="true"
           placeholder="Select or type member"
