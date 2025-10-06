@@ -436,7 +436,7 @@ if (highlightedPlan) {
                     Swal.fire({
                       icon: 'success',
                       title: 'Payment Successful!',
-                      text: 'Your subscription has been updated successfully.',
+                      text: 'Your subscription has been updated successfully!!! check Downloads For Receipt.',
                       showConfirmButton: true,
                       confirmButtonText: 'OK',
                       confirmButtonColor: '#3085d6', // professional blue
