@@ -369,14 +369,14 @@ scannerActive: boolean = false;
   // 📌 Fullscreen Exit
   onFullscreenChange(): void {
     if (!document.fullscreenElement && !this.scannerClosed) {
-      this.playSiren();
+      // this.playSiren();
       this.confirmCloseScanner();
     }
   }
   // 📌 Refresh/Unload Attempt
   onBeforeUnload(event: BeforeUnloadEvent): void {
     if (!this.scannerClosed) {
-      this.playSiren();
+      // this.playSiren();
       event.preventDefault();
       event.returnValue = ''; // required for Chrome
       // ⚠️ Will show browser native confirm dialog
@@ -1500,108 +1500,113 @@ isUnassignedGym(member: any): boolean {
   saveMember() {
     const { name, email, phone, subscriptionType, validUntil } = this.newMember;
   
-    // ✅ Field Validations
-    if (!name?.trim()) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Validation Error',
-        text: 'Please enter the member name.',
-        background: '#1e1e1e',
-        color: '#f5f5f5',
-        confirmButtonColor: '#d63031'
-      });
-      return;
-    }
+    // ✅ Skip all validations for superadmin
+    if (this.userrole !== 'superadmin') {
+      // Field Validations
+      if (!name?.trim()) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Validation Error',
+          text: 'Please enter the member name.',
+          background: '#1e1e1e',
+          color: '#f5f5f5',
+          confirmButtonColor: '#d63031'
+        });
+        return;
+      }
   
-    if (!email?.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Validation Error',
-        text: 'Please enter a valid email address.',
-        background: '#1e1e1e',
-        color: '#f5f5f5',
-        confirmButtonColor: '#d63031'
-      });
-      return;
-    }
+      if (!email?.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Validation Error',
+          text: 'Please enter a valid email address.',
+          background: '#1e1e1e',
+          color: '#f5f5f5',
+          confirmButtonColor: '#d63031'
+        });
+        return;
+      }
   
-    if (!phone?.trim() || phone.length < 10) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Validation Error',
-        text: 'Please enter a valid phone number (10 digits).',
-        background: '#1e1e1e',
-        color: '#f5f5f5',
-        confirmButtonColor: '#d63031'
-      });
-      return;
-    }
+              // ✅ Validate phone number properly (10 digits, numeric)
+        if (!phone?.trim() || !/^\d{10}$/.test(phone)) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Validation Error',
+            text: 'Please enter a valid 10-digit phone number.',
+            background: '#1e1e1e',
+            color: '#f5f5f5',
+            confirmButtonColor: '#d63031'
+          });
+          return;
+        }
+
   
-    if (!subscriptionType) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Validation Error',
-        text: 'Please select a subscription type.',
-        background: '#1e1e1e',
-        color: '#f5f5f5',
-        confirmButtonColor: '#d63031'
-      });
-      return;
-    }
+      if (!subscriptionType) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Validation Error',
+          text: 'Please select a subscription type.',
+          background: '#1e1e1e',
+          color: '#f5f5f5',
+          confirmButtonColor: '#d63031'
+        });
+        return;
+      }
   
-    if (!this.newMember.amountPaid || this.newMember.amountPaid <= 0) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Validation Error',
-        text: 'Please enter a valid amount paid.',
-        background: '#1e1e1e',
-        color: '#f5f5f5',
-        confirmButtonColor: '#d63031'
-      });
-      return;
-    }
+      if (!this.newMember.amountPaid || this.newMember.amountPaid <= 0) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Validation Error',
+          text: 'Please enter a valid amount paid.',
+          background: '#1e1e1e',
+          color: '#f5f5f5',
+          confirmButtonColor: '#d63031'
+        });
+        return;
+      }
   
-    if (!validUntil) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Validation Error',
-        text: 'Please provide a valid end date.',
-        background: '#1e1e1e',
-        color: '#f5f5f5',
-        confirmButtonColor: '#d63031'
-      });
-      return;
-    }
+      if (!validUntil) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Validation Error',
+          text: 'Please provide a valid end date.',
+          background: '#1e1e1e',
+          color: '#f5f5f5',
+          confirmButtonColor: '#d63031'
+        });
+        return;
+      }
   
-    // ✅ Duplicate Validation (skip self in edit mode)
-    const duplicatePhone = this.members.some(
-      m => m.phone === phone && m.id !== this.selectedMemberId
-    );
-    if (duplicatePhone) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Duplicate Found',
-        text: `Phone number ${phone} is already registered.`,
-        background: '#1e1e1e',
-        color: '#f5f5f5',
-        confirmButtonColor: '#d63031'
-      });
-      return;
-    }
+      // Duplicate Validation (skip self in edit mode)
+      const duplicatePhone = this.members.some(
+        m => m.phone === phone && m.id !== this.selectedMemberId
+      );
+      if (duplicatePhone) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Duplicate Found',
+          text: `Phone number ${phone} is already registered.`,
+          background: '#1e1e1e',
+          color: '#f5f5f5',
+          confirmButtonColor: '#d63031'
+        });
+        return;
+      }
   
-    const duplicateEmail = this.members.some(
-      m => m.email.toLowerCase() === email.toLowerCase() && m.id !== this.selectedMemberId
-    );
-    if (duplicateEmail) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Duplicate Found',
-        text: `Email ${email} is already registered.`,
-        background: '#1e1e1e',
-        color: '#f5f5f5',
-        confirmButtonColor: '#d63031'
-      });
-      return;
+      const duplicateEmail = this.members.some(
+        m => m.email.toLowerCase() === email.toLowerCase() && m.id !== this.selectedMemberId
+      );
+      if (duplicateEmail) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Duplicate Found',
+          text: `Email ${email} is already registered.`,
+          background: '#1e1e1e',
+          color: '#f5f5f5',
+          confirmButtonColor: '#d63031'
+        });
+        return;
+      }
     }
   
     // ✅ Gym info based on role
@@ -1617,71 +1622,67 @@ isUnassignedGym(member: any): boolean {
     }
   
     // ✅ Edit mode
+    if (this.isEditMode && this.selectedMemberId != null) {
+      const existingAttendance = this.members.find(m => m.id === this.selectedMemberId)?.attendance || [];
+      const updatedMember: Member = {
+        ...this.newMember,
+        id: Number(this.selectedMemberId),
+        subscriptionType,
+        validUntil,
+        gymId,
+        gymName,
+        attendance: existingAttendance
+      };
   
-if (this.isEditMode && this.selectedMemberId != null) {
-  // Keep existing attendance for this member
-  const existingAttendance = this.members.find(m => m.id === this.selectedMemberId)?.attendance || [];
-
-  const updatedMember: Member = {
-    ...this.newMember,
-    id: Number(this.selectedMemberId),
-    subscriptionType,
-    validUntil,
-    gymId,
-    gymName,
-    attendance: existingAttendance   // 👈 preserve attendance
-  };
-
-  this.memberService.updateMember(updatedMember).subscribe(() => {
-    const index = this.members.findIndex(m => m.id === this.selectedMemberId);
-    if (index !== -1) {
-      this.members[index] = { ...updatedMember };
-      this.members = [...this.members];
+      this.memberService.updateMember(updatedMember).subscribe(() => {
+        const index = this.members.findIndex(m => m.id === this.selectedMemberId);
+        if (index !== -1) this.members[index] = { ...updatedMember };
+        this.members = [...this.members];
+        this.closeDialog();
+  
+        Swal.fire({
+          icon: 'success',
+          title: 'Member Updated!',
+          text: `${updatedMember.name} has been updated successfully.`,
+          background: '#1e1e1e',
+          color: '#f5f5f5',
+          confirmButtonColor: '#00b894',
+          timer: 2000,
+          showConfirmButton: false,
+          timerProgressBar: true
+        });
+      });
+    } else {
+      // ✅ Add mode
+      const memberToAdd: Member = {
+        ...this.newMember,
+        id: 0,
+        subscriptionType,
+        validUntil,
+        gymId,
+        gymName,
+        attendance: []
+      };
+  
+      this.memberService.addMember(memberToAdd).subscribe((createdMember: Member) => {
+        this.members = [...this.members, createdMember];
+        this.closeDialog();
+  
+        Swal.fire({
+          icon: 'success',
+          title: 'Member Added!',
+          text: `${this.newMember.name} has been added successfully.`,
+          background: '#1e1e1e',
+          color: '#f5f5f5',
+          confirmButtonColor: '#00b894',
+          timer: 2000,
+          showConfirmButton: false,
+          timerProgressBar: true
+        });
+      });
     }
-    this.closeDialog();
-    Swal.fire({
-      icon: 'success',
-      title: 'Member Updated!',
-      text: `${updatedMember.name} has been updated successfully.`,
-      background: '#1e1e1e',
-      color: '#f5f5f5',
-      confirmButtonColor: '#00b894',
-      timer: 2000,
-      showConfirmButton: false,
-      timerProgressBar: true
-    });
-  });
-} else {
-  // ✅ Add mode
-  const memberToAdd: Member = {
-    ...this.newMember,
-    id: 0,
-    subscriptionType,
-    validUntil,
-    gymId,
-    gymName,
-    attendance: []   // 👈 new members start with empty attendance
-  };
-
-  this.memberService.addMember(memberToAdd).subscribe((createdMember: Member) => {
-    this.members = [...this.members, createdMember];
-    this.closeDialog();
-
-    Swal.fire({
-      icon: 'success',
-      title: 'Member Added!',
-      text: `${this.newMember.name} has been added successfully.`,
-      background: '#1e1e1e',
-      color: '#f5f5f5',
-      confirmButtonColor: '#00b894',
-      timer: 2000,
-      showConfirmButton: false,
-      timerProgressBar: true
-    });
-  });
-}
-
   }
+  
   
   
   
