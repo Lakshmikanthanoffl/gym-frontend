@@ -3,7 +3,7 @@ import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { GymService } from './gym.service';
-
+import { environment } from '../../environments/environment';
 export interface Role {
   RoleId: number;
   RoleName: string;
@@ -45,7 +45,7 @@ export class AuthService {
   private privilegesSubject = new BehaviorSubject<string[]>(this.getPrivileges());
   privileges$ = this.privilegesSubject.asObservable();
 
-  private apiUrl = 'https://gymmanagementapi.onrender.com/api/Role/login';
+  private apiUrl = `${environment.apiBaseUrl}/api/Role/login`;
 
   constructor(private http: HttpClient, private router: Router,private gymService: GymService) {
     // ✅ Immediately check validity on service load

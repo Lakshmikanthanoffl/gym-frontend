@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import Swal from 'sweetalert2';
-
+import { environment } from '../../../environments/environment';
 @Component({
   selector: 'app-signup',
   standalone: false,
@@ -19,8 +19,8 @@ export class SignupComponent {
   showPassword = false;
   showConfirmPassword = false;
   isPasswordStrong = false;
+  private apiUrl = `${environment.apiBaseUrl}/api/Role`;
 
-  private apiUrl = 'https://gymmanagementapi.onrender.com/api/Role';
 
   constructor(private router: Router, private http: HttpClient) {}
 
