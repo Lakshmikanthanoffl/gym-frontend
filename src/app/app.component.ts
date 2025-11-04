@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { Router, NavigationEnd } from '@angular/router';
 import { GymService } from './services/gym.service';
-
+import { environment } from '../../src/environments/environment';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -21,6 +21,8 @@ export class AppComponent {
   ) {}
 
   ngOnInit() {
+    console.log('✅ Current Environment:', environment.production ? 'Production' : 'Development');
+    console.log('🌐 API Base URL:', environment.apiBaseUrl);
     // Subscribe to gym changes
     this.gymService.currentGym$.subscribe(gymName => {
       this.titleService.setTitle(gymName);
