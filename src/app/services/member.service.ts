@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Member } from '../models/member.model';
 import { Role } from './auth.service';
-
+import { environment } from '../../environments/environment';
 export interface Payment {
   id?: number;
   PaymentId: number;
@@ -20,10 +20,10 @@ export interface Payment {
   providedIn: 'root'
 })
 export class MemberService {
-  private apiUrl = 'https://gymmanagementapi.onrender.com/api/members';
-  private roleApiUrl = 'https://gymmanagementapi.onrender.com/api/Role';
-  private gymApiUrl = 'https://gymmanagementapi.onrender.com/api/role/bygym';
-  private apiUrlpayments = 'https://gymmanagementapi.onrender.com/api/Payment';
+  private apiUrl = `${environment.apiBaseUrl}/api/members`;
+  private roleApiUrl = `${environment.apiBaseUrl}/api/Role`;
+  private gymApiUrl = `${environment.apiBaseUrl}/api/role/bygym`;
+  private apiUrlpayments = `${environment.apiBaseUrl}/api/Payment`;
 
   constructor(private http: HttpClient) {}
 
