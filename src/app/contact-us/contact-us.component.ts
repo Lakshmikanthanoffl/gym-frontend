@@ -145,7 +145,7 @@ export class ContactUsComponent implements OnInit {
       // 3️⃣ Auto-reply to User
       return emailjs.send(
         'service_lru3z9o',
-        'template_kvf6n1n',
+        'template_urqxi64',
         {
           from_name: "Your Company",
           to_name: this.formData.from_name,
@@ -177,6 +177,40 @@ export class ContactUsComponent implements OnInit {
       });
       this.resetForm();
     });
+    // emailjs.send(
+    //   'service_lru3z9o',
+    //   'template_yky09qo',
+    //   this.formData,
+    //   'JGLahuBchSiLeVlp7'
+    // ).then((result: EmailJSResponseStatus) => {
+    //   console.log("✅ Email sent to Admin:", result.text);
+    
+    //   Swal.fire({
+    //     icon: 'success',
+    //     title: 'Email Sent Successfully!',
+    //     text: 'Your message has been delivered professionally.',
+    //     background: '#1e1e1e',
+    //     color: '#f5f5f5',
+    //     confirmButtonColor: '#00b894'
+    //   });
+    
+    //   this.resetForm();
+    
+    // }).catch((error) => {
+    //   console.error("❌ Error:", error.text);
+    
+    //   Swal.fire({
+    //     icon: 'error',
+    //     title: 'Sending Failed',
+    //     text: 'Something went wrong while sending your email.',
+    //     background: '#1e1e1e',
+    //     color: '#f5f5f5',
+    //     confirmButtonColor: '#d63031'
+    //   });
+    
+    //   this.resetForm();
+    // });
+    
   }
   
 

@@ -324,23 +324,41 @@
 <p-dialog header="Member QR Code" [(visible)]="qrDialogVisible" [modal]="true" [closable]="true" [resizable]="false">
   <div class="text-center">
     <img 
-    *ngIf="selectedMemberId !== null"
-    [src]="getMemberQrUrl(selectedMemberId)" 
-    alt="QR Code" 
-    class="qr-image"
-  />
-  
+      *ngIf="selectedMemberId !== null"
+      [src]="getMemberQrUrl(selectedMemberId)" 
+      alt="QR Code" 
+      class="qr-image"
+    />
 
-    <button 
-      pButton 
-      type="button" 
-      label="Download QR" 
-      icon="pi pi-download"
-      class="mt-3"
-      (click)="downloadMemberQr()">
-    </button>
+    <div class="mt-3 flex justify-content-center gap-2">
+      <button 
+        pButton 
+        type="button" 
+        label="Download QR" 
+        icon="pi pi-download"
+        (click)="downloadMemberQr()">
+      </button>
+
+      <button 
+        pButton 
+        type="button" 
+        label="Send whatsapp" 
+        icon="pi pi-envelope"
+        class="p-button-success"
+        (click)="sendQrTowhatsapp()">
+      </button>
+        <!-- <button 
+        pButton 
+        type="button" 
+        label="Send Email" 
+        icon="pi pi-envelope"
+        class="p-button-success"
+        (click)="sendQrToEmail()">
+      </button> -->
+    </div>
   </div>
 </p-dialog>
+
   <p-dialog
   header="Confirm Delete"
   [(visible)]="deleteDialogVisible"

@@ -24,6 +24,7 @@ export class MemberService {
   private roleApiUrl = `${environment.apiBaseUrl}/api/Role`;
   private gymApiUrl = `${environment.apiBaseUrl}/api/role/bygym`;
   private apiUrlpayments = `${environment.apiBaseUrl}/api/Payment`;
+  private emailApiUrl = `${environment.apiBaseUrl}/api/members/send-qr-email`;
 
   constructor(private http: HttpClient) {}
 
@@ -90,7 +91,21 @@ export class MemberService {
   deleteMember(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
-
+  sendQrEmail(payload: { 
+    username: string,
+    gymname: string,
+    gymUserEmail: string,
+    email: string,
+    qrUrl: string
+  }): Observable<any> {
+  
+    return this.http.post<any>(this.emailApiUrl, payload);
+  }
+  
+  sendQrWhatsapp(payload: any) {
+    return this.http.post(`${this.apiUrl}/send-whatsapp`, payload);
+  }
+  
   // =========================
   // Roles
   // =========================

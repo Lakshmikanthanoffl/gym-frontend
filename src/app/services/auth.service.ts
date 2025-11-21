@@ -115,6 +115,7 @@ export class AuthService {
         localStorage.setItem('GymName', role.GymName);
         localStorage.setItem('GymId', role.GymId.toString());
         localStorage.setItem('RoleId', role.RoleId.toString());
+        localStorage.setItem('UserEmail', role.UserEmail.toString());
 
         if (role.ValidUntil) {
           localStorage.setItem('validUntil', role.ValidUntil);
