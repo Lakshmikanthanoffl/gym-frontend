@@ -686,12 +686,26 @@ async downloadMemberQr() {
 }
 
 sendQrTowhatsapp() {
-  const phoneNumber = "91" + this.selectedmemberphone;
-  const message = `Hi ${this.selectedmembername}, your gym QR code is ready!`;
-  const qrUrl = encodeURIComponent(this.getMemberQrUrl(this.selectedMemberId));
-  const whatAppUrl = `https://wa.me/${phoneNumber}?text=${message}%0A${qrUrl}`;
-  window.open(whatAppUrl, "_blank");
+  const phone = "91" + this.selectedmemberphone;
+  const qrUrl = this.getMemberQrUrl(this.selectedMemberId);
+
+  const message = `
+Hi *${this.selectedmembername}* 👋,
+
+🎉 Your gym member QR is ready!
+
+📍 *Gym:* ${this.defaultGymName}
+
+👇 Tap below to view or download your QR:
+${qrUrl}
+
+Thank you! 💪
+  `;
+
+  const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+  window.open(url, "_blank");
 }
+
 
 // sendQrTowhatsapp() {
 //   const payload = {
