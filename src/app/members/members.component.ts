@@ -497,7 +497,7 @@ stopSiren(): void {
     
   openMemberQR(member: any) {
     this.selectedmemberphone = member.phone
-    this.selectedmembername = member.name
+    this.selectedmembername = (member.name || "").trim();
     this.selectedmemberemailid = member.email
     this.selectedMemberId = Number(member.id); // convert to number
     this.qrDialogVisible = true;
