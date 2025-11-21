@@ -17,7 +17,8 @@ import { filter, map } from 'rxjs/operators';
 import { GymService } from '../../services/gym.service';
 import { SidebarService } from '../../services/sidebar.service';
 import { PaymentService } from '../../services/payment.service';
-
+import { MemberService } from '../../services/member.service';
+type PlanName = 'Basic' | 'Advanced' | 'Premium';
 @Component({
   selector: 'app-header',
   standalone: false,
@@ -167,8 +168,9 @@ planAccessPoints = {
     'Manual Attendance Tracking'
   ]
 };
+planName: string = '';
 filteredMenus: { label: string; value: string }[] = []; // ✅ add this
-  constructor(private router: Router, private activatedRoute: ActivatedRoute,private sidebarService: SidebarService,private authService: AuthService,private gymService: GymService,private paymentService: PaymentService) {
+  constructor(private memberService: MemberService,private router: Router, private activatedRoute: ActivatedRoute,private sidebarService: SidebarService,private authService: AuthService,private gymService: GymService,private paymentService: PaymentService) {
     this.router.events
       .pipe(
         filter(event => event instanceof NavigationEnd),
@@ -187,6 +189,7 @@ filteredMenus: { label: string; value: string }[] = []; // ✅ add this
   }
 
   ngOnInit() {
+    this.planName = localStorage.getItem('PlanName') || 'Free';
     this.authService.role$.subscribe(role => {
       this.userrole = role;
     });
@@ -635,24 +638,46 @@ if (highlightedPlan) {
                       title: 'Payment Successful! Subscription updated 🎉',
                       confirmButtonText: 'OK'
                     }).then(() => {
-                      if (updatedRole.ValidUntil) {
-                        localStorage.setItem('validUntil', updatedRole.ValidUntil);
-                        this.authService['validUntilSubject'].next(updatedRole.ValidUntil);
-                      }
-                      if (updatedRole.PaidDate) {
-                        localStorage.setItem('startDate', updatedRole.PaidDate);
-                        this.authService['PaidDateSubject'].next(updatedRole.PaidDate);
-                      }
-                      localStorage.setItem('isActive', updatedRole.IsActive ? 'true' : 'false');
-                      this.authService['isActiveSubject'].next(updatedRole.IsActive);
-                      this.generateReceipt(updatedRole, amount, response, planName,durationText).then(() => {
-                        window.location.reload();
-                      });
+                     
+  // --------------------------------------
+  // 🔥 Auto update admin subscription logic
+  // --------------------------------------
 
-                     // ✅ New: update privileges dynamically
-                      if (updatedRole.Privileges) {
-                        this.authService.setPrivileges(updatedRole.Privileges);
-                      }
+
+// 🔥 Call API with selected plan values
+this.updateSubscription(planName as PlanName, durationType, amount, (updatedData) => {
+
+  // Use updated values from API or fallback to local generated values
+  updatedRole.ValidUntil = updatedData.validUntil ?? updatedRole.ValidUntil;
+  updatedRole.PaidDate = updatedData.paidDate ?? updatedRole.PaidDate;
+  updatedRole.AmountPaid = updatedData.amountPaid ?? updatedRole.AmountPaid;
+  updatedRole.SubscriptionPeriod = updatedData.subscriptionPeriod;
+  updatedRole.PlanName = updatedData.planName;
+
+
+  // 👇 Store updated values
+  if (updatedRole.ValidUntil) {
+    localStorage.setItem('validUntil', updatedRole.ValidUntil);
+    this.authService['validUntilSubject'].next(updatedRole.ValidUntil);
+  }
+
+  if (updatedRole.PaidDate) {
+    localStorage.setItem('startDate', updatedRole.PaidDate);
+    this.authService['PaidDateSubject'].next(updatedRole.PaidDate);
+  }
+
+  localStorage.setItem('isActive', 'true');
+  this.authService['isActiveSubject'].next(true);
+  if (updatedRole.Privileges)
+   {
+    this.authService.setPrivileges(updatedRole.Privileges); 
+  }
+  // 🎟 Generate receipt then reload
+  this.generateReceipt(updatedRole, amount, response, planName, durationText)
+    .then(() => window.location.reload());
+});
+
+
 
                     });
                   } else {
@@ -885,6 +910,55 @@ async generateUpiQr(amount: string) {
     return '';
   }
 }
+
+
+calculateValidity(type: string): Date {
+  const date = new Date();
+
+  switch (type) {
+    case 'monthly':
+      date.setMonth(date.getMonth() + 1);
+      break;
+    case 'quarterly':
+      date.setMonth(date.getMonth() + 3);
+      break;
+    case 'yearly':
+      date.setFullYear(date.getFullYear() + 1);
+      break;
+  }
+
+  return date;
+}
+updateSubscription(planName: PlanName, durationType: string, amount: number, callback?: (updatedData: any) => void) {
+
+  const payload = {
+    planName: planName,
+    subscriptionPeriod: durationType,
+    amountPaid: amount,
+    paidDate: new Date(),
+    validUntil: this.calculateValidity(durationType)
+  };
+
+  this.memberService.updateSubscription(Number(this.currentUserRoleId), payload)
+    .subscribe({
+      next: (response) => {
+        console.log("Subscription updated", response);
+
+        // return updated values to caller
+        if (callback) callback(payload);
+      },
+      error: (err) => {
+        Swal.fire({
+          icon: 'error',
+          title: 'Update Failed',
+          text: 'Unable to update subscription. Please try again.'
+        });
+      }
+    });
+}
+
+
+
 generateReceipt(updatedRole: any, amount: number, response: any, planName: string,  planType: string): Promise<void> {
   return new Promise((resolve) => {
     const doc = new jsPDF();

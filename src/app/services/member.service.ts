@@ -105,6 +105,9 @@ export class MemberService {
   sendQrWhatsapp(payload: any) {
     return this.http.post(`${this.apiUrl}/send-whatsapp`, payload);
   }
+  updateSubscription(id: number, payload: any) {
+    return this.http.put(`${this.roleApiUrl}/update-subscription/${id}`, payload);
+  }
   
   // =========================
   // Roles

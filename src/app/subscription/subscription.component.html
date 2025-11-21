@@ -1,6 +1,11 @@
 <div class="subscription-card">
   <div class="header">
     <h3>⚠ Subscription Status</h3>
+
+      <!-- 🎖 Subscription Plan Badge -->
+  <span class="plan-badge" [ngClass]="planName.toLowerCase()">
+    {{ planName }}
+  </span>
     <span class="status" [ngClass]="statusClass">
       {{ subscriptionStatus }}
     </span>

@@ -16,6 +16,7 @@ export interface Role {
   ValidUntil: string;  // ✅ from API
   PaidDate:string;
   Privileges: string[];  // ✅ add this
+  PlanName:string;
 }
 
 @Injectable({
@@ -116,6 +117,7 @@ export class AuthService {
         localStorage.setItem('GymId', role.GymId.toString());
         localStorage.setItem('RoleId', role.RoleId.toString());
         localStorage.setItem('UserEmail', role.UserEmail.toString());
+        localStorage.setItem('PlanName', role.PlanName.toString());
 
         if (role.ValidUntil) {
           localStorage.setItem('validUntil', role.ValidUntil);

@@ -707,31 +707,7 @@ Thank you! 💪
 }
 
 
-// sendQrTowhatsapp() {
-//   const payload = {
-//     phoneNumber: "8778858563",
-//     username: this.selectedmembername,
-//     gymName: this.defaultGymName,
-//     qrUrl: this.getMemberQrUrl(this.selectedMemberId)
-//   };
 
-//   this.memberService.sendQrWhatsapp(payload).subscribe({
-//     next: () => {
-//       Swal.fire({
-//         icon: 'success',
-//         title: 'WhatsApp Sent Successfully 🎉',
-//         text: `${this.selectedmembername} has received the QR on WhatsApp.`,
-//       });
-//     },
-//     error: (err) => {
-//       Swal.fire({
-//         icon: 'error',
-//         title: 'Failed to Send ❌',
-//         text: err?.error?.message || 'Something went wrong'
-//       });
-//     }
-//   });
-// }
 
   
 exportExcel() {
