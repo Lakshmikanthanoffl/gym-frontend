@@ -41,6 +41,10 @@ export class MembersComponent implements OnInit{
   @ViewChild('scanner')   scanner: ZXingScannerComponent | undefined; 
   @ViewChild('qrcodeCanvas', { static: false }) qrcodeCanvas: ElementRef | undefined;
   userPrivileges!: string[];
+  selectedmemberemailid: any;
+  defaultUserEmail: any;
+  selectedmembername: any;
+  selectedmemberphone: any;
     // ✅ Block refresh / navigation when scanner is open
     handleBeforeUnload(event: any): string | void {
       if (this.isScannerOpen) {
@@ -206,6 +210,7 @@ scannerActive: boolean = false;
     this.isAdmin = this.userrole === 'admin';
     this.privileges = this.authService.getPrivileges();
     this.defaultGymName = localStorage.getItem('GymName') ?? '';
+    this.defaultUserEmail = localStorage.getItem('UserEmail') ?? '';
     this.defaultGymId = Number(localStorage.getItem('GymId')) || 0;
     this.fetchMembersFromAPI(); // 👈
     this.getgymname();
@@ -491,6 +496,9 @@ stopSiren(): void {
   }
     
   openMemberQR(member: any) {
+    this.selectedmemberphone = member.phone
+    this.selectedmembername = member.name
+    this.selectedmemberemailid = member.email
     this.selectedMemberId = Number(member.id); // convert to number
     this.qrDialogVisible = true;
   }
@@ -504,6 +512,44 @@ stopSiren(): void {
 getCameraLabel = (device: MediaDeviceInfo) => {
   return device.label || `Camera (${device.deviceId})`;
 };
+
+sendQrToEmail() {
+  const payload = {
+    username: this.selectedmembername,
+    gymname: this.defaultGymName,
+    gymUserEmail: this.defaultUserEmail,
+    email: this.selectedmemberemailid,
+    qrUrl: this.getMemberQrUrl(this.selectedMemberId)
+  };
+
+  this.memberService.sendQrEmail(payload).subscribe({
+    next: () => {
+      Swal.fire({
+        icon: "success",
+        title: "QR Sent Successfully",
+        text: "The QR code email was delivered to the member.",
+        showConfirmButton: false,
+        timer: 2000,
+        timerProgressBar: true
+      });
+    },
+    error: (err) => {
+      console.error("Failed to send email:", err);
+
+      Swal.fire({
+        icon: "error",
+        title: "Failed to Send",
+        text: "Unable to deliver the QR code email.",
+        toast: true,
+        position: "top-end",
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true
+      });
+    }
+  });
+}
+
 
 
 // Called when cameras are detected
@@ -609,15 +655,69 @@ private updateVideoConstraints() {
 }
 
 // Download QR
-downloadMemberQr() {
-  if (this.selectedMemberId === null) return;
+async downloadMemberQr() {
+  if (!this.selectedMemberId) return;
 
   const url = this.getMemberQrUrl(this.selectedMemberId);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = `member-${this.selectedMemberId}-qrcode.png`;
-  link.click();
+
+  try {
+    // Fetch the QR image as a Blob
+    const response = await fetch(url);
+    const blob = await response.blob();
+
+    // Create a blob object URL for downloading
+    const blobUrl = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = blobUrl;
+    a.download = `${this.selectedmembername}-${this.defaultGymName}-qrcode.png`;
+    a.style.display = 'none';
+
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+
+    // Cleanup
+    URL.revokeObjectURL(blobUrl);
+
+  } catch (error) {
+    console.error('Download failed', error);
+  }
 }
+
+sendQrTowhatsapp() {
+  const phoneNumber = "91" + this.selectedmemberphone;
+  const message = `Hi ${this.selectedmembername}, your gym QR code is ready!`;
+  const qrUrl = encodeURIComponent(this.getMemberQrUrl(this.selectedMemberId));
+  const whatAppUrl = `https://wa.me/${phoneNumber}?text=${message}%0A${qrUrl}`;
+  window.open(whatAppUrl, "_blank");
+}
+
+// sendQrTowhatsapp() {
+//   const payload = {
+//     phoneNumber: "8778858563",
+//     username: this.selectedmembername,
+//     gymName: this.defaultGymName,
+//     qrUrl: this.getMemberQrUrl(this.selectedMemberId)
+//   };
+
+//   this.memberService.sendQrWhatsapp(payload).subscribe({
+//     next: () => {
+//       Swal.fire({
+//         icon: 'success',
+//         title: 'WhatsApp Sent Successfully 🎉',
+//         text: `${this.selectedmembername} has received the QR on WhatsApp.`,
+//       });
+//     },
+//     error: (err) => {
+//       Swal.fire({
+//         icon: 'error',
+//         title: 'Failed to Send ❌',
+//         text: err?.error?.message || 'Something went wrong'
+//       });
+//     }
+//   });
+// }
 
   
 exportExcel() {
