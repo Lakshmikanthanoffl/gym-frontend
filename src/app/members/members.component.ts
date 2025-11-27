@@ -12,6 +12,7 @@ import { BarcodeFormat } from '@zxing/library';
 import * as XLSXStyle from 'xlsx-js-style';
 import { ZXingScannerComponent } from '@zxing/ngx-scanner';
 import { AuthService } from '../services/auth.service';
+import { HeaderService } from '../layout/header/services/header.service';
 
 
 export interface SubscriptionOption {
@@ -72,7 +73,7 @@ export class MembersComponent implements OnInit{
   currentYear: number = new Date().getFullYear();
   refreshHandlerBound!: (event: BeforeUnloadEvent) => void;
 
-  constructor(private memberService: MemberService,private authService: AuthService) {
+  constructor(private memberService: MemberService,private authService: AuthService,private headerService: HeaderService) {
      // Subscribe to privileges so we always have the latest
      this.authService.privileges$.subscribe(privs => {
       this.userPrivileges = privs;
@@ -204,6 +205,7 @@ private contextMenuHandler!: (event: MouseEvent) => void;
 private popStateHandler!: (event: PopStateEvent) => void;
 scannerActive: boolean = false;
   ngOnInit() {
+    this.headerService.setTitle('Members');
     this.checkScreenSize();
     this.isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
     this.userrole = localStorage.getItem("role")
