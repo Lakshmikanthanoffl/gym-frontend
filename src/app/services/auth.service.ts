@@ -119,7 +119,9 @@ export class AuthService {
         localStorage.setItem('RoleId', role.RoleId.toString());
         localStorage.setItem('UserEmail', role.UserEmail.toString());
         localStorage.setItem('PlanName', role.PlanName.toString());
-        this.setUserAnalytics(role.UserName, role.UserEmail.toString());
+        this.setUserAnalytics(role.RoleId.toString(), role.UserEmail);
+
+
 
         if (role.ValidUntil) {
           localStorage.setItem('validUntil', role.ValidUntil);
@@ -144,19 +146,19 @@ export class AuthService {
       })
     );
   }
-  setUserAnalytics(username: string, email: string) {
-    // Track user ID
-    gtag('set', {
-      user_id: username       // or real userId if you have
-    });
+  setUserAnalytics(userId: string, email: string) {
+
+    // Set the user_id (only identifier allowed in GA)
+    gtag('set', { user_id: userId });
   
-    // Track custom event
+    // Send login evente with custom params
     gtag('event', 'login', {
       method: 'email',
-      user_id: username,
-      user_email: email      // custom property you can register later
+      user_id: userId,
+      user_email: email // can be captured only via custom dimension
     });
   }
+  
   // Set role manually
   setRole(role: string) {
     localStorage.setItem('authToken', 'dummy-token');
