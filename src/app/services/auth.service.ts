@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { GymService } from './gym.service';
 import { environment } from '../../environments/environment';
+declare let gtag: Function;
 export interface Role {
   RoleId: number;
   RoleName: string;
@@ -118,6 +119,7 @@ export class AuthService {
         localStorage.setItem('RoleId', role.RoleId.toString());
         localStorage.setItem('UserEmail', role.UserEmail.toString());
         localStorage.setItem('PlanName', role.PlanName.toString());
+        this.setUserAnalytics(role.UserName, role.UserEmail.toString());
 
         if (role.ValidUntil) {
           localStorage.setItem('validUntil', role.ValidUntil);
@@ -142,7 +144,17 @@ export class AuthService {
       })
     );
   }
-
+  setUserAnalytics(username: string, email: string) {
+    gtag('set', {
+      'user_name': username,
+      'user_email': email
+    });
+  
+    gtag('event', 'login', {
+      method: 'email'
+    });
+  }
+  
   // Set role manually
   setRole(role: string) {
     localStorage.setItem('authToken', 'dummy-token');
