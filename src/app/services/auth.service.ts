@@ -145,16 +145,18 @@ export class AuthService {
     );
   }
   setUserAnalytics(username: string, email: string) {
+    // Track user ID
     gtag('set', {
-      'user_name': username,
-      'user_email': email
+      user_id: username       // or real userId if you have
     });
   
+    // Track custom event
     gtag('event', 'login', {
-      method: 'email'
+      method: 'email',
+      user_id: username,
+      user_email: email      // custom property you can register later
     });
   }
-  
   // Set role manually
   setRole(role: string) {
     localStorage.setItem('authToken', 'dummy-token');
