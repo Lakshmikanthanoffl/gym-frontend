@@ -1,10 +1,14 @@
+html, body {
+  height: 100%;
+}
+
 /* ============================= */
 /* Split screen layout           */
 /* ============================= */
 .login-page {
   display: flex;
-  min-height: 100vh;        /* allow full height but not fixed */
-  overflow-y: auto;         /* enable scrolling if needed */
+  height: 100vh;     /* full screen fixed height */
+  overflow: hidden;  /* prevent bottom overflow */
   flex-wrap: wrap;          /* wrap sections on smaller screens */
 }
 
@@ -75,6 +79,7 @@
   align-items: center;
   padding: 2rem;
   min-height: 100%;   /* adjust naturally */
+  overflow-y: auto;   /* allow scroll if form is longer */
 }
 
 .login-box {
