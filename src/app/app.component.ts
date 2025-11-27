@@ -3,6 +3,7 @@ import { Title } from '@angular/platform-browser';
 import { Router, NavigationEnd } from '@angular/router';
 import { GymService } from './services/gym.service';
 import { environment } from '../../src/environments/environment';
+declare let gtag: Function;
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -18,7 +19,15 @@ export class AppComponent {
     private titleService: Title,
     private gymService: GymService,
     private router: Router         // <-- added
-  ) {}
+  ) {
+    this.router.events.subscribe(event => {
+      if (event instanceof NavigationEnd) {
+        gtag('config', 'G-32ZXF3XQVQ', {
+          'page_path': event.urlAfterRedirects
+        });
+      }
+    });
+  }
 
   ngOnInit() {
     console.log('✅ Current Environment:', environment.production ? 'Production' : 'Development');
