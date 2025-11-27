@@ -18,6 +18,7 @@ import { GymService } from '../../services/gym.service';
 import { SidebarService } from '../../services/sidebar.service';
 import { PaymentService } from '../../services/payment.service';
 import { MemberService } from '../../services/member.service';
+import { HeaderService } from './services/header.service';
 type PlanName = 'Basic' | 'Advanced' | 'Premium';
 @Component({
   selector: 'app-header',
@@ -170,7 +171,7 @@ planAccessPoints = {
 };
 planName: string = '';
 filteredMenus: { label: string; value: string }[] = []; // ✅ add this
-  constructor(private memberService: MemberService,private router: Router, private activatedRoute: ActivatedRoute,private sidebarService: SidebarService,private authService: AuthService,private gymService: GymService,private paymentService: PaymentService) {
+  constructor( private headerService: HeaderService,private memberService: MemberService,private router: Router, private activatedRoute: ActivatedRoute,private sidebarService: SidebarService,private authService: AuthService,private gymService: GymService,private paymentService: PaymentService) {
     this.router.events
       .pipe(
         filter(event => event instanceof NavigationEnd),
@@ -192,6 +193,9 @@ filteredMenus: { label: string; value: string }[] = []; // ✅ add this
     this.planName = localStorage.getItem('PlanName') || 'Free';
     this.authService.role$.subscribe(role => {
       this.userrole = role;
+    });
+    this.headerService.title$.subscribe(title => {
+      this.headerTitle = title;
     });
     
     this.authService.username$.subscribe(username => {

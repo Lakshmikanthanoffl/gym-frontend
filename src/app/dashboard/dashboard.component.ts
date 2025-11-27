@@ -6,6 +6,7 @@ import Swal from 'sweetalert2';
 import { interval, Subscription } from 'rxjs';
 import { ThemeService } from '../services/theme.service';
 import type { Chart } from 'chart.js';
+import { HeaderService } from '../layout/header/services/header.service';
 
 ;
 
@@ -66,13 +67,16 @@ export class DashboardComponent implements OnInit {
     private authService: AuthService,
     private router: Router,
     private memberService: MemberService,
-    public themeService: ThemeService
+    public themeService: ThemeService,
+    private headerService: HeaderService
   ) {}
 
   ngOnInit() {
     this.themeService.theme$.subscribe(theme => {
       this.updateMemberChartColors(theme === 'dark');
     });
+      // Set header title when entering this page
+  this.headerService.setTitle('Dashboard');
     this.defaultGymName = localStorage.getItem('GymName') ?? '';
     this.defaultGymId = Number(localStorage.getItem('GymId')) || 0;
     this.userrole = localStorage.getItem("role");
