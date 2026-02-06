@@ -856,69 +856,79 @@ exportExcel() {
     const todayStr = today.toLocaleDateString('en-CA');
     const memberId = parseInt(resultString.replace(/\D/g, ''), 10);
   
-    if (!isNaN(memberId)) {
-      const member = this.members.find(m => m.id === memberId);
+    if (isNaN(memberId)) return;
   
-      this.memberService.markAttendance(memberId, todayStr).subscribe({
-        next: () => {
-          // ✅ Play success sound
-          this.successAudio.play().catch(e => console.warn('Audio play failed', e));
+    const member = this.members.find(m => m.id === memberId);
   
-          // ✅ Success toast
-          Swal.fire({
-            toast: true,
-            position: 'top',
-            target: '.qr-scanner-dialog',
-            icon: 'success',
-            iconColor: '#fff',
-            html: member
-              ? `Attendance marked for <b>${member.name}</b> (ID: <b>${member.id}</b>)`
-              : `Attendance marked for ID: <b>${memberId}</b>`,
-            showConfirmButton: false,
-            timer: 2500,
-            timerProgressBar: true,
-            background: '#28a745',
-            color: '#fff',
-            showClass: {
-              popup: 'animate__animated animate__slideInDown'
-            },
-            hideClass: {
-              popup: 'animate__animated animate__fadeOut'
-            }
-          });
+    // ❌ MEMBER NOT FOUND — STOP HERE
+    if (!member) {
+      this.successAudio.pause(); // stop any playing sound if needed
   
-          // ✅ Update attendance in list
-          if (member) {
-            if (!member.attendance) member.attendance = [];
-            if (!member.attendance.includes(todayStr)) {
-              member.attendance.push(todayStr);
-            }
-          }
-        },
-        error: () => {
-          Swal.fire({
-            toast: true,
-            position: 'top',
-            target: '.qr-scanner-dialog',
-            icon: 'error',
-            iconColor: '#fff',
-            title: 'Failed to mark attendance.',
-            showConfirmButton: false,
-            timer: 2500,
-            timerProgressBar: true,
-            background: '#dc3545',
-            color: '#fff',
-            showClass: {
-              popup: 'animate__animated animate__shakeX'
-            },
-            hideClass: {
-              popup: 'animate__animated animate__fadeOut'
-            }
-          });
+      Swal.fire({
+        toast: true,
+        position: 'top',
+        target: '.qr-scanner-dialog',
+        icon: 'error',
+        iconColor: '#fff',
+        title: `Member ID ${memberId} not found!`,
+        text: 'Invalid QR Code or member not registered.',
+        showConfirmButton: false,
+        timer: 2500,
+        timerProgressBar: true,
+        background: '#dc3545',
+        color: '#fff',
+        showClass: {
+          popup: 'animate__animated animate__shakeX'
         }
       });
+  
+      return; // 🚫 VERY IMPORTANT — STOPS API CALL
     }
+  
+    // ✅ MEMBER FOUND — NOW CALL API
+    this.memberService.markAttendance(memberId, todayStr).subscribe({
+      next: () => {
+        this.successAudio.play().catch(e => console.warn('Audio play failed', e));
+  
+        Swal.fire({
+          toast: true,
+          position: 'top',
+          target: '.qr-scanner-dialog',
+          icon: 'success',
+          iconColor: '#fff',
+          html: `Attendance marked for <b>${member.name}</b> (ID: <b>${member.id}</b>)`,
+          showConfirmButton: false,
+          timer: 2500,
+          timerProgressBar: true,
+          background: '#28a745',
+          color: '#fff',
+          showClass: {
+            popup: 'animate__animated animate__slideInDown'
+          }
+        });
+  
+        if (!member.attendance) member.attendance = [];
+        if (!member.attendance.includes(todayStr)) {
+          member.attendance.push(todayStr);
+        }
+      },
+      error: () => {
+        Swal.fire({
+          toast: true,
+          position: 'top',
+          target: '.qr-scanner-dialog',
+          icon: 'error',
+          iconColor: '#fff',
+          title: 'Failed to mark attendance.',
+          showConfirmButton: false,
+          timer: 2500,
+          background: '#dc3545',
+          color: '#fff'
+        });
+      }
+    });
   }
+  
   
   
 

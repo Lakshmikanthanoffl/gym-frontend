@@ -58,17 +58,26 @@
 
   <div class="scanner-container text-center">
     
-    <!-- ZXing Scanner (Only render when dialog is open) -->
-    <zxing-scanner
-      *ngIf="qrScannerDialogVisible"
-      [formats]="allowedFormats"
-      (scanSuccess)="onCodeResult($event)"
-      [device]="selectedDevice"
-      [videoConstraints]="videoConstraints"
-      (camerasFound)="onCamerasFound($event)"
-      class="scanner"
-      [enable]="qrScannerDialogVisible"
-    ></zxing-scanner>
+    <div class="scanner-wrapper">
+
+      <zxing-scanner
+        *ngIf="qrScannerDialogVisible"
+        [formats]="allowedFormats"
+        (scanSuccess)="onCodeResult($event)"
+        [device]="selectedDevice"
+        [videoConstraints]="videoConstraints"
+        (camerasFound)="onCamerasFound($event)"
+        class="scanner"
+        [enable]="qrScannerDialogVisible"
+      ></zxing-scanner>
+    
+      <!-- 🎯 QR Guide Box Overlay -->
+      <div class="qr-overlay">
+        <div class="qr-frame"></div>
+      </div>
+    
+    </div>
+    
 
     <!-- Camera Selection for Desktop -->
     <div *ngIf="!isMobile && qrScannerDialogVisible" class="mt-3">
